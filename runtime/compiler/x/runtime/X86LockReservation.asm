@@ -18,29 +18,206 @@
 ;
 ; SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
 
-include jilconsts.inc
-include x/runtime/X86RegisterMap.inc
+; %include jilconsts.inc :
 
-    public jitMonitorEnterReserved
-    public jitMonitorEnterReservedPrimitive
-    public jitMonitorEnterPreservingReservation
-    public jitMethodMonitorEnterReserved
-    public jitMethodMonitorEnterReservedPrimitive
-    public jitMethodMonitorEnterPreservingReservation
-    public jitMonitorExitReserved
-    public jitMonitorExitReservedPrimitive
-    public jitMonitorExitPreservingReservation
-    public jitMethodMonitorExitPreservingReservation
-    public jitMethodMonitorExitReserved
-    public jitMethodMonitorExitReservedPrimitive
+%define ASM_J9VM_JIT_NEW_DUAL_HELPERS  1
+%define ASM_J9VM_ENV_LITTLE_ENDIAN  1
+%define ASM_J9VM_ENV_DATA64  1
+%define ASM_J9VM_INTERP_COMPRESSED_OBJECT_HEADER  1
+%define ASM_J9VM_THR_LOCK_NURSERY  1
+%define ASM_J9VM_INTERP_SMALL_MONITOR_SLOT  1
+%define ASM_J9VM_GC_TLH_PREFETCH_FTA  1
+%define ASM_J9VM_GC_DYNAMIC_CLASS_UNLOADING  1
+%define J9TR_cframe_sizeof  280
+%define J9TR_cframe_vmStruct  0
+%define J9TR_cframe_machineBP  8
+%define J9TR_cframe_jitGPRs  16
+%define J9TR_cframe_jitFPRs  144
+%define J9TR_cframe_rax  16
+%define J9TR_cframe_rbx  24
+%define J9TR_cframe_rcx  32
+%define J9TR_cframe_rdx  40
+%define J9TR_cframe_rdi  48
+%define J9TR_cframe_rsi  56
+%define J9TR_cframe_rbp  64
+%define J9TR_cframe_rsp  72
+%define J9TR_cframe_r8  80
+%define J9TR_cframe_r9  88
+%define J9TR_cframe_r10  96
+%define J9TR_cframe_r11  104
+%define J9TR_cframe_r12  112
+%define J9TR_cframe_r13  120
+%define J9TR_cframe_r14  128
+%define J9TR_cframe_r15  136
+%define J9TR_runtimeFlags_PatchingFenceRequired  67108864
+%define J9TR_runtimeFlags_PatchingFenceType  134217728
+%define J9TR_VMThread_machineSP  2392
+%define J9TR_machineSP_machineBP  8
+%define J9TR_machineSP_vmStruct  0
+%define J9TR_VMThreadCurrentException  72
+%define J9TR_VMThread_floatTemp1  264
+%define J9TR_VMThread_floatTemp2  272
+%define J9TR_VMThread_floatTemp3  280
+%define J9TR_VMThread_floatTemp4  288
+%define J9TR_VMThread_stackOverflowMark  80
+%define J9TR_VMThread_heapAlloc  96
+%define J9TR_VMThread_heapTop  104
+%define J9TR_VMThread_tlhPrefetchFTA  112
+%define J9TR_VMThread_publicFlags  152
+%define J9TR_VMThread_privateFlags  424
+%define J9TR_VMThread_privateFlags2  2336
+%define J9TR_VMThreadJavaVM  8
+%define J9TR_VMThread_javaVM  8
+%define J9TR_VMThread_sp  32
+%define J9TR_VMThread_pc  40
+%define J9TR_VMThread_literals  48
+%define J9TR_VMThread_arg0EA  16
+%define J9TR_VMThread_codertTOC  344
+%define J9TR_VMThread_debugEventData1  496
+%define J9TR_VMThread_debugEventData2  504
+%define J9TR_VMThread_debugEventData3  512
+%define J9TR_VMThread_debugEventData4  520
+%define J9TR_VMThread_debugEventData5  528
+%define J9TR_VMThread_debugEventData6  536
+%define J9TR_VMThread_debugEventData7  544
+%define J9TR_VMThread_debugEventData8  552
+%define J9TR_VMThread_tempSlot  248
+%define J9TR_VMThread_jitReturnAddress  256
+%define J9TR_VMThread_returnValue  296
+%define J9TR_VMThread_returnValue2  304
+%define J9TR_VMThread_entryLocalStorage  616
+%define J9TR_VMThread_stackWalkState  608
+%define J9TR_J9StackWalkState_restartPoint  224
+%define J9TR_JavaVMJitConfig  6384
+%define J9TR_JavaVM_runtimeFlags  224
+%define J9TR_JavaVM_cInterpreter  184
+%define J9TR_JavaVM_bytecodeLoop  192
+%define J9TR_JavaVM_extendedRuntimeFlags  228
+%define J9TR_JavaVMInternalFunctionTable  0
+%define J9TR_ELS_jitGlobalStorageBase  8
+%define J9TR_ELS_jitFPRegisterStorageBase  48
+%define J9TR_ELS_machineSPSaveSlot  88
+%define J9TR_J9VMJITRegisterState_jit_fpr0  128
+%define J9TR_J9Class_classLoader  40
+%define J9TR_J9Class_lastITable  96
+%define J9TR_J9Class_lockOffset  200
+%define J9TR_ArrayClass_componentType  88
+%define J9TR_ITableOffset  24
+%define J9TR_J9ITable_interfaceClass  0
+%define J9TR_MethodFlagsOffset  8
+%define J9TR_MethodPCStartOffset  24
+%define J9TR_JitConfig_runtimeFlags  1088
+%define J9TR_JitConfig_loadPreservedAndBranch  2960
+%define J9TR_JitConfig_pseudoTOC  1984
+%define J9TR_InternalFunctionTableReleaseVMAccess  312
+%define J9TR_J9Object_class  0
+%define J9TR_ObjectHeader_class  0
+%define J9TR_IndexableObjectContiguous_objectData  8
+%define J9TR_J9SFJNICallInFrame_exitAddress  0
+%define J9TR_bcloop_execute_bytecode  0
+%define J9TR_bcloop_handle_pop_frames  10
+%define J9TR_bcloop_i2j_transition  16
+%define J9TR_bcloop_j2i_invoke_exact  12
+%define J9TR_bcloop_j2i_transition  11
+%define J9TR_bcloop_j2i_virtual  13
+%define J9TR_bcloop_jump_bytecode_prototype  2
+%define J9TR_bcloop_load_preserved_and_branch  14
+%define J9TR_bcloop_return_from_jit  17
+%define J9TR_bcloop_return_from_jit_ctor  18
+%define J9TR_bcloop_run_exception_handler  4
+%define J9TR_bcloop_run_jni_native  5
+%define J9TR_bcloop_run_method  1
+%define J9TR_bcloop_run_method_compiled  3
+%define J9TR_bcloop_run_method_handle  7
+%define J9TR_bcloop_run_method_handle_compiled  8
+%define J9TR_bcloop_run_method_interpreted  9
+%define J9TR_bcloop_stack_overflow  6
+%define J9TR_bcloop_throw_current_exception  15
+%define J9TR_bcloop_enter_method_monitor  19
+%define J9TR_bcloop_report_method_enter  20
+%define J9TR_bcloop_exit_interpreter  22
+%define J9TR_MethodNotCompiledBit  1
+%define J9TR_InterpVTableOffset  328
+%define J9TR_RequiredClassAlignment  256
+%define J9TR_RequiredClassAlignmentInBits  8
+%define J9TR_pointerSize  8
+%define J9TR_ELSSize  96
+%define J9TR_J9_EXTENDED_RUNTIME_DEBUG_MODE  16384
+%define J9TR_J9_EXTENDED_RUNTIME_USE_VECTOR_REGISTERS  1
+%define J9TR_J9_INLINE_JNI_MAX_ARG_COUNT  32
 
-ifdef WINDOWS
-    UseFastCall = 1
-else
-    ifdef TR_HOST_32BIT
-        UseFastCall = 1
-    endif
-endif
+; args: register, helperName
+%macro MoveHelper 2
+		lea %1,[rip + %2]
+%endmacro
+
+; source, helperName, register
+%macro CompareHelperUseReg 3
+	   	lea %3,[rip + %2]
+	   	cmp %1, %3
+%endmacro
+
+;helperName
+%macro CallHelper 1
+	   	call %1
+%endmacro
+
+; helperName, register
+%macro CallHelperUseReg 2
+	   	call $1
+%endmacro
+
+; temp, index, table
+%macro JumpTableHelper 3
+		lea %1,[rip + %3]
+		jmp qword [%1 + %2 * 8]
+%endmacro
+
+;table
+%macro JumpTableStart 1
+align 16
+%1:
+%endmacro
+
+;table
+%macro JumpTableEnd 1
+
+%endmacro
+
+;helperName
+%macro ExternHelper 1
+extern %1:near
+%endmacro
+
+;helperName
+%macro GlueHelper 1
+		test    byte [rdi+J9TR_MethodPCStartOffset], J9TR_MethodNotCompiledBit
+	   	jnz     %1
+	   	jmp     mergedStaticGlueCallFixer
+%endmacro
+
+; %include x/runtime/X86RegisterMap.inc : perhaps not relevant
+
+    global jitMonitorEnterReserved
+    global jitMonitorEnterReservedPrimitive
+    global jitMonitorEnterPreservingReservation
+    global jitMethodMonitorEnterReserved
+    global jitMethodMonitorEnterReservedPrimitive
+    global jitMethodMonitorEnterPreservingReservation
+    global jitMonitorExitReserved
+    global jitMonitorExitReservedPrimitive
+    global jitMonitorExitPreservingReservation
+    global jitMethodMonitorExitPreservingReservation
+    global jitMethodMonitorExitReserved
+    global jitMethodMonitorExitReservedPrimitive
+
+%ifdef WINDOWS
+%define UseFastCall 1
+%else
+%ifdef TR_HOST_32BIT
+%define UseFastCall  1
+%endif
+%endif
 
 eq_ObjectClassMask            equ -J9TR_RequiredClassAlignment
 eq_J9Monitor_IncDecValue      equ 08h
@@ -51,167 +228,169 @@ eq_J9Monitor_FLCINFBits       equ 03h
 eq_J9Monitor_RecCountMask     equ 0F8h
 
 
-ifndef TR_HOST_64BIT
+%ifndef TR_HOST_64BIT
 
 eq_J9Monitor_LockWord         equ 04h
 eq_J9Monitor_CountsClearMask  equ 0FFFFFF07h
 eq_J9Monitor_CNTFLCClearMask  equ 0FFFFFF05h
 
-else ; ndef  64bit
+%else 
+; ndef  64bit
 ; this stupidness is required because masm2gas can't handle
 ; ifdef on definitions
 
-ifdef ASM_J9VM_INTERP_SMALL_MONITOR_SLOT
+%ifdef ASM_J9VM_INTERP_SMALL_MONITOR_SLOT
 eq_J9Monitor_LockWord         equ 04h
-else
+%else
 eq_J9Monitor_LockWord         equ 08h
-endif
+%endif
 
 eq_J9Monitor_CountsClearMask  equ 0FFFFFFFFFFFFFF07h
 eq_J9Monitor_CNTFLCClearMask  equ 0FFFFFFFFFFFFFF05h
 
-endif ; 64bit
+%endif ; 64bit
 
 ; object <= ObjAddr
 ; lockword address => _rcx
 ; lockword value   => _rax
-ObtainLockWordHelper macro ObjAddr
-    ifdef ASM_J9VM_THR_LOCK_NURSERY
-        ifdef ASM_J9VM_INTERP_COMPRESSED_OBJECT_HEADER
-            mov  eax, [&ObjAddr + J9TR_J9Object_class] ; receiver class
-        else
-            mov _rax, [&ObjAddr + J9TR_J9Object_class] ; receiver class
-        endif
-        and _rax, eq_ObjectClassMask
-        mov _rax, [_rax + J9TR_J9Class_lockOffset]     ; offset of lock word in receiver class
-        lea _rcx, [&ObjAddr + _rax]                    ; load the address of object lock word
-    else
-        lea _rcx, [&ObjAddr + eq_J9Monitor_LockWord]   ; load the address of object lock word
-    endif
-    ifdef ASM_J9VM_INTERP_SMALL_MONITOR_SLOT
-        mov  eax, [_rcx]
-    else
-        mov _rax, [_rcx]
-    endif
-endm
+; args: ObjAddr
+%macro ObtainLockWordHelper 1 
+    %ifdef ASM_J9VM_THR_LOCK_NURSERY
+        %ifdef ASM_J9VM_INTERP_COMPRESSED_OBJECT_HEADER
+            mov  eax, [%1 + J9TR_J9Object_class] ; receiver class
+        %else
+            mov rax, [%1 + J9TR_J9Object_class] ; receiver class
+        %endif
+        and rax, eq_ObjectClassMask
+        mov rax, [rax + J9TR_J9Class_lockOffset]     ; offset of lock word in receiver class
+        lea rcx, [%1 + rax]                    ; load the address of object lock word
+    %else
+        lea rcx, [%1 + eq_J9Monitor_LockWord]   ; load the address of object lock word
+    %endif
+    %ifdef ASM_J9VM_INTERP_SMALL_MONITOR_SLOT
+        mov  eax, [rcx]
+    %else
+        mov rax, [rcx]
+    %endif
+%endmacro
 
-ObtainLockWord macro
-    ifdef UseFastCall
-        ObtainLockWordHelper _rdx
-    else
-        ObtainLockWordHelper _rsi
-    endif
-endm
+%macro ObtainLockWord 0
+    %ifdef UseFastCall
+        ObtainLockWordHelper rdx
+    %else
+        ObtainLockWordHelper rsi
+    %endif
+%endmacro
 
 ; try to obtain the lock
 ; lockword address <= _rcx
 ; vmthread         <= _rbp
-TryLock macro
-    push _rbp
-    lea  _rbp, [_rbp + eq_J9Monitor_RESINCBits] ; make thread ID + RES + INC_DEC value
+%macro TryLock 0
+    push bp
+    lea  rbp, [rbp + eq_J9Monitor_RESINCBits] ; make thread ID + RES + INC_DEC value
 
     ; Set _rax to the lock word value that allows a monitor to be reserved (the
     ; reservation bit by default, or 0 for -XlockReservation). This value is
     ; provided to the reserving monent helper as the third argument. Calling
     ; conventions differ...
-    ifdef TR_HOST_32BIT
+%ifdef TR_HOST_32BIT
         ; 32-bit always uses fastcall. This is the only argument on the stack.
         ; Stack offsets: +0 saved ebp, +4 return address, +8 argument
-        mov eax, dword ptr [esp+8]
-    else
-        ifdef UseFastCall
+        mov eax, dword [esp+8]
+%else
+%ifdef UseFastCall
             mov rax, r8
-        else
+%else
             mov rax, rdx
-        endif
-    endif
+%endif
+%endif
 
-    ifdef ASM_J9VM_INTERP_SMALL_MONITOR_SLOT
-        lock cmpxchg [_rcx],  ebp               ; try taking the lock
-    else
-        lock cmpxchg [_rcx], _rbp               ; try taking the lock
-    endif
-    pop  _rbp
-endm
+%ifdef ASM_J9VM_INTERP_SMALL_MONITOR_SLOT
+        lock cmpxchg [rcx],  ebp               ; try taking the lock
+%else
+        lock cmpxchg [rcx], rbp               ; try taking the lock
+%endif
+    pop  rbp
+%endmacro
 
 ; We reach the reserved monitor enter code here if the monitor isn't reserved, it's reserved
 ; by another thread or the reservation count has reached it's maximum value.
 ; In this helper we first check if the reservation count is about to overflow
 ; then we try taking the lock and if we succeed we increment the reservation count and we
 ; are back to mainline code.
-MonitorEnterReserved macro
-    local fallback,trylock
+%macro MonitorEnterReserved 0
+    ;local fallback,trylock
     ObtainLockWord
-    push _rax
-    and  _rax, eq_J9Monitor_RecCountMask            ; check if the recursive count has
-    xor  _rax, eq_J9Monitor_RecCountMask            ; reached the max value
-    pop  _rax
-    jz   fallback                                   ; and call VM helper to resolve it
-    xor  _rax, _rbp                                 ; mask thread ID
-    xor  _rax, eq_J9Monitor_RESBit                  ; mask RES bit
-    and  _rax, eq_J9Monitor_CountsClearMask         ; clear the count bits
-    jnz  trylock                                    ; if any bit is set we don't have it reserved by the same thread, or not reserved at all
-    add  dword ptr [_rcx], eq_J9Monitor_IncDecValue ; add 1 to the reservation count
-    ifdef TR_HOST_32BIT
+    push rax
+    and  rax, eq_J9Monitor_RecCountMask            ; check if the recursive count has
+    xor  rax, eq_J9Monitor_RecCountMask            ; reached the max value
+    pop  rax
+    jz   %%fallback                                   ; and call VM helper to resolve it
+    xor  rax, rbp                                 ; mask thread ID
+    xor  rax, eq_J9Monitor_RESBit                  ; mask RES bit
+    and  rax, eq_J9Monitor_CountsClearMask         ; clear the count bits
+    jnz  %%trylock                                    ; if any bit is set we don't have it reserved by the same thread, or not reserved at all
+    add  dword [rcx], eq_J9Monitor_IncDecValue ; add 1 to the reservation count
+    %ifdef TR_HOST_32BIT
         ret 4
-    else
+    %else
         ret
-    endif
-  trylock:
+    %endif
+  %%trylock:
     TryLock
-    jne  fallback                                   ; call out to VM if we couldn't take the lock, which means it's not reserved for us
-    ifdef TR_HOST_32BIT
+    jne  %%fallback                                   ; call out to VM if we couldn't take the lock, which means it's not reserved for us
+    %ifdef TR_HOST_32BIT
         ret 4
-    else
+    %else
         ret
-    endif
-  fallback:
-endm
+    %endif
+  %%fallback:
+%endmacro
 
 ; This code is called when we need to exit reserved montior with couple of possible
 ; scenarios:
 ;   - more than one level of recursion
 ;   - FLC or INF are set
 ;   - we have illegal monitor state
-MonitorExitReserved macro
-    local fallback
+%macro MonitorExitReserved 0
+    ;local fallback
     ObtainLockWord
-    test _rax, eq_J9Monitor_RESBit
-    jz   fallback
-    test _rax, eq_J9Monitor_FLCINFBits
-    jnz  fallback
-    test _rax, eq_J9Monitor_RecCountMask
-    jz   fallback
-    sub  dword ptr [_rcx], eq_J9Monitor_IncDecValue
+    test rax, eq_J9Monitor_RESBit
+    jz   %%fallback
+    test rax, eq_J9Monitor_FLCINFBits
+    jnz  %%fallback
+    test rax, eq_J9Monitor_RecCountMask
+    jz   %%fallback
+    sub  dword [rcx], eq_J9Monitor_IncDecValue
     ret
-  fallback:
-endm
+  %%fallback:
+%endmacro
 
 ; We reach the reserved monitor enter code here if the monitor isn't reserved, it's reserved
 ; by another thread. We try to reserve it for ourselves and if we succeed we just go into
 ; main line code.
-MonitorEnterReservedPrimitive macro
-    local fallback,trylock
+%macro MonitorEnterReservedPrimitive 0
+    ;local fallback,trylock
     ObtainLockWord
-    xor  _rax, _rbp                         ; mask thread ID
-    xor  _rax, eq_J9Monitor_RESBit          ; mask RES bit
-    and  _rax, eq_J9Monitor_CNTFLCClearMask ; clear the count bits
-    jnz  trylock                            ; if any bit is set we don't have it reserved by the same thread, or not reserved at all
-    ifdef TR_HOST_32BIT
+    xor  rax, rbp                         ; mask thread ID
+    xor  rax, eq_J9Monitor_RESBit          ; mask RES bit
+    and  rax, eq_J9Monitor_CNTFLCClearMask ; clear the count bits
+    jnz  %%trylock                            ; if any bit is set we don't have it reserved by the same thread, or not reserved at all
+    %ifdef TR_HOST_32BIT
         ret 4
-    else
+    %else
         ret
-    endif
-  trylock:
+    %endif
+  %%trylock:
     TryLock
-    jne  fallback                           ; call out to VM if we couldn't take the lock, which means it's not reserved for us
-    ifdef TR_HOST_32BIT
+    jne  %%fallback                           ; call out to VM if we couldn't take the lock, which means it's not reserved for us
+    %ifdef TR_HOST_32BIT
         ret 4
-    else
+    %else
         ret
-    endif
-  fallback:
-endm
+    %endif
+  %%fallback:
+%endmacro
 
 ; This code is reachable from reserved primitive exit code and it is
 ; supposed to make sure we call out to monitor exit but with recursive count
@@ -220,105 +399,106 @@ endm
 ; stopped inside them. We can get stopped at the exit in which we have to
 ; make sure we have count set to at least 1, that is pretend we increment/decrement.
 ; The state of count=0, RES=1, FLC=1 is invalid and illegal monitor state exception is thrown.
-MonitorExitReservedPrimitive macro
-    local fallback
+%macro MonitorExitReservedPrimitive 0
+    ;local fallback
     ObtainLockWord
-    test _rax, eq_J9Monitor_INFBit                   ; check to see if we have inflated monitor
-    jnz  fallback                                    ; monitor inflated call the VM helper
-    test _rax, eq_J9Monitor_RESBit                   ; check to see if we have reservation ON
-    jz   fallback                                    ; no reserved bit set - go on, call the helper to exit
-    test _rax, eq_J9Monitor_RecCountMask             ; check to see if we have any recursive bits on
-    jnz  fallback                                    ; yes some recursive count, go back to main line code
-    sub  dword ptr [_rcx], eq_J9Monitor_IncDecValue
+    test rax, eq_J9Monitor_INFBit                   ; check to see if we have inflated monitor
+    jnz  %%fallback                                    ; monitor inflated call the VM helper
+    test rax, eq_J9Monitor_RESBit                   ; check to see if we have reservation ON
+    jz   %%fallback                                    ; no reserved bit set - go on, call the helper to exit
+    test rax, eq_J9Monitor_RecCountMask             ; check to see if we have any recursive bits on
+    jnz  %%fallback                                    ; yes some recursive count, go back to main line code
+    sub  dword [rcx], eq_J9Monitor_IncDecValue
     ret
-  fallback:
-endm
+  %%fallback:
+%endmacro
 
 ; We reach this out of line code when we fail to enter monitor with
 ; flat lock, where the monitor is supposed to preserve existing reservation.
 ; This enter procedure is different compared to the regular monitor enter
 ; sequence only that it checks for reservation and enters in reserved manner
 ; if possible.
-MonitorEnterPreservingReservation macro
-    local fallback
+%macro MonitorEnterPreservingReservation 0
+    ;local fallback
     ObtainLockWord
-    push _rax
-    and  _rax, eq_J9Monitor_RecCountMask            ; check if the recursive count has
-    xor  _rax, eq_J9Monitor_RecCountMask            ; reached the max value
-    pop  _rax
-    jz   fallback                                   ; and call VM helper to resolve it
-    xor  _rax, _rbp                                 ; mask thread ID
-    xor  _rax, eq_J9Monitor_RESBit                  ; mask RES bit
-    and  _rax, eq_J9Monitor_CountsClearMask         ; clear the count bits
-    jnz  fallback                                   ; if any bit is set we don't have it reserved by the same thread, or not reserved at all
-    add  dword ptr [_rcx], eq_J9Monitor_IncDecValue ; add 1 to the reservation count
+    push rax
+    and  rax, eq_J9Monitor_RecCountMask            ; check if the recursive count has
+    xor  rax, eq_J9Monitor_RecCountMask            ; reached the max value
+    pop  rax
+    jz   %%fallback                                   ; and call VM helper to resolve it
+    xor  rax, rbp                                 ; mask thread ID
+    xor  rax, eq_J9Monitor_RESBit                  ; mask RES bit
+    and  rax, eq_J9Monitor_CountsClearMask         ; clear the count bits
+    jnz  %%fallback                                   ; if any bit is set we don't have it reserved by the same thread, or not reserved at all
+    add  dword [rcx], eq_J9Monitor_IncDecValue ; add 1 to the reservation count
     ret
-  fallback:
-endm
+  %%fallback:
+%endmacro
 
 ; We reach this code when we are in regular monitor and we want to make sure we
 ; preserve reservation for any monitor that has reserved bit set and we are the
 ; same thread.
-MonitorExitPreservingReservation macro
-    local fallback
+%macro MonitorExitPreservingReservation 0
+    ;local fallback
     ObtainLockWord
-    test _rax, eq_J9Monitor_RecCountMask            ; check if the recursive count is greater than 1
-    jz   fallback                                   ; branch to VM if 0, weird thing has happened
-    xor  _rax, _rbp                                 ; mask thread ID
-    xor  _rax, eq_J9Monitor_RESBit                  ; mask RES bit
-    and  _rax, eq_J9Monitor_CountsClearMask         ; clear the count bits
-    jnz  fallback                                   ; if any bit is set we don't have it reserved by the same thread, or not reserved at all
-    sub  dword ptr [_rcx], eq_J9Monitor_IncDecValue
+    test rax, eq_J9Monitor_RecCountMask            ; check if the recursive count is greater than 1
+    jz   %%fallback                                   ; branch to VM if 0, weird thing has happened
+    xor  rax, rbp                                 ; mask thread ID
+    xor  rax, eq_J9Monitor_RESBit                  ; mask RES bit
+    and  rax, eq_J9Monitor_CountsClearMask         ; clear the count bits
+    jnz  %%fallback                                   ; if any bit is set we don't have it reserved by the same thread, or not reserved at all
+    sub  dword [rcx], eq_J9Monitor_IncDecValue
     ret
-  fallback:
-endm
+  %%fallback:
+%endmacro
 
 
-; template for exported functions
-MonitorReservationFunction macro Name, Fallback, Template
+; template for exported functions args: Name, Fallback, Template
+%macro MonitorReservationFunction 3
     align 16
-  ifdef TR_HOST_64BIT
-    &Name proc
-  else
-    &Name proc near
-  endif
-    &Template
-    ifdef UseFastCall
-        mov  _rcx, _rbp ; restore the first param - vmthread
-    endif
-    jmp  &Fallback
-    &Name endp
-endm
+  %ifdef TR_HOST_64BIT
+    %1
+  %else
+    %1
+  %endif
+    %3
+    %ifdef UseFastCall
+        mov  rcx, rbp ; restore the first param - vmthread
+    %endif
+    jmp  %2
+%endmacro
 
-ifdef TR_HOST_64BIT
-_TEXT segment para 'CODE'
-else
-_TEXT segment para use32 public 'CODE'
-endif
+%ifdef TR_HOST_64BIT
+SECTION .text
+%else
+SECTION .text
+%endif
 
-ifdef TR_HOST_64BIT
+%ifdef TR_HOST_64BIT
     entryFallback equ jitMonitorEntry
     methodEntryFallback equ jitMethodMonitorEntry
-else
-    entryFallback proc near
+%else
+    entryFallback:
         ; jitMonitorEntry won't clean up the extra argument
         pop eax
-        mov dword ptr [esp], eax
+        mov dword [esp], eax
         jmp jitMonitorEntry
-    entryFallback endp
+        ret
 
-    methodEntryFallback proc near
+    methodEntryFallback:
         ; jitMethodMonitorEntry won't clean up the extra argument
         pop eax
-        mov dword ptr [esp], eax
+        mov dword [esp], eax
         jmp jitMethodMonitorEntry
-    methodEntryFallback endp
-endif
+        ret
+%endif
 
-ExternHelper jitMonitorEntry
-ExternHelper jitMethodMonitorEntry
-ExternHelper jitMonitorExit
-ExternHelper jitMethodMonitorExit
+extern jitMonitorEntry
+extern jitMethodMonitorEntry
+extern jitMonitorExit
+extern jitMethodMonitorExit
+
+mainProc:
 
 MonitorReservationFunction jitMonitorEnterReserved,                    entryFallback,         MonitorEnterReserved
 MonitorReservationFunction jitMethodMonitorEnterReserved,              methodEntryFallback,   MonitorEnterReserved
@@ -334,6 +514,4 @@ MonitorReservationFunction jitMethodMonitorExitReservedPrimitive,     jitMethodM
 MonitorReservationFunction jitMonitorExitPreservingReservation,       jitMonitorExit,       MonitorExitPreservingReservation
 MonitorReservationFunction jitMethodMonitorExitPreservingReservation, jitMethodMonitorExit, MonitorExitPreservingReservation
 
-_TEXT ends
-
-end
+ret
