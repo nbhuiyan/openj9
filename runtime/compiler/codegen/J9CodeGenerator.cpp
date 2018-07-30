@@ -1299,7 +1299,7 @@ J9::CodeGenerator::moveUpArrayLengthStores(TR::TreeTop *insertionPoint)
 void
 J9::CodeGenerator::doInstructionSelection()
    {
-   self()->setNextAvailableBlockIndex(self()->comp()->getFlowGraph()->getNextNodeNumber() + 1);
+   setNextAvailableBlockIndex(comp()->getFlowGraph()->getNextNodeNumber() + 1);
 
    J9::SetMonitorStateOnBlockEntry::LiveMonitorStacks liveMonitorStacks(
       (J9::SetMonitorStateOnBlockEntry::LiveMonitorStacksComparator()),
