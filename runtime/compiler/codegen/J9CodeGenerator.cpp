@@ -1318,7 +1318,7 @@ J9::CodeGenerator::doInstructionSelection()
    if (self()->comp()->getOption(TR_TraceCG) || debug("traceGRA"))
       self()->comp()->getDebug()->setupToDumpTreesAndInstructions("Performing Instruction Selection");
 
-   self()->beginInstructionSelection();
+   beginInstructionSelection();
 
    {
    TR::StackMemoryRegion stackMemoryRegion(*self()->trMemory());
