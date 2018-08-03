@@ -2110,7 +2110,7 @@ J9::CodeGenerator::doInstructionSelection()
 void
 J9::CodeGenerator::splitWarmAndColdBlocks()
    {
-   if (!self()->allowSplitWarmAndColdBlocks() || self()->comp()->compileRelocatableCode())
+   if (!allowSplitWarmAndColdBlocks() || self()->comp()->compileRelocatableCode())
       {
       return;
       }

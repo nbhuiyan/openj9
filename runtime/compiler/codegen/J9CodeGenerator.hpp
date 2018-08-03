@@ -102,7 +102,7 @@ public:
 
    TR::Linkage *createLinkageForCompilation();
 
-   bool enableAESInHardwareTransformations() {return false;}
+   virtual bool enableAESInHardwareTransformations() {return false;}
 
    bool isMethodInAtomicLongGroup(TR::RecognizedMethod rm);
 
