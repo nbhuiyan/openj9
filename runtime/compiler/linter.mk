@@ -89,6 +89,16 @@ include $(JIT_MAKE_DIR)/files/common.mk
 #
 include $(JIT_MAKE_DIR)/toolcfg/common.mk
 
+# Add include directories to find j9cfg.h and omrcfg.h if needed.
+#
+# Due to the Travis CI lint job running after a CMake build, it
+# results in j9cfg.h and omrcfg.h to be in a location that
+# autotools does not expect them to be, this "hack" is needed
+#
+
+ifneq ("$(wildcard $(J9SRC)/build/j9cfg.h)", "")
+CXX_INCLUDES+=$(J9SRC)/build $(J9SRC)/build/omr
+endif
 
 #
 # Add OMRChecker targets
@@ -122,13 +132,16 @@ omrchecker_cleandll:
 omrchecker_cleanall:
 	cd $(OMRCHECKER_DIR); make cleanall
 
+cmake_additional_includes:
+
+
 
 # The core linter bits.  
 # 
 # linter:: is the default target, and we construct a pre-req for each
 #  .cpp file.
 #
-linter:: omrchecker 
+linter:: omrchecker cmake_additional_includes
 
 
 # The clang invocation magic line.
