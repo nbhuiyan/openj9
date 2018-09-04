@@ -164,12 +164,12 @@
 
 ; args: register, helperName
 %macro MoveHelper 2
-		lea %1,[rip + %2]
+		lea %1,[rel %2] ;lea %1,[rel $ + %2]
 %endmacro
 
 ; source, helperName, register
 %macro CompareHelperUseReg 3
-	   	lea %3,[rip + %2]
+	   	lea %3,[rel %2]
 	   	cmp %1, %3
 %endmacro
 
@@ -185,7 +185,7 @@
 
 ; temp, index, table
 %macro JumpTableHelper 3
-		lea %1,[rip + %3]
+		lea %1,[rel %3]
 		jmp qword [%1 + %2 * 8]
 %endmacro
 
@@ -276,7 +276,7 @@ endm
 %ifdef WINDOWS
         mov     %1, dword [%2] ;&targetReg, dword ptr[&helperIndexSym]
 %else
-        mov     %1, dword [rip + %2] ;&targetReg, dword ptr[rip+&helperIndexSym]
+        mov     %1, dword [rel %2] ;&targetReg, dword ptr[rip+&helperIndexSym]
 %endif
 %endmacro
 
@@ -1543,12 +1543,12 @@ ret ;resolveAndPopulateVTableDispatch endp
 
 ; args: register, helperName
 %macro MoveHelper 2
-		lea %1,[rip + %2]
+		lea %1,[rel %2]
 %endmacro
 
 ; source, helperName, register
 %macro CompareHelperUseReg 3
-	   	lea %3,[rip + %2]
+	   	lea %3,[rel %2]
 	   	cmp %1, %3
 %endmacro
 
@@ -1564,7 +1564,7 @@ ret ;resolveAndPopulateVTableDispatch endp
 
 ; temp, index, table
 %macro JumpTableHelper 3
-		lea %1,[rip + %3]
+		lea %1,[rel %3]
 		jmp qword [%1 + %2 * 8]
 %endmacro
 
@@ -1595,17 +1595,17 @@ align 16
 
       ; --------------------------------------------------------------------------------
 ;                                    COMMON
-; --------------------------------------------------------------------------------
+      ; --------------------------------------------------------------------------------
 
 ; Binary encoding of the MFENCE instruction.  Not all assemblers can handle the mnemonic.
 ;
-%macro tr_mfence
+%macro tr_mfence 0
       db          00Fh
       db          0AEh
       db          0F0h
 %endmacro
 
-%macro MEMORY_FENCE
+%macro MEMORY_FENCE 0
       tr_mfence
 %endmacro
 
@@ -1655,7 +1655,7 @@ endm
 %ifdef WINDOWS
         mov     %1, dword [%2] ;&targetReg, dword ptr[&helperIndexSym]
 %else
-        mov     %1, dword [rip + %2] ;&targetReg, dword ptr[rip+&helperIndexSym]
+        mov     %1, dword [rel %2] ;&targetReg, dword ptr[rip+&helperIndexSym]
 %endif
 %endmacro
 
@@ -1676,7 +1676,7 @@ endm
 
 %endif
 
-OPTION NOSCOPED
+;OPTION NOSCOPED
 
 ;_TEXT segment para 'CODE'
 segment .text
@@ -1755,6 +1755,7 @@ selectHelperOrTrampolineDisp32:  ;proc
 
       ; Call MCC service
       ;
+      ;lea rax, [rel mcc_lookupHelperTrampoline_unwrapper]
       MoveHelper rax, mcc_lookupHelperTrampoline_unwrapper ; p1) helper address
       lea rsi, [rsp] ; p2) EA parms in TLS area
       lea rdx, [rsp+32] ; p3) EA of return value in TLS area
