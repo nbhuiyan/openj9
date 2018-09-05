@@ -146,12 +146,12 @@
 
 ; args: register, helperName
 %macro MoveHelper 2
-		lea %1,[rip + %2]
+		lea %1,[rel %2]
 %endmacro
 
 ; source, helperName, register
 %macro CompareHelperUseReg 3
-	   	lea %3,[rip + %2]
+	   	lea %3,[rel + %2]
 	   	cmp %1, %3
 %endmacro
 
@@ -167,7 +167,7 @@
 
 ; temp, index, table
 %macro JumpTableHelper 3
-		lea %1,[rip + %3]
+		lea %1,[rel %3]
 		jmp qword [%1 + %2 * 8]
 %endmacro
 
@@ -308,7 +308,7 @@ SCALEDOWN_NUM:
 ONEHALF:
         dq 3fe0000000000000h
         dq 3fe0000000000000h
-_DATA ends
+;_DATA ends
 
 %ifdef TR_HOST_64BIT
 section .text ;segment para 'CODE'
@@ -546,11 +546,9 @@ f2l_done:
 ;   ST0 - dividend % divisor
 ;
         align       16
-%ifdef TR_HOST_64BIT
-_X87floatRemainder proc
-%else
-_X87floatRemainder proc near
-%endif
+
+_X87floatRemainder:
+
 %ifdef NO_X87_UNDER_WIN64
    int 3
 %else
@@ -598,9 +596,9 @@ dremloop:
 ;
         align 16
 %ifdef TR_HOST_64BIT
-_SSEfloatRemainderIA32Thunk proc
+_SSEfloatRemainderIA32Thunk: ; proc
 %else
-_SSEfloatRemainderIA32Thunk proc near
+_SSEfloatRemainderIA32Thunk: ; proc near
 %endif
         sub         rsp, 8
         movq        qword [rsp], xmm1
@@ -611,7 +609,7 @@ _SSEfloatRemainderIA32Thunk proc near
         movq        xmm1, qword [rsp]
         add         rsp, 8
         ret         8
-_SSEfloatRemainderIA32Thunk endp
+;_SSEfloatRemainderIA32Thunk endp
 
 
 ; The assumption is that this thunk method would be called from a 32-bit runtime only.
@@ -680,9 +678,9 @@ doSSEdoubleRemainder:
         punpcklqdq xmm1, xmm0   ; xmm1 = {a, b}
         ; note, the sign of the divisor has no affect on the final result
 %ifndef ASM_J9VM_USE_GOT
-        andpd xmm1, qword [rip ABSMASK]           ; xmm1 = {|a|, |b|}
-        movapd xmm2, QWORD  [rip NULL_INF_MASK]    ; xmm2 = {+inf, 0.0}
-%else
+        andpd xmm1, oword  [rel + ABSMASK]           ; xmm1 = {|a|, |b|}
+        movapd xmm2, [rel NULL_INF_MASK];QWORD  [rel NULL_INF_MASK]    ; xmm2 = {+inf, 0.0}
+%else ;todo
         andpd xmm1, QWORD  ABSMASK@GOTOFF[rdx]           ; xmm1 = {|a|, |b|}
         movapd xmm2, QWORD  NULL_INF_MASK@GOTOFF[rdx]    ; xmm2 = {+inf, 0.0}
 %endif
@@ -693,7 +691,7 @@ doSSEdoubleRemainder:
 
         ; xmm2 = {|a| != +inf ? 0 : QNaN, |b| != 0.0 ? 0 : QNaN}
 %ifndef ASM_J9VM_USE_GOT
-        andnpd xmm2, QWORD  [rip  QNaN]
+        andnpd xmm2, [rel  QNaN] ;qword
 %else
         andnpd xmm2, QWORD  QNaN@GOTOFF[rdx]
 %endif
@@ -714,7 +712,7 @@ doSSEdoubleRemainder:
 
 RETURN_NAN:
 %ifndef ASM_J9VM_USE_GOT
-        movapd xmm0, QWORD  [rip QNaN]     ; xmm0 = QNaN
+        movapd xmm0, [rel QNaN];QWORD  [rel QNaN]     ; xmm0 = QNaN
 %else
         movapd xmm0, QWORD  QNaN@GOTOFF[rdx]     ; xmm0 = QNaN
 %endif
@@ -753,7 +751,7 @@ _dblRemain:
         movq QWORD  [rsp+16], xmm2      ; preserve xmm2
         ; Prolog End
 %ifndef ASM_J9VM_USE_GOT
-        andpd xmm1, QWORD  [rip ABSMASK]   ; xmm1 = |divisor|
+        andpd xmm1, [rel ABSMASK];QWORD  [rel ABSMASK]   ; xmm1 = |divisor|
 %else
         andpd xmm1, QWORD  ABSMASK@GOTOFF[rdx]   ; xmm1 = |divisor|
 %endif
@@ -769,7 +767,7 @@ L144:                                   ; and fall through to the normal case
         ; Anything greater than MAGIC_NUM1 is considered "large"
         ; compare |dividend| to MAGIC_NUM1
 %ifndef ASM_J9VM_USE_GOT
-        ucomisd xmm1, QWORD  [rip MAGIC_NUM1]
+        ucomisd xmm1, [rel MAGIC_NUM1] ;QWORD
 %else
         ucomisd xmm1, QWORD  MAGIC_NUM1@GOTOFF[rdx]
 %endif
@@ -783,7 +781,7 @@ L184:
 
         movq  xmm4, xmm0             ; xmm4 = xmm0 (dividend)
 %ifndef ASM_J9VM_USE_GOT
-        andpd xmm4, QWORD  [rip ABSMASK] ; xmm4 = |dividend|
+        andpd xmm4, [rel ABSMASK] ;QWORD xmm4 = |dividend|
 %else
         andpd xmm4, QWORD  ABSMASK@GOTOFF[rdx] ; xmm4 = |dividend|
 %endif
@@ -881,7 +879,7 @@ L280:
 
 SMALL_NUMS:
 %ifndef ASM_J9VM_USE_GOT
-        mulsd xmm1, QWORD  [rip SCALEUP_NUM] ; xmm1 = |divisor| * 2^54
+        mulsd xmm1,  [rel SCALEUP_NUM] ; xmm1 = |divisor| * 2^54
 %else
         mulsd xmm1, QWORD  SCALEUP_NUM@GOTOFF[rdx] ; xmm1 = |divisor| * 2^54
 %endif
@@ -889,7 +887,7 @@ SMALL_NUMS:
         call _dblRemain
 
 %ifndef ASM_J9VM_USE_GOT
-        mulsd xmm0, QWORD  [rip SCALEUP_NUM]       ; xmm0 = dividend * 2^54
+        mulsd xmm0,  [rel SCALEUP_NUM]       ; xmm0 = dividend * 2^54
 %else
         mulsd xmm0, QWORD  SCALEUP_NUM@GOTOFF[rdx]       ; xmm0 = dividend * 2^54
 %endif
@@ -898,7 +896,7 @@ SMALL_NUMS:
         call _dblRemain
 
 %ifndef ASM_J9VM_USE_GOT
-        mulsd xmm0, QWORD  [rip SCALEDOWN_NUM]     ; dividend * 1/2^54
+        mulsd xmm0,  [rel SCALEDOWN_NUM]     ; dividend * 1/2^54
 %else
         mulsd xmm0, QWORD  SCALEDOWN_NUM@GOTOFF[rdx]     ; dividend * 1/2^54
 %endif
@@ -916,14 +914,14 @@ SMALL_NUMS:
 
 LARGE_NUMS:
 %ifndef ASM_J9VM_USE_GOT
-        mulsd xmm1, QWORD  [rip ONEHALF]   ; xmm1 *= 0.5 (scaledown)
+        mulsd xmm1,  [rel ONEHALF]   ; xmm1 *= 0.5 (scaledown)
 %else
         mulsd xmm1, QWORD  ONEHALF@GOTOFF[rdx]   ; xmm1 *= 0.5 (scaledown)
 %endif
         ; store xmm1 in divisor slot on stack
         movq  QWORD  [rsp+8], xmm1
 %ifndef ASM_J9VM_USE_GOT
-        mulsd xmm0, QWORD  [rip ONEHALF]   ; xmm2 *= 0.5 (scaledown)
+        mulsd xmm0,  [rel ONEHALF]   ; xmm2 *= 0.5 (scaledown)
 %else
         mulsd xmm0, QWORD  ONEHALF@GOTOFF[rdx]   ; xmm2 *= 0.5 (scaledown)
 %endif

@@ -462,7 +462,7 @@ eq_J9Monitor_CNTFLCClearMask  equ 0FFFFFFFFFFFFFF05h
     %ifdef UseFastCall
         mov  rcx, rbp ; restore the first param - vmthread
     %endif
-    jmp  %2 ;fallback
+    call %2 wrt ..plt ;fallback
 %endmacro
 
 ; %ifdef TR_HOST_64BIT

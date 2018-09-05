@@ -131,7 +131,7 @@ Laligned16_%1: ;helperName:
 
 %if %2 ;&bigEndian
                 ; shuffle mask for PSHUFB
-                movdqa xmm4, oword ptr [_rip _encodeUTF16Big_shufmask]
+                movdqa xmm4, oword [rel _encodeUTF16Big_shufmask]
 %endif
 
 L8_at_a_time_%1: ;&helperName:
@@ -158,7 +158,7 @@ L8_at_a_time_%1: ;&helperName:
                 sub rdx, 8
                 jge L8_at_a_time_%1 ;&helperName
 
-Lresidue_%1 ;&helperName:
+Lresidue_%1: ;&helperName:
                 add rdx, 8
                 cmp rdx, 0
                 je Lend_%1 ;&helperName
@@ -190,7 +190,7 @@ Lend_%1: ;&helperName:
 
 ; Expand out the two helpers
 
-DefineUTF16EncodeHelper _encodeUTF16Big,    1
+DefineUTF16EncodeHelper _encodeUTF16Big, 1
 DefineUTF16EncodeHelper _encodeUTF16Little, 0
 
 ;_TEXT           ends

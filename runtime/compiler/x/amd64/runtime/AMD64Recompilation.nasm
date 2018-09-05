@@ -150,12 +150,12 @@
 
 ; args: register, helperName
 %macro MoveHelper 2
-		lea %1,[rip + %2]
+		lea %1,[rel + %2]
 %endmacro
 
 ; source, helperName, register
 %macro CompareHelperUseReg 3
-	   	lea %3,[rip + %2]
+	   	lea %3,[rel + %2]
 	   	cmp %1, %3
 %endmacro
 
@@ -171,7 +171,7 @@
 
 ; temp, index, table
 %macro JumpTableHelper 3
-		lea %1,[rip + %3]
+		lea %1,[rel + %3]
 		jmp qword [%1 + %2 * 8]
 %endmacro
 
@@ -242,7 +242,7 @@ eq_MethodInfo_HasBeenReplaced        equ 0100000h
 eq_stack_senderPC                    equ  96
 eq_HasFailedRecompilation            equ  80h ; Flag bit, defined in codert.dev/Runtime.hpp
 
-%macro saveRegs
+%macro saveRegs 0
                 ; XMMs
                 sub     rsp, 64 ; Reserve space for XMMs
                 ; Do the writes in-order so we don't defeat the cache
@@ -341,7 +341,7 @@ _samplingRecompileMethod: ; PROC
                 mov     rdx, qword [rsp+eq_stack_senderPC]
 
                 ; old startPC
-                lea     rsi, qword [rdi+eq_retAddr_startPC]
+                lea     rsi, [rdi+eq_retAddr_startPC]
 
                 ; J9Method
                 mov     rax, qword [rdi+eq_stack_samplingBodyInfo]
@@ -520,7 +520,7 @@ _samplingPatchCallSite: ; PROC
                 push    rax
 
                 ; Compute the old startPC
-                lea     rax, qword [rdi+eq_retAddr_startPC]
+                lea     rax, [rdi+eq_retAddr_startPC]
 
 
                 ; Assume:

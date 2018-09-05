@@ -26,13 +26,13 @@
 
 ; Binary encoding of the MFENCE instruction.  Not all assemblers can handle the mnemonic.
 ;
-%macro tr_mfence
+%macro tr_mfence 0
       db          00Fh
       db          0AEh
       db          0F0h
 %endmacro
 
-%macro MEMORY_FENCE
+%macro MEMORY_FENCE 0
       tr_mfence
 %endmacro
 
@@ -54,7 +54,7 @@ eq_LORBinaryWord                  equ 083f0h
 eq_IsFloatOp                      equ 000040000h
 eq_CompressedPointer              equ 040000000h
 eq_isOwningObjectNeeded           equ 000040000h
-eq_ObjectClassMask                equ -J9TR_RequiredClassAlignment
+eq_ObjectClassMask                equ -256
 
 ; --------------------------------------------------------------------------------
 ;                                    32-BIT
@@ -82,7 +82,7 @@ J9PreservedFPRStackSize    equ   80
 %ifdef WINDOWS
         mov     %1, dword [%2] ;&targetReg, dword ptr[&helperIndexSym]
 %else
-        mov     %1, dword [rip + %2] ;&targetReg, dword ptr[rip+&helperIndexSym]
+        mov     %1, dword [rel + %2] ;&targetReg, dword ptr[rip+&helperIndexSym]
 %endif
 %endmacro
 
@@ -249,12 +249,12 @@ J9PreservedFPRStackSize    equ   80
 
 ; args: register, helperName
 %macro MoveHelper 2
-		lea %1,[rip + %2]
+		lea %1,[rel + %2]
 %endmacro
 
 ; source, helperName, register
 %macro CompareHelperUseReg 3
-	   	lea %3,[rip + %2]
+	   	lea %3,[rel + %2]
 	   	cmp %1, %3
 %endmacro
 
@@ -270,7 +270,7 @@ J9PreservedFPRStackSize    equ   80
 
 ; temp, index, table
 %macro JumpTableHelper 3
-		lea %1,[rip + %3]
+		lea %1,[rel + %3]
 		jmp qword [%1 + %2 * 8]
 %endmacro
 
@@ -1513,12 +1513,12 @@ eq_offsetof_J9Object_clazz equ 16 ; offset of class pointer in a J9Object
 
 ; args: register, helperName
 %macro MoveHelper 2
-		lea %1,[rip + %2]
+		lea %1,[rel + %2]
 %endmacro
 
 ; source, helperName, register
 %macro CompareHelperUseReg 3
-	   	lea %3,[rip + %2]
+	   	lea %3,[rel + %2]
 	   	cmp %1, %3
 %endmacro
 
@@ -1534,7 +1534,7 @@ eq_offsetof_J9Object_clazz equ 16 ; offset of class pointer in a J9Object
 
 ; temp, index, table
 %macro JumpTableHelper 3
-		lea %1,[rip + %3]
+		lea %1,[rel + %3]
 		jmp qword [%1 + %2 * 8]
 %endmacro
 
@@ -1638,7 +1638,7 @@ segment .text
       extern mcc_callPointPatching_unwrapper
 
 
-%macro CheckIfMethodCompiledAndPatch ; helperName
+%macro CheckIfMethodCompiledAndPatch 1 ; helperName
       test byte [rdi+J9TR_MethodPCStartOffset], J9TR_MethodNotCompiledBit
       jnz %1
       jmp mergedStaticGlueCallFixer2
@@ -1886,7 +1886,7 @@ ret ;interpreterSyncXMM0DStaticGlue endp
 ;
 ; --------------------------------------------------------------------------------
 
-%macro DataResolvePrologue
+%macro DataResolvePrologue 0
       pushfq ; rsp+256 = flags
       push r15 ; rsp+248
       push r14 ; rsp+240
@@ -1924,7 +1924,7 @@ ret ;interpreterSyncXMM0DStaticGlue endp
 %endmacro
 
 
-%macro DispatchUnresolvedDataHelper ; helper
+%macro DispatchUnresolvedDataHelper 1; helper
       mov rdi, qword [rsp+264] ; RA in snippet (see stack shape below)
       mov rax, qword [rdi] ; p1) rax = cpAddr
       mov esi, dword [rdi+8] ; p2) rsi = cpIndex
@@ -1935,7 +1935,7 @@ ret ;interpreterSyncXMM0DStaticGlue endp
 %endmacro
 
 
-%macro DataResolveEpilogue
+%macro DataResolveEpilogue 0
       movsd xmm0, qword  [rsp+0]
       movsd xmm1, qword  [rsp+8]
       movsd xmm2, qword  [rsp+16]
@@ -2016,9 +2016,9 @@ checkReferenceVolatility: ; proc
 
       ; determine what kind of fence we are dealing with: LOCK OR [ESP] (or mfence using appropriate command line option)
       ;
-      mov rsi, J9TR_VMThread_javaVM[rbp]
-      mov rsi, J9TR_JavaVMJitConfig[rsi]
-      mov rsi, J9TR_JitConfig_runtimeFlags[rsi]
+      mov rsi, [J9TR_VMThread_javaVM + rbp] ;[rbp]
+      mov rsi, [J9TR_JavaVMJitConfig + rsi] ;[rsi]
+      mov rsi, [J9TR_JitConfig_runtimeFlags + rsi] ;[rsi]
 
       ; get the RA in the mainline code
       ;
@@ -2035,8 +2035,8 @@ checkReferenceVolatility: ; proc
       mov bl, byte  [rbx + 12] ; get the first byte of the instruction descriptor (+ 8 (length of cpAddr) + 4 (length of cpIndex))
       and rbx, 0f0h ; find the length of the instruction stored in the upper nibble
       shr rbx, 4
-      lea rbx, qword  [rbx - 5]
-      lea rax, qword  [r9 + rbx]
+      lea rbx,   [rbx - 5]
+      lea rax,   [r9 + rbx]
 
       ; select the patching path based on the type of barrier being used
       ;

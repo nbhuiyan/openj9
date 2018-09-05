@@ -252,10 +252,10 @@ extern %1:near
       and rcx, rcx
       je  doneTO
    failedloopTO:
-      mov  bx, word ptr [rsi+2*rax]
+      mov  bx, word [rsi+2*rax]
       test bx, dx
       jnz  doneTO
-      mov  byte ptr [rdi+rax], bl
+      mov  byte [rdi+rax], bl
       inc  rax
       dec  rcx
       jnz  failedloopTO

@@ -261,7 +261,7 @@ eightchars:
                 mov  rax, rdx
                 shl  rdx, 32
                 or   rax, rdx
-                loop eightchars
+                ;loop eightchars
 		shr  rax, 32
                 ret
 ;_compressString endp
