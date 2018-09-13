@@ -73,9 +73,10 @@ RULE.cpp=$(eval $(DEF_RULE.cpp))
 #
 # Compile .s file into .o file
 #
-define DEF_RULE.s
+# hack! currently elf64 only
+define DEF_RULE.nasm
 $(1): $(2) | jit_createdirs
-	$$(S_CMD) $$(S_FLAGS) $$(patsubst %,--defsym %=1,$$(S_DEFINES)) $$(patsubst %,-I'%',$$(S_INCLUDES)) -o $$@ $$<
+	nasm -felf64 $$(patsubst %,-D %=1,$$(S_DEFINES)) $$(patsubst %,-I'%/',$$(S_INCLUDES)) -o $$@ $$< #$$(S_CMD) $$(S_FLAGS) $$(patsubst %,--defsym %=1,$$(S_DEFINES)) $$(patsubst %,-I'%',$$(S_INCLUDES)) -o $$@ $$<
 
 JIT_DIR_LIST+=$(dir $(1))
 
@@ -83,6 +84,15 @@ jit_cleanobjs::
 	rm -f $(1)
 
 endef # DEF_RULE.s
+
+
+# 
+# TODO: Compile .nasm files to .o files
+# 
+
+#define DEF_RULE.nasm
+#
+#endef
 
 RULE.s=$(eval $(DEF_RULE.s))
 

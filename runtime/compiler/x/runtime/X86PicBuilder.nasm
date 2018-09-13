@@ -19,7 +19,7 @@
 ; SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
 
 
-; TODO: #include "j9cfg.h"
+; TODO: #include "j9cfg.h" by redefining #define as %define, etc
 
 %ifndef TR_HOST_64BIT
 
@@ -258,10 +258,10 @@ eq_ObjectClassMask                equ -J9TR_RequiredClassAlignment
 
 J9PreservedFPRStackSize    equ   80
 
-LoadClassPointerFromObjectHeader macro ObjectReg, ClassPtrReg64, ClassPtrReg32
-        mov     &ClassPtrReg32, dword ptr[&ObjectReg+J9TR_J9Object_class]
-        and     &ClassPtrReg32, eq_ObjectClassMask
-endm
+%macro LoadClassPointerFromObjectHeader ;ObjectReg, ClassPtrReg64, ClassPtrReg32
+        mov     %3, dword [%1+J9TR_J9Object_class]
+        and     %3, eq_ObjectClassMask
+%endmacro
 
 %else
 
@@ -349,7 +349,7 @@ doLockOrEsp:
       db 000h
 
 doneMemoryFence:
-      pop ecx ; restore
+      pop ecx                                         ; restore
       retn
 
 ;memoryFence endp
