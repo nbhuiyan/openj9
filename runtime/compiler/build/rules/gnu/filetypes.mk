@@ -76,7 +76,7 @@ RULE.cpp=$(eval $(DEF_RULE.cpp))
 # hack! currently elf64 only
 define DEF_RULE.nasm
 $(1): $(2) | jit_createdirs
-	nasm -felf64 $$(patsubst %,-D %=1,$$(S_DEFINES)) $$(patsubst %,-I'%/',$$(S_INCLUDES)) -o $$@ $$< #$$(S_CMD) $$(S_FLAGS) $$(patsubst %,--defsym %=1,$$(S_DEFINES)) $$(patsubst %,-I'%',$$(S_INCLUDES)) -o $$@ $$<
+	nasm -felf64 $$(patsubst %,-D%=1,$$(S_DEFINES)) $$(patsubst %,-I'%/',$$(S_INCLUDES)) -o $$@ $$< #$$(S_CMD) $$(S_FLAGS) $$(patsubst %,--defsym %=1,$$(S_DEFINES)) $$(patsubst %,-I'%',$$(S_INCLUDES)) -o $$@ $$<
 
 JIT_DIR_LIST+=$(dir $(1))
 
