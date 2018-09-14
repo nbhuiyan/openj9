@@ -474,6 +474,8 @@ ifeq ($(BUILD_CONFIG),debug)
     SOLINK_VERSION_SCRIPT=$(JIT_SCRIPT_DIR)/j9jit.linux.debug.exp
 endif
 
+ifeq ($(OS),linux)
 SOLINK_EXTRA_ARGS+=-Wl,--version-script=$(SOLINK_VERSION_SCRIPT)
+endif
 
 SOLINK_FLAGS+=$(SOLINK_FLAGS_EXTRA)
