@@ -9102,17 +9102,17 @@ TR_J9VMBase::classNameChars(TR::Compilation *comp, TR::SymbolReference * symRef,
 // Native method bodies
 //
 
-JIT_HELPER(_initialInvokeExactThunkGlue);
+JIT_HELPER(initialInvokeExactThunkGlue);
 
 JNIEXPORT jlong JNICALL Java_java_lang_invoke_ThunkTuple_initialInvokeExactThunk
    (JNIEnv *env, jclass clazz)
    {
 #if defined(J9ZOS390)
-   return (jlong)TOC_UNWRAP_ADDRESS(_initialInvokeExactThunkGlue);
+   return (jlong)TOC_UNWRAP_ADDRESS(initialInvokeExactThunkGlue);
 #elif defined(TR_HOST_POWER) && (defined(TR_HOST_64BIT) || defined(AIXPPC)) && !defined(__LITTLE_ENDIAN__)
-   return (jlong)(*(void **)_initialInvokeExactThunkGlue);
+   return (jlong)(*(void **)initialInvokeExactThunkGlue);
 #else
-   return (jlong)_initialInvokeExactThunkGlue;
+   return (jlong)initialInvokeExactThunkGlue;
 #endif
    }
 

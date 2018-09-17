@@ -4679,7 +4679,7 @@ bool TR::CompilationInfo::isQueuedForCompilation(J9Method * method, void *oldSta
    return linkageInfo->isBeingCompiled();
    }
 
-JIT_HELPER(_initialInvokeExactThunkGlue);
+JIT_HELPER(initialInvokeExactThunkGlue);
 
 void *TR::CompilationInfo::startPCIfAlreadyCompiled(J9VMThread * vmThread, TR::IlGeneratorMethodDetails & details, void *oldStartPC)
    {
@@ -4706,11 +4706,11 @@ void *TR::CompilationInfo::startPCIfAlreadyCompiled(J9VMThread * vmThread, TR::I
          void *thunkAddress = fe->methodHandle_jitInvokeExactThunk(methodHandle);
          void *initialInvokeExactThunkGlueAddress;
 #if defined(J9ZOS390)
-         initialInvokeExactThunkGlueAddress = (void*)TOC_UNWRAP_ADDRESS(_initialInvokeExactThunkGlue);
+         initialInvokeExactThunkGlueAddress = (void*)TOC_UNWRAP_ADDRESS(initialInvokeExactThunkGlue);
 #elif defined(TR_HOST_POWER) && (defined(TR_HOST_64BIT) || defined(AIXPPC)) && !defined(__LITTLE_ENDIAN__)
-         initialInvokeExactThunkGlueAddress = (*(void **)_initialInvokeExactThunkGlue);
+         initialInvokeExactThunkGlueAddress = (*(void **)initialInvokeExactThunkGlue);
 #else
-         initialInvokeExactThunkGlueAddress = (void*)_initialInvokeExactThunkGlue;
+         initialInvokeExactThunkGlueAddress = (void*)initialInvokeExactThunkGlue;
 #endif
          if (thunkAddress != initialInvokeExactThunkGlueAddress)
             {

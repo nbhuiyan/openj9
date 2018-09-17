@@ -26,7 +26,7 @@ define({CALL_SLOW_PATH_ONLY_HELPER},{
 	pop uword ptr J9TR_VMThread_jitReturnAddress[_rbp]
 	SWITCH_TO_C_STACK
 	SAVE_ALL_REGS
-	FASTCALL_C_WITH_VMTHREAD(old_slow_$1,1)
+	FASTCALL_C_WITH_VMTHREAD(_old_slow_$1,1)
 	test _rax,_rax
 	je SHORT_JMP LABEL(L_done_$1)
 	jmp _rax
@@ -41,7 +41,7 @@ define({CALL_SLOW_PATH_ONLY_HELPER_NO_RETURN_VALUE},{
 	pop uword ptr J9TR_VMThread_jitReturnAddress[_rbp]
 	SWITCH_TO_C_STACK
 	SAVE_ALL_REGS
-	FASTCALL_C_WITH_VMTHREAD(old_slow_$1,1)
+	FASTCALL_C_WITH_VMTHREAD(_old_slow_$1,1)
 	test _rax,_rax
 	je SHORT_JMP LABEL(L_done_$1)
 	jmp _rax
@@ -55,7 +55,7 @@ define({CALL_SLOW_PATH_ONLY_HELPER_NO_EXCEPTION_NO_RETURN_VALUE},{
 	pop uword ptr J9TR_VMThread_jitReturnAddress[_rbp]
 	SWITCH_TO_C_STACK
 	SAVE_ALL_REGS
-	FASTCALL_C_WITH_VMTHREAD(old_slow_$1,1)
+	FASTCALL_C_WITH_VMTHREAD(_old_slow_$1,1)
 	RESTORE_ALL_REGS
 	SWITCH_TO_JAVA_STACK
 	push uword ptr J9TR_VMThread_jitReturnAddress[_rbp]
@@ -67,25 +67,25 @@ define({CALL_SLOW_PATH_ONLY_HELPER_NO_EXCEPTION},{
 })
 
 define({SLOW_PATH_ONLY_HELPER},{
-	FASTCALL_EXTERN(old_slow_$1,1)
+	FASTCALL_EXTERN(_old_slow_$1,1)
 	BEGIN_HELPER($1)
 	CALL_SLOW_PATH_ONLY_HELPER($1,$2)
 	END_HELPER($1,$2)
 })
 
 define({SLOW_PATH_ONLY_HELPER_NO_RETURN_VALUE},{
-	FASTCALL_EXTERN(old_slow_$1,1)
+	FASTCALL_EXTERN(_old_slow_$1,1)
 	BEGIN_HELPER($1)
 	CALL_SLOW_PATH_ONLY_HELPER_NO_RETURN_VALUE($1,$2)
 	END_HELPER($1,$2)
 })
 
 define({TRAP_HANDLER},{
-	FASTCALL_EXTERN(old_slow_$1,1)
+	FASTCALL_EXTERN(_old_slow_$1,1)
 	BEGIN_HELPER($1)
 	SWITCH_TO_C_STACK
 	SAVE_ALL_REGS
-	FASTCALL_C_WITH_VMTHREAD(old_slow_$1,1)
+	FASTCALL_C_WITH_VMTHREAD(_old_slow_$1,1)
 	jmp _rax
 	END_HELPER($1,$2)
 })
@@ -97,26 +97,26 @@ define({PICBUILDER_SLOW_PATH_ONLY_HELPER},{SLOW_PATH_ONLY_HELPER($1,$2)})
 define({EXCEPTION_THROW_HELPER},{SLOW_PATH_ONLY_HELPER($1,$2)})
 
 define({SLOW_PATH_ONLY_HELPER_NO_EXCEPTION},{
-	FASTCALL_EXTERN(old_slow_$1,1)
+	FASTCALL_EXTERN(_old_slow_$1,1)
 	BEGIN_HELPER($1)
 	CALL_SLOW_PATH_ONLY_HELPER_NO_EXCEPTION($1,$2)
 	END_HELPER($1,$2)
 })
 
 define({SLOW_PATH_ONLY_HELPER_NO_EXCEPTION_NO_RETURN_VALUE},{
-	FASTCALL_EXTERN(old_slow_$1,1)
+	FASTCALL_EXTERN(_old_slow_$1,1)
 	BEGIN_HELPER($1)
 	CALL_SLOW_PATH_ONLY_HELPER_NO_EXCEPTION_NO_RETURN_VALUE($1,$2)
 	END_HELPER($1,$2)
 })
 
 define({FAST_PATH_ONLY_HELPER},{
-	FASTCALL_EXTERN(old_fast_$1,1)
+	FASTCALL_EXTERN(_old_fast_$1,1)
 	BEGIN_HELPER($1)
 	pop uword ptr J9TR_VMThread_jitReturnAddress[_rbp]
 	SWITCH_TO_C_STACK
 	SAVE_C_VOLATILE_REGS
-	FASTCALL_C_WITH_VMTHREAD(old_fast_$1,1)
+	FASTCALL_C_WITH_VMTHREAD(_old_fast_$1,1)
 	RESTORE_C_VOLATILE_REGS
 	SWITCH_TO_JAVA_STACK
 	push uword ptr J9TR_VMThread_jitReturnAddress[_rbp]
@@ -125,12 +125,12 @@ define({FAST_PATH_ONLY_HELPER},{
 })
 
 define({FAST_PATH_ONLY_HELPER_NO_RETURN_VALUE},{
-	FASTCALL_EXTERN(old_fast_$1,1)
+	FASTCALL_EXTERN(_old_fast_$1,1)
 	BEGIN_HELPER($1)
 	pop uword ptr J9TR_VMThread_jitReturnAddress[_rbp]
 	SWITCH_TO_C_STACK
 	SAVE_C_VOLATILE_REGS
-	FASTCALL_C_WITH_VMTHREAD(old_fast_$1,1)
+	FASTCALL_C_WITH_VMTHREAD(_old_fast_$1,1)
 	RESTORE_C_VOLATILE_REGS
 	SWITCH_TO_JAVA_STACK
 	push uword ptr J9TR_VMThread_jitReturnAddress[_rbp]
@@ -138,12 +138,12 @@ define({FAST_PATH_ONLY_HELPER_NO_RETURN_VALUE},{
 })
 
 define({OLD_DUAL_MODE_HELPER},{
-	FASTCALL_EXTERN(old_fast_$1,1)
+	FASTCALL_EXTERN(_old_fast_$1,1)
 	BEGIN_HELPER($1)
 	pop uword ptr J9TR_VMThread_jitReturnAddress[_rbp]
 	SWITCH_TO_C_STACK
 	SAVE_C_VOLATILE_REGS
-	FASTCALL_C_WITH_VMTHREAD(old_fast_$1,1)
+	FASTCALL_C_WITH_VMTHREAD(_old_fast_$1,1)
 	test _rax,_rax
 	je LABEL(L_done_$1)
 	SAVE_C_NONVOLATILE_REGS
@@ -163,12 +163,12 @@ LABEL(L_done_$1):
 })
 
 define({OLD_DUAL_MODE_HELPER_NO_RETURN_VALUE},{
-	FASTCALL_EXTERN(old_fast_$1,1)
+	FASTCALL_EXTERN(_old_fast_$1,1)
 	BEGIN_HELPER($1)
 	pop uword ptr J9TR_VMThread_jitReturnAddress[_rbp]
 	SWITCH_TO_C_STACK
 	SAVE_C_VOLATILE_REGS
-	FASTCALL_C_WITH_VMTHREAD(old_fast_$1,1)
+	FASTCALL_C_WITH_VMTHREAD(_old_fast_$1,1)
 	test _rax,_rax
 	je LABEL(L_done_$1)
 	SAVE_C_NONVOLATILE_REGS
@@ -187,10 +187,10 @@ LABEL(L_done_$1):
 })
 
 define({NEW_DUAL_MODE_HELPER},{
-	FASTCALL_EXTERN(fast_$1,$2+1)
+	FASTCALL_EXTERN(_fast_$1,$2+1)
 	BEGIN_HELPER($1)
 	pop uword ptr J9TR_VMThread_jitReturnAddress[_rbp]
-	call FASTCALL_SYMBOL(fast_$1,$2+1)
+	call FASTCALL_SYMBOL(_fast_$1,$2+1)
 	test _rax,_rax
 	jne SHORT_JMP LABEL(L_slow_$1)
 	push uword ptr J9TR_VMThread_jitReturnAddress[_rbp]
@@ -213,10 +213,10 @@ LABEL(L_exception_$1):
 })
 
 define({NEW_DUAL_MODE_HELPER_NO_RETURN_VALUE},{
-	FASTCALL_EXTERN(fast_$1,$2+1)
+	FASTCALL_EXTERN(_fast_$1,$2+1)
 	BEGIN_HELPER($1)
 	pop uword ptr J9TR_VMThread_jitReturnAddress[_rbp]
-	call FASTCALL_SYMBOL(fast_$1,$2+1)
+	call FASTCALL_SYMBOL(_fast_$1,$2+1)
 	test _rax,_rax
 	jne SHORT_JMP LABEL(L_slow_$1)
 	push uword ptr J9TR_VMThread_jitReturnAddress[_rbp]
@@ -241,11 +241,11 @@ ifdef({ASM_J9VM_ENV_DATA64},{
 dnl All arguments are register-based.
 
 define({NEW_DUAL_MODE_ALLOCATION_HELPER},{
-	FASTCALL_EXTERN(fast_$1,$2+1)
+	FASTCALL_EXTERN(_fast_$1,$2+1)
 	BEGIN_HELPER($1)
 	pop uword ptr J9TR_VMThread_jitReturnAddress[_rbp]
 	SWITCH_TO_C_STACK
-	call FASTCALL_SYMBOL(fast_$1,$2+1)
+	call FASTCALL_SYMBOL(_fast_$1,$2+1)
 	test _rax,_rax
 	jne SHORT_JMP LABEL(L_slow_$1)
 	SWITCH_TO_JAVA_STACK
@@ -279,13 +279,13 @@ dnl No allocation helper has more than 2 args
 dnl after the current thread arg.
 
 define({NEW_DUAL_MODE_ALLOCATION_HELPER},{
-	FASTCALL_EXTERN(fast_$1,$2+1)
+	FASTCALL_EXTERN(_fast_$1,$2+1)
 	BEGIN_HELPER($1)
 	pop uword ptr J9TR_VMThread_jitReturnAddress[_rbp]
 	ifelse($2,0,,$2,1,,$2,2,{pop eax},{ERROR more than 2 args})
 	SWITCH_TO_C_STACK
 	ifelse($2,0,,$2,1,,$2,2,{push eax})
-	call FASTCALL_SYMBOL(fast_$1,$2+1)
+	call FASTCALL_SYMBOL(_fast_$1,$2+1)
 	test _rax,_rax
 	jne SHORT_JMP LABEL(L_slow_$1)
 	SWITCH_TO_JAVA_STACK
@@ -473,13 +473,13 @@ UNUSED(icallVMprJavaSendInvokeWithArgumentsHelperL)
 UNUSED(j2iInvokeWithArguments)
 
 START_PROC(jitThrowClassCastException)
-	FASTCALL_EXTERN(impl_jitClassCastException,1)
+	FASTCALL_EXTERN(_impl_jitClassCastException,1)
 	pop uword ptr J9TR_VMThread_jitReturnAddress[_rbp]
 	pop uword ptr J9TR_VMThread_floatTemp1[_rbp]
 	pop uword ptr J9TR_VMThread_floatTemp2[_rbp]
 	SWITCH_TO_C_STACK
 	SAVE_ALL_REGS
-	FASTCALL_C_WITH_VMTHREAD(impl_jitClassCastException)
+	FASTCALL_C_WITH_VMTHREAD(_impl_jitClassCastException)
 	jmp _rax
 END_PROC(jitThrowClassCastException)
 
@@ -490,14 +490,14 @@ START_PROC(jitRunOnJavaStack)
 	jmp uword ptr J9TR_VMThread_tempSlot[_rbp]
 END_PROC(jitRunOnJavaStack)
 
-	FASTCALL_EXTERN(fast_jitAcquireVMAccess,1)
+	FASTCALL_EXTERN(_fast_jitAcquireVMAccess,1)
 
 dnl Non-standard - _RSP points to C stack when this is called
 BEGIN_HELPER(jitAcquireVMAccess)
 dnl Ensure _rsp is pointing to the C interpreter stack frame
 	pop uword ptr J9TR_VMThread_jitReturnAddress[_rbp]
 	SAVE_ALL_REGS
-	FASTCALL_C_WITH_VMTHREAD(fast_jitAcquireVMAccess)
+	FASTCALL_C_WITH_VMTHREAD(_fast_jitAcquireVMAccess)
 	RESTORE_ALL_REGS
 	push uword ptr J9TR_VMThread_jitReturnAddress[_rbp]
 END_HELPER(jitAcquireVMAccess,0)
@@ -505,7 +505,7 @@ END_HELPER(jitAcquireVMAccess,0)
 ifdef({OMIT},{
 dnl currently declared by JIT, but could move here
 
-	FASTCALL_EXTERN(fast_jitReleaseVMAccess)
+	FASTCALL_EXTERN(_fast_jitReleaseVMAccess)
 
 dnl Non-standard - _RSP points to C stack when this is called
 dnl Extra JNI arguments may be pushed on the stack, so the code
@@ -514,14 +514,14 @@ BEGIN_HELPER(jitReleaseVMAccess)
 dnl Ensure _rsp is pointing to the C interpreter stack frame
 	pop uword ptr J9TR_VMThread_jitReturnAddress[_rbp]
 	SAVE_ALL_REGS
-	FASTCALL_C_WITH_VMTHREAD(fast_jitReleaseVMAccess)
+	FASTCALL_C_WITH_VMTHREAD(_fast_jitReleaseVMAccess)
 	RESTORE_ALL_REGS
 	push uword ptr J9TR_VMThread_jitReturnAddress[_rbp]
 END_HELPER(jitReleaseVMAccess,0)
 })
 
-	FASTCALL_EXTERN(old_slow_jitInterpretNewInstanceMethod,1)
-	FASTCALL_EXTERN(old_slow_jitTranslateNewInstanceMethod,1)
+	FASTCALL_EXTERN(_old_slow_jitInterpretNewInstanceMethod,1)
+	FASTCALL_EXTERN(_old_slow_jitTranslateNewInstanceMethod,1)
 
 dnl Non-standard - Called via an invoke - arguments are reversed on stack and doesn't return to caller right away
 BEGIN_HELPER(jitInterpretNewInstanceMethod)
@@ -629,147 +629,147 @@ START_PROC(j2iVirtual)
 END_PROC(j2iVirtual)
 
 START_PROC(icallVMprJavaSendNativeStatic)
-	jmp j2iTransition
+	jmp _j2iTransition
 END_PROC(icallVMprJavaSendNativeStatic)
 
 START_PROC(icallVMprJavaSendStatic0)
-	jmp j2iTransition
+	jmp _j2iTransition
 END_PROC(icallVMprJavaSendStatic0)
 
 START_PROC(icallVMprJavaSendStatic1)
-	jmp j2iTransition
+	jmp _j2iTransition
 END_PROC(icallVMprJavaSendStatic1)
 
 START_PROC(icallVMprJavaSendStaticJ)
-	jmp j2iTransition
+	jmp _j2iTransition
 END_PROC(icallVMprJavaSendStaticJ)
 
 START_PROC(icallVMprJavaSendStaticF)
-	jmp j2iTransition
+	jmp _j2iTransition
 END_PROC(icallVMprJavaSendStaticF)
 
 START_PROC(icallVMprJavaSendStaticD)
-	jmp j2iTransition
+	jmp _j2iTransition
 END_PROC(icallVMprJavaSendStaticD)
 
 START_PROC(icallVMprJavaSendStaticSync0)
-	jmp j2iTransition
+	jmp _j2iTransition
 END_PROC(icallVMprJavaSendStaticSync0)
 
 START_PROC(icallVMprJavaSendStaticSync1)
-	jmp j2iTransition
+	jmp _j2iTransition
 END_PROC(icallVMprJavaSendStaticSync1)
 
 START_PROC(icallVMprJavaSendStaticSyncJ)
-	jmp j2iTransition
+	jmp _j2iTransition
 END_PROC(icallVMprJavaSendStaticSyncJ)
 
 START_PROC(icallVMprJavaSendStaticSyncF)
-	jmp j2iTransition
+	jmp _j2iTransition
 END_PROC(icallVMprJavaSendStaticSyncF)
 
 START_PROC(icallVMprJavaSendStaticSyncD)
-	jmp j2iTransition
+	jmp _j2iTransition
 END_PROC(icallVMprJavaSendStaticSyncD)
 
 START_PROC(icallVMprJavaSendNativeVirtual)
-	jmp j2iVirtual
+	jmp _j2iVirtual
 END_PROC(icallVMprJavaSendNativeVirtual)
 
 START_PROC(icallVMprJavaSendVirtual0)
-	jmp j2iVirtual
+	jmp _j2iVirtual
 END_PROC(icallVMprJavaSendVirtual0)
 
 START_PROC(icallVMprJavaSendVirtual1)
-	jmp j2iVirtual
+	jmp _j2iVirtual
 END_PROC(icallVMprJavaSendVirtual1)
 
 START_PROC(icallVMprJavaSendVirtualJ)
-	jmp j2iVirtual
+	jmp _j2iVirtual
 END_PROC(icallVMprJavaSendVirtualJ)
 
 START_PROC(icallVMprJavaSendVirtualF)
-	jmp j2iVirtual
+	jmp _j2iVirtual
 END_PROC(icallVMprJavaSendVirtualF)
 
 START_PROC(icallVMprJavaSendVirtualD)
-	jmp j2iVirtual
+	jmp _j2iVirtual
 END_PROC(icallVMprJavaSendVirtualD)
 
 START_PROC(icallVMprJavaSendVirtualSync0)
-	jmp j2iVirtual
+	jmp _j2iVirtual
 END_PROC(icallVMprJavaSendVirtualSync0)
 
 START_PROC(icallVMprJavaSendVirtualSync1)
-	jmp j2iVirtual
+	jmp _j2iVirtual
 END_PROC(icallVMprJavaSendVirtualSync1)
 
 START_PROC(icallVMprJavaSendVirtualSyncJ)
-	jmp j2iVirtual
+	jmp _j2iVirtual
 END_PROC(icallVMprJavaSendVirtualSyncJ)
 
 START_PROC(icallVMprJavaSendVirtualSyncF)
-	jmp j2iVirtual
+	jmp _j2iVirtual
 END_PROC(icallVMprJavaSendVirtualSyncF)
 
 START_PROC(icallVMprJavaSendVirtualSyncD)
-	jmp j2iVirtual
+	jmp _j2iVirtual
 END_PROC(icallVMprJavaSendVirtualSyncD)
 
 START_PROC(icallVMprJavaSendInvokeExact0)
-	jmp j2iInvokeExact
+	jmp _j2iInvokeExact
 END_PROC(icallVMprJavaSendInvokeExact0)
 
 START_PROC(icallVMprJavaSendInvokeExact1)
-	jmp j2iInvokeExact
+	jmp _j2iInvokeExact
 END_PROC(icallVMprJavaSendInvokeExact1)
 
 START_PROC(icallVMprJavaSendInvokeExactD)
-	jmp j2iInvokeExact
+	jmp _j2iInvokeExact
 END_PROC(icallVMprJavaSendInvokeExactD)
 
 START_PROC(icallVMprJavaSendInvokeExactF)
-	jmp j2iInvokeExact
+	jmp _j2iInvokeExact
 END_PROC(icallVMprJavaSendInvokeExactF)
 
 START_PROC(icallVMprJavaSendInvokeExactJ)
-	jmp j2iInvokeExact
+	jmp _j2iInvokeExact
 END_PROC(icallVMprJavaSendInvokeExactJ)
 
 START_PROC(icallVMprJavaSendInvokeExactL)
-	jmp j2iInvokeExact
+	jmp _j2iInvokeExact
 END_PROC(icallVMprJavaSendInvokeExactL)
 
 START_PROC(icallVMprJavaSendStaticL)
-	jmp j2iTransition
+	jmp _j2iTransition
 END_PROC(icallVMprJavaSendStaticL)
 
 START_PROC(icallVMprJavaSendStaticSyncL)
-	jmp j2iTransition
+	jmp _j2iTransition
 END_PROC(icallVMprJavaSendStaticSyncL)
 
 START_PROC(icallVMprJavaSendVirtualL)
-	jmp j2iVirtual
+	jmp _j2iVirtual
 END_PROC(icallVMprJavaSendVirtualL)
 
 START_PROC(icallVMprJavaSendVirtualSyncL)
-	jmp j2iVirtual
+	jmp _j2iVirtual
 END_PROC(icallVMprJavaSendVirtualSyncL)
 
-	DECLARE_EXTERN(c_jitDecompileOnReturn)
-	DECLARE_EXTERN(c_jitReportExceptionCatch)
-	DECLARE_EXTERN(c_jitDecompileAtExceptionCatch)
-	DECLARE_EXTERN(c_jitDecompileAtCurrentPC)
-	DECLARE_EXTERN(c_jitDecompileBeforeReportMethodEnter)
-	DECLARE_EXTERN(c_jitDecompileBeforeMethodMonitorEnter)
-	DECLARE_EXTERN(c_jitDecompileAfterAllocation)
-	DECLARE_EXTERN(c_jitDecompileAfterMonitorEnter)
+	DECLARE_EXTERN(_c_jitDecompileOnReturn)
+	DECLARE_EXTERN(_c_jitReportExceptionCatch)
+	DECLARE_EXTERN(_c_jitDecompileAtExceptionCatch)
+	DECLARE_EXTERN(_c_jitDecompileAtCurrentPC)
+	DECLARE_EXTERN(_c_jitDecompileBeforeReportMethodEnter)
+	DECLARE_EXTERN(_c_jitDecompileBeforeMethodMonitorEnter)
+	DECLARE_EXTERN(_c_jitDecompileAfterAllocation)
+	DECLARE_EXTERN(_c_jitDecompileAfterMonitorEnter)
 
 START_PROC(jitDecompileOnReturn0)
 	mov uword ptr J9TR_VMThread_tempSlot[_rbp],0
 	SWITCH_TO_C_STACK
 	SAVE_PRESERVED_REGS
-	CALL_C_WITH_VMTHREAD(c_jitDecompileOnReturn)
+	CALL_C_WITH_VMTHREAD(_c_jitDecompileOnReturn)
 	jmp uword ptr J9TR_VMThread_tempSlot[_rbp]
 END_PROC(jitDecompileOnReturn0)
 
@@ -778,7 +778,7 @@ START_PROC(jitDecompileOnReturn1)
 	mov uword ptr J9TR_VMThread_tempSlot[_rbp],1
 	SWITCH_TO_C_STACK
 	SAVE_PRESERVED_REGS
-	CALL_C_WITH_VMTHREAD(c_jitDecompileOnReturn)
+	CALL_C_WITH_VMTHREAD(_c_jitDecompileOnReturn)
 	jmp uword ptr J9TR_VMThread_tempSlot[_rbp]
 END_PROC(jitDecompileOnReturn1)
 
@@ -787,7 +787,7 @@ START_PROC(jitDecompileOnReturnF)
 	mov uword ptr J9TR_VMThread_tempSlot[_rbp],1
 	SWITCH_TO_C_STACK
 	SAVE_PRESERVED_REGS
-	CALL_C_WITH_VMTHREAD(c_jitDecompileOnReturn)
+	CALL_C_WITH_VMTHREAD(_c_jitDecompileOnReturn)
 	jmp uword ptr J9TR_VMThread_tempSlot[_rbp]
 END_PROC(jitDecompileOnReturnF)
 
@@ -796,14 +796,14 @@ START_PROC(jitDecompileOnReturnD)
 	mov uword ptr J9TR_VMThread_tempSlot[_rbp],2
 	SWITCH_TO_C_STACK
 	SAVE_PRESERVED_REGS
-	CALL_C_WITH_VMTHREAD(c_jitDecompileOnReturn)
+	CALL_C_WITH_VMTHREAD(_c_jitDecompileOnReturn)
 	jmp uword ptr J9TR_VMThread_tempSlot[_rbp]
 END_PROC(jitDecompileOnReturnD)
 
 START_PROC(jitReportExceptionCatch)
 	SWITCH_TO_C_STACK
 	SAVE_PRESERVED_REGS
-	CALL_C_WITH_VMTHREAD(c_jitReportExceptionCatch)
+	CALL_C_WITH_VMTHREAD(_c_jitReportExceptionCatch)
 	RESTORE_PRESERVED_REGS
 	SWITCH_TO_JAVA_STACK
 	jmp uword ptr J9TR_VMThread_tempSlot[_rbp]
@@ -812,37 +812,37 @@ END_PROC(jitReportExceptionCatch)
 START_PROC(jitDecompileAtExceptionCatch)
 	SWITCH_TO_C_STACK
 	SAVE_PRESERVED_REGS
-	CALL_C_WITH_VMTHREAD(c_jitDecompileAtExceptionCatch)
+	CALL_C_WITH_VMTHREAD(_c_jitDecompileAtExceptionCatch)
 	jmp uword ptr J9TR_VMThread_tempSlot[_rbp]
 END_PROC(jitDecompileAtExceptionCatch)
 
 START_PROC(jitDecompileAtCurrentPC)
 	SWITCH_TO_C_STACK
-	CALL_C_WITH_VMTHREAD(c_jitDecompileAtCurrentPC)
+	CALL_C_WITH_VMTHREAD(_c_jitDecompileAtCurrentPC)
 	jmp uword ptr J9TR_VMThread_tempSlot[_rbp]
 END_PROC(jitDecompileAtCurrentPC)
 
 START_PROC(jitDecompileBeforeReportMethodEnter)
 	SWITCH_TO_C_STACK
-	CALL_C_WITH_VMTHREAD(c_jitDecompileBeforeReportMethodEnter)
+	CALL_C_WITH_VMTHREAD(_c_jitDecompileBeforeReportMethodEnter)
 	jmp uword ptr J9TR_VMThread_tempSlot[_rbp]
 END_PROC(jitDecompileBeforeReportMethodEnter)
 
 START_PROC(jitDecompileBeforeMethodMonitorEnter)
 	SWITCH_TO_C_STACK
-	CALL_C_WITH_VMTHREAD(c_jitDecompileBeforeMethodMonitorEnter)
+	CALL_C_WITH_VMTHREAD(_c_jitDecompileBeforeMethodMonitorEnter)
 	jmp uword ptr J9TR_VMThread_tempSlot[_rbp]
 END_PROC(jitDecompileBeforeMethodMonitorEnter)
 
 START_PROC(jitDecompileAfterAllocation)
 	SWITCH_TO_C_STACK
-	CALL_C_WITH_VMTHREAD(c_jitDecompileAfterAllocation)
+	CALL_C_WITH_VMTHREAD(_c_jitDecompileAfterAllocation)
 	jmp uword ptr J9TR_VMThread_tempSlot[_rbp]
 END_PROC(jitDecompileAfterAllocation)
 
 START_PROC(jitDecompileAfterMonitorEnter)
 	SWITCH_TO_C_STACK
-	CALL_C_WITH_VMTHREAD(c_jitDecompileAfterMonitorEnter)
+	CALL_C_WITH_VMTHREAD(_c_jitDecompileAfterMonitorEnter)
 	jmp uword ptr J9TR_VMThread_tempSlot[_rbp]
 END_PROC(jitDecompileAfterMonitorEnter)
 
@@ -906,7 +906,7 @@ END_PROC(returnFromJITL)
 dnl icallVMprJavaSendPatchupVirtual
 dnl see j2iVirtual for calling convention details
 
-	DECLARE_EXTERN(old_slow_icallVMprJavaSendPatchupVirtual)
+	DECLARE_EXTERN(_old_slow_icallVMprJavaSendPatchupVirtual)
 
 START_PROC(icallVMprJavaSendPatchupVirtual)
 	STORE_VIRTUAL_REGISTERS
@@ -919,7 +919,7 @@ START_PROC(jitDecompileOnReturnJ)
 	mov uword ptr J9TR_VMThread_tempSlot[_rbp],2
 	SWITCH_TO_C_STACK
 	SAVE_PRESERVED_REGS
-	CALL_C_WITH_VMTHREAD(c_jitDecompileOnReturn)
+	CALL_C_WITH_VMTHREAD(_c_jitDecompileOnReturn)
 	jmp uword ptr J9TR_VMThread_tempSlot[_rbp]
 END_PROC(jitDecompileOnReturnJ)
 
@@ -928,7 +928,7 @@ START_PROC(jitDecompileOnReturnL)
 	mov uword ptr J9TR_VMThread_tempSlot[_rbp],1
 	SWITCH_TO_C_STACK
 	SAVE_PRESERVED_REGS
-	CALL_C_WITH_VMTHREAD(c_jitDecompileOnReturn)
+	CALL_C_WITH_VMTHREAD(_c_jitDecompileOnReturn)
 	jmp uword ptr J9TR_VMThread_tempSlot[_rbp]
 END_PROC(jitDecompileOnReturnL)
 
@@ -954,7 +954,7 @@ START_PROC(jitDecompileOnReturnJ)
 	mov uword ptr J9TR_VMThread_tempSlot[_rbp],2
 	SWITCH_TO_C_STACK
 	SAVE_PRESERVED_REGS
-	CALL_C_WITH_VMTHREAD(c_jitDecompileOnReturn)
+	CALL_C_WITH_VMTHREAD(_c_jitDecompileOnReturn)
 	jmp uword ptr J9TR_VMThread_tempSlot[_rbp]
 END_PROC(jitDecompileOnReturnJ)
 
