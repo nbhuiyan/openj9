@@ -30,8 +30,8 @@
 
       CPU PPRO
 
-      %include jilconsts_nasm.inc
-      %include x/runtime/X86PicBuilder_nasm.inc
+      %include "jilconsts.inc"
+      %include "x/runtime/X86PicBuilder_nasm.inc"
 
       segment .text
 
@@ -1146,7 +1146,7 @@ ret ;resolveAndPopulateVTableDispatch endp
 ;
 ; --------------------------------------------------------------------------------
 
-%include "jilconsts_nasm.inc"
+%include "jilconsts.inc"
 %include "x/runtime/X86PicBuilder_nasm.inc"
 
 ;OPTION NOSCOPED
