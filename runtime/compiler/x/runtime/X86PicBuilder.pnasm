@@ -1240,7 +1240,7 @@ ret ;_resolveAndPopulateVTableDispatch endp
 ;
 ; --------------------------------------------------------------------------------
 
-%include "jilconsts_nasm.inc"
+%include "jilconsts.inc"
 %include "x/runtime/X86PicBuilder_nasm.inc"
 
 ;OPTION NOSCOPED
