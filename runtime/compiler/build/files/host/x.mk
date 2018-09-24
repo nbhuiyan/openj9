@@ -21,7 +21,7 @@
 JIT_PRODUCT_BACKEND_SOURCES+= \
     omr/compiler/x/runtime/VirtualGuardRuntime.cpp
 
-ifeq ($(USE_NASM),yes)
+ifeq ($(OS),osx)
     JIT_PRODUCT_SOURCE_FILES+=\
     compiler/x/runtime/Recomp.cpp \
     compiler/x/runtime/X86ArrayTranslate.nasm \
@@ -46,6 +46,6 @@ JIT_PRODUCT_SOURCE_FILES+=\
     compiler/x/runtime/X86RelocationTarget.cpp \
     compiler/x/runtime/X86Unresolveds.pasm
 
-endif # USE_NASM
+endif # OS == osx
 
 include $(JIT_MAKE_DIR)/files/host/$(HOST_SUBARCH).mk
