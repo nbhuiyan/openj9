@@ -24,12 +24,12 @@
 
                 ;OPTION NOSCOPED
 
-                extern jitRetranslateMethod
-                extern jitCallCFunction
-                extern induceRecompilation_unwrapper
-                extern mcc_AMD64callPointPatching_unwrapper
-                extern initialInvokeExactThunk_unwrapper
-                extern methodHandleJ2I_unwrapper
+                extern _jitRetranslateMethod
+                extern _jitCallCFunction
+                extern _induceRecompilation_unwrapper
+                extern _mcc_AMD64callPointPatching_unwrapper
+                extern _initialInvokeExactThunk_unwrapper
+                extern _methodHandleJ2I_unwrapper
 
                 global _countingRecompileMethod
                 global _samplingRecompileMethod
@@ -37,9 +37,9 @@
                 global _samplingPatchCallSite
                 global _induceRecompilation
                 global _initialInvokeExactThunkGlue
-                global methodHandleJ2IGlue
+                global _methodHandleJ2IGlue
 
-segment .text ;_TEXT   segment para 'CODE'
+segment _TEXT ;_TEXT   segment para 'CODE'
 
 ; Offsets for sampling
 eq_stack_samplingBodyInfo            equ  0
@@ -124,7 +124,7 @@ _countingRecompileMethod: ; PROC
 		mov	rax, qword [rax+eq_BodyInfo_MethodInfo]
                 mov     rax, qword [rax+eq_MethodInfo_J9Method]
 
-                CallHelperUseReg jitRetranslateMethod,rax
+                CallHelperUseReg _jitRetranslateMethod,rax
                 test    rax, rax
                 jnz     countingGotStartAddress
 
@@ -170,7 +170,7 @@ _samplingRecompileMethod: ; PROC
 		mov	rax, qword [rax+eq_BodyInfo_MethodInfo]
                 mov     rax, qword [rax+eq_MethodInfo_J9Method]
 
-                CallHelperUseReg jitRetranslateMethod,rax
+                CallHelperUseReg _jitRetranslateMethod,rax
 
                 ; If the compilation has not been done yet, restart this method.
                 ; It should now execute normally
@@ -204,15 +204,15 @@ _induceRecompilation: ; PROC
                 movsxd  rsi, dword [rdi+eq_induceSnippet_startPCOffset]
                 add     rsi, rdi
 
-                ; set up args to induceRecompilation_unwrapper
+                ; set up args to _induceRecompilation_unwrapper
                 push    rbp        ; parm: vmThread
                 push    rsi        ; parm: startPC
 
-                ; set up args to jitCallCFunction
-                MoveHelper rax, induceRecompilation_unwrapper  ; parm: C function to call
+                ; set up args to _jitCallCFunction
+                MoveHelper rax, _induceRecompilation_unwrapper  ; parm: C function to call
                 mov     rsi, rsp                               ; parm: args array
                                                                ; parm: result pointer; don't care
-                CallHelper jitCallCFunction
+                CallHelper _jitCallCFunction
                 add     rsp, 16
 
                 ; restore regs and return to snippet
@@ -279,7 +279,7 @@ patchCallSite:
                 push    rsi                                          ; preserve rsi
                 xor     rsi, rsi
                 push    rsi                                          ; extraArg
-                push    rax                                          ; pass old startPC to mcc_AMD64callPointPatching_unwrapper
+                push    rax                                          ; pass old startPC to _mcc_AMD64callPointPatching_unwrapper
                 mov     rsi, qword [rax+eq_startPC_BodyInfo]
 		mov     rsi, qword [rsi+eq_BodyInfo_MethodInfo]
                 mov     rax, qword [rsi+eq_MethodInfo_J9Method]   ; rax = j9method
@@ -289,10 +289,10 @@ patchCallSite:
                 push    rsi                                          ; new startPC
                 push    rdx                                          ; call instruction
                 push    rax                                          ; j9method
-                MoveHelper rax, mcc_AMD64callPointPatching_unwrapper
+                MoveHelper rax, _mcc_AMD64callPointPatching_unwrapper
                 lea     rsi, [rsp]
                 lea     rdx, [rsp]
-                call    jitCallCFunction
+                call    _jitCallCFunction
                 add     rsp, 48
                 pop     rsi
                 
@@ -389,15 +389,15 @@ _initialInvokeExactThunkGlue: ; PROC
                 push    rsi
                 push    rdx
 
-                ; set up args to initialInvokeExactThunk_unwrapper
+                ; set up args to _initialInvokeExactThunk_unwrapper
                 push    rbp     ; parm: vmThread
                 push    rax     ; parm: receiver MethodHandle; also, result goes here
 
-                ; set up args to jitCallCFunction
-                MoveHelper rax, initialInvokeExactThunk_unwrapper       ; parm: C function to call
+                ; set up args to _jitCallCFunction
+                MoveHelper rax, _initialInvokeExactThunk_unwrapper       ; parm: C function to call
                 mov     rsi, rsp                                        ; parm: args array
                 mov     rdx, rsp                                        ; parm: result pointer
-                CallHelper jitCallCFunction
+                CallHelper _jitCallCFunction
                 pop     rax      ; result jitted entry point
 		pop     rbp
 
@@ -417,7 +417,7 @@ _initialInvokeExactThunkGlue: ; PROC
 
                 align 16
 ;
-methodHandleJ2IGlue: ; PROC
+_methodHandleJ2IGlue: ; PROC
 ;
                 ; Note: this glue is not called, it is jumped to.  There is no
                 ; return address on the stack.
@@ -427,17 +427,17 @@ methodHandleJ2IGlue: ; PROC
                 push    rsi
                 push    rdx
 
-                ; set up args to initialInvokeExactThunk_unwrapper
+                ; set up args to _initialInvokeExactThunk_unwrapper
                 push    rbp     ; parm: vmThread
                 lea     rsi, [rsp+40]
                 push    rsi     ; parm: stack pointer before the call to the j2i thunk
                 push    rax     ; parm: receiver MethodHandle; also, result goes here
 
-                ; set up args to jitCallCFunction
-                MoveHelper rax, methodHandleJ2I_unwrapper               ; parm: C function to call
+                ; set up args to _jitCallCFunction
+                MoveHelper rax, _methodHandleJ2I_unwrapper               ; parm: C function to call
                 mov     rsi, rsp                                        ; parm: args array
                 mov     rdx, rsp                                        ; parm: result pointer
-                CallHelper jitCallCFunction
+                CallHelper _jitCallCFunction
                 pop     rax      ; result (currently unused)
                 pop     rsi
                 pop     rbp
@@ -451,7 +451,7 @@ methodHandleJ2IGlue: ; PROC
                 jmp     rdi
 ;
 ;
-ret ;methodHandleJ2IGlue ENDP
+ret ;_methodHandleJ2IGlue ENDP
 ;
 
         ;_TEXT ends
