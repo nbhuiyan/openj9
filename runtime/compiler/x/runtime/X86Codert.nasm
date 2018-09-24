@@ -20,8 +20,6 @@
 
 %include "jilconsts.inc"
 
-; %include x/runtime/X86RegisterMap.inc : TODO: needed for 32bit
-
 %ifdef TR_HOST_64BIT
         ; 64-bit
 eq_floats_Offset              equ 128
@@ -38,14 +36,11 @@ eq_gpr_size                   equ 8
 
    ; Hack marker:
 %ifdef WINDOWS
-   NO_X87_UNDER_WIN64 textequ <true>
+   %define NO_X87_UNDER_WIN64 1
 %endif
 %else
         ; 32-bit
         CPU P2 ;.686p
-        ;assume cs:flat,ds:flat,ss:flat
-        ;option NoOldMacros
-        ;.xmm
 
 eq_gpr_size                   equ 4
 eq_vft_pointer_size           equ 4
@@ -96,7 +91,7 @@ eq_doubleNanMaskHigh        equ 07ff80000h
 %endif
 
 
-segment .data
+segment _DATA
 
         align 16
 ABSMASK:
@@ -131,7 +126,7 @@ ONEHALF:
         dq 3fe0000000000000h
 ;_DATA ends
 
-segment .text
+segment _TEXT
 
 %ifdef TR_HOST_32BIT
         global _doubleToLong
@@ -149,11 +144,11 @@ segment .text
 %ifdef TR_HOST_32BIT
         global _SSEdouble2LongIA32
 %endif
-        global jitFPHelpersBegin
-        global jitFPHelpersEnd
+        global _jitFPHelpersBegin
+        global _jitFPHelpersEnd
 
         align 16
-jitFPHelpersBegin:
+_jitFPHelpersBegin:
 
 %ifdef TR_HOST_32BIT
 
@@ -873,25 +868,25 @@ SSEd2l_NaN:                             ; if the number is a NaN, return 0 (note
 ;_SSEdouble2LongIA32 endp
 %endif
 
-jitFPHelpersEnd:
+_jitFPHelpersEnd:
 
 
 eq_J9VMThread_heapAlloc      equ J9TR_VMThread_heapAlloc
 eq_J9VMThread_heapTop        equ J9TR_VMThread_heapTop
 eq_J9VMThread_PrefetchCursor equ J9TR_VMThread_tlhPrefetchFTA
 
-      global prefetchTLH
-      global newPrefetchTLH
+      global _prefetchTLH
+      global _newPrefetchTLH
 
 %ifdef ASM_J9VM_GC_TLH_PREFETCH_FTA
 
       align 16
 ;%ifdef TR_HOST_64BIT
-;prefetchTLH proc
+;_prefetchTLH proc
 ;%else
-;prefetchTLH proc near
+;_prefetchTLH proc near
 ;%endif
-prefetchTLH:
+_prefetchTLH:
       push  rcx
 
 %ifdef TR_HOST_64BIT
@@ -917,7 +912,7 @@ prefetchTLH:
 prefetch_done:
       pop   rcx
       ret
-;prefetchTLH endp
+;_prefetchTLH endp
 
 
 
@@ -938,11 +933,11 @@ eq_prefetchTriggerDistance  equ 64*8
 
       align 16
 ;%ifdef TR_HOST_64BIT
-;newPrefetchTLH proc
+;_newPrefetchTLH proc
 ;%else
-;newPrefetchTLH proc near
+;_newPrefetchTLH proc near
 ;%endif
-newPrefetchTLH:
+_newPrefetchTLH:
 ;      int 3
 
       push        rcx                                         ; preserve
@@ -1046,34 +1041,34 @@ prefetchFromNewTLH:
 
       jmp mergePrefetchTLHRoundDown
 
-ret ;newPrefetchTLH endp
+ret ;_newPrefetchTLH endp
 
 
 %else  ; ASM_J9VM_GC_TLH_PREFETCH_FTA
 
       align 16
 ;%ifdef TR_HOST_64BIT
-;prefetchTLH proc
+;_prefetchTLH proc
 ;%else
-;prefetchTLH proc near
+;_prefetchTLH proc near
 ;%endif
-prefetchTLH:
+_prefetchTLH:
          ret
-;prefetchTLH endp
+;_prefetchTLH endp
 
       align 16
 ;%ifdef TR_HOST_64BIT
-;newPrefetchTLH proc
+;_newPrefetchTLH proc
 ;%else
-;newPrefetchTLH proc near
+;_newPrefetchTLH proc near
 ;%endif
-newPrefetchTLH:
+_newPrefetchTLH:
          ret
-;newPrefetchTLH endp
+;_newPrefetchTLH endp
 
 %endif  ; REALTIME
 
-      global   jitReleaseVMAccess
+      global   _jitReleaseVMAccess
 
 %ifndef TR_HOST_64BIT
 
@@ -1083,9 +1078,9 @@ newPrefetchTLH:
 ;
 ; --------------------------------------------------------------------------------
 
-      global   clearFPStack
+      global   _clearFPStack
 
-jitReleaseVMAccess:; PROC NEAR
+_jitReleaseVMAccess:; PROC NEAR
                 pusha
                 push       ebp
                 mov        eax, [ebp+J9TR_VMThread_javaVM]
@@ -1098,12 +1093,12 @@ jitReleaseVMAccess:; PROC NEAR
                 add        esp,4
                 popa
                 retn
-;jitReleaseVMAccess ENDP
+;_jitReleaseVMAccess ENDP
 
 	; Wipe the entire FP stack without raising any exceptions.
 	;
 		align 16
-clearFPStack:; proc near
+_clearFPStack:; proc near
 		ffree     st0
 		ffree     st1
 		ffree     st2
@@ -1113,7 +1108,7 @@ clearFPStack:; proc near
 		ffree     st6
 		ffree     st7
 		retn
-;clearFPStack endp
+;_clearFPStack endp
 
 %else
 
@@ -1123,7 +1118,7 @@ clearFPStack:; proc near
 ;
 ; --------------------------------------------------------------------------------
 
-jitReleaseVMAccess:; proc
+_jitReleaseVMAccess:; proc
         ; Save system-linkage volatile regs
         ; GPRs
         push    r11     ; Lin Win
@@ -1200,7 +1195,7 @@ jitReleaseVMAccess:; proc
         pop     r10
         pop     r11
         ret
-;jitReleaseVMAccess endp
+;_jitReleaseVMAccess endp
 
 
 %endif ; 64-bit
