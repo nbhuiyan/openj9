@@ -22,7 +22,7 @@
 
 ; %include x/runtime/X86RegisterMap.inc : TODO: needed for 32bit support
 
-segment .text
+segment _TEXT
 
    global  _arrayTranslateTRTO
    global  _arrayTranslateTROTNoBreak
