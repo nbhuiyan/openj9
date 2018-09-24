@@ -24,9 +24,8 @@
                 SURROGATE_BITS32    equ 0d800d800h
                 SSE_MIN_CHARS       equ 32
 
-                ;include x/runtime/X86RegisterMap.inc TODO: needed for 32 bit compatibility
 
-segment .text
+segment _TEXT
 
                 global _encodeUTF16Big
                 global _encodeUTF16Little
