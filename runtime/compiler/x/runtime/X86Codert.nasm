@@ -91,7 +91,7 @@ eq_doubleNanMaskHigh        equ 07ff80000h
 %endif
 
 
-segment _DATA
+segment .data
 
         align 16
 ABSMASK:
@@ -126,7 +126,7 @@ ONEHALF:
         dq 3fe0000000000000h
 ;_DATA ends
 
-segment _TEXT
+segment .text
 
 %ifdef TR_HOST_32BIT
         global _doubleToLong

@@ -39,7 +39,7 @@
                 global _initialInvokeExactThunkGlue
                 global _methodHandleJ2IGlue
 
-segment _TEXT ;_TEXT   segment para 'CODE'
+segment .text ;_TEXT   segment para 'CODE'
 
 ; Offsets for sampling
 eq_stack_samplingBodyInfo            equ  0

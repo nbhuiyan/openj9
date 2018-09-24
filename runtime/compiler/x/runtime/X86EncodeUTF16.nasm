@@ -25,7 +25,7 @@
                 SSE_MIN_CHARS       equ 32
 
 
-segment _TEXT
+segment .text
 
                 global _encodeUTF16Big
                 global _encodeUTF16Little

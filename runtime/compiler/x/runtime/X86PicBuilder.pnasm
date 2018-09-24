@@ -33,7 +33,7 @@
       %include jilconsts_nasm.inc
       %include x/runtime/X86PicBuilder_nasm.inc
 
-      segment _TEXT
+      segment .text
 
       extern _jitLookupInterfaceMethod
       extern _jitResolveInterfaceMethod
@@ -1246,7 +1246,7 @@ ret ;_resolveAndPopulateVTableDispatch endp
 ;OPTION NOSCOPED
 
 ;_TEXT segment para 'CODE'
-segment _TEXT
+segment .text
 
       global _resolveIPicClass
       global _populateIPicSlotClass
@@ -1511,7 +1511,7 @@ typeCheckAndDirectDispatchIPic:
       jz          throwOnFailedTypeCheckIPic
 
       ; Type check passed
-      mov         rax, qword ptr [rdx+eq_IPicData_itableOffset]
+      mov         rax, qword [rdx+eq_IPicData_itableOffset]
       xor         rax, J9TR_J9_ITABLE_OFFSET_DIRECT            ; Direct J9Method pointer
 
       lea         rdi, [rdx-5]                                 ; Adjusted return address

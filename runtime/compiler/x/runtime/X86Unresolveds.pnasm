@@ -37,7 +37,7 @@
 
       %include "jilconsts.inc"
 
-      segment _TEXT
+      segment .text
 
       global _interpreterUnresolvedStaticGlue
       global _interpreterUnresolvedSpecialGlue
@@ -757,7 +757,7 @@ retn ;_interpreterUnresolvedStringGlue endp
       align 16
 _interpreterUnresolvedConstantDynamicGlue: ; proc near
       DataResolvePrologue
-      DispatchUnresolvedDataHelper jitResolveConstantDynamic
+      DispatchUnresolvedDataHelper _jitResolveConstantDynamic
 ;      int 3
       jmp commonUnresolvedCode
 retn ;interpreterUnresolvedConstantDynamicGlue endp
@@ -1129,7 +1129,7 @@ eq_offsetof_J9Object_clazz equ   16     ; offset of class pointer in a J9Object
 
 %include "jilconsts.inc"
 
-segment _TEXT
+segment .text
 
       global _interpreterUnresolvedStaticGlue
       global _interpreterUnresolvedSpecialGlue
@@ -1783,7 +1783,7 @@ ret ;_interpreterUnresolvedStringGlue endp
       align 16
 _interpreterUnresolvedConstantDynamicGlue: ; proc
       DataResolvePrologue
-      DispatchUnresolvedDataHelper jitResolveConstantDynamic
+      DispatchUnresolvedDataHelper _jitResolveConstantDynamic
 ;      int 3
       jmp commonUnresolvedCode
 ret ;interpreterUnresolvedConstantDynamicGlue endp

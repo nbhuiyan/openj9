@@ -285,7 +285,7 @@ eq_J9Monitor_CNTFLCClearMask  equ 0FFFFFFFFFFFFFF05h
     jmp %2;call %2 wrt ..plt ;fallback
 %endmacro
 
-segment _TEXT
+segment .text
 
 extern _jitMonitorEntry
 extern _jitMethodMonitorEntry
