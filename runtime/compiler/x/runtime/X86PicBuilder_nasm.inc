@@ -61,6 +61,19 @@ eq_ObjectClassMask                equ -256 ;hack!! this is supposed to be read f
 
 %ifndef TR_HOST_64BIT
 
+eq_VPicData_cpAddr             equ 00h
+eq_VPicData_cpIndex            equ 04h
+eq_VPicData_directMethod       equ 08h
+eq_VPicData_cmpRegImm4ModRM    equ 0ch
+eq_VPicData_size               equ 0dh
+
+eq_IPicData_cpAddr             equ 00h
+eq_IPicData_cpIndex            equ 04h
+eq_IPicData_interfaceClass     equ 08h
+eq_IPicData_itableOffset       equ 0ch
+eq_IPicData_cmpRegImm4ModRM    equ 10h
+; IPIC data size is omitted here since it would be unused anyway.
+
 J9PreservedFPRStackSize    equ   80
 
 %macro LoadClassPointerFromObjectHeader 3 ;ObjectReg, ClassPtrReg64, ClassPtrReg32
@@ -74,14 +87,29 @@ J9PreservedFPRStackSize    equ   80
 ;                                    64-BIT
 ; --------------------------------------------------------------------------------
 
+eq_VPicData_cpAddr             equ 00h
+eq_VPicData_cpIndex            equ 08h
+eq_VPicData_directMethod       equ 10h
+eq_VPicData_j2iThunk           equ 18h
+eq_VPicData_movabsRexAndOpcode equ 20h
+eq_VPicData_callMemRex         equ 22h
+eq_VPicData_callMemModRM       equ 23h
+eq_VPicData_size               equ 24h
 
-
+eq_IPicData_cpAddr             equ 00h
+eq_IPicData_cpIndex            equ 08h
+eq_IPicData_interfaceClass     equ 10h
+eq_IPicData_itableOffset       equ 18h
+eq_IPicData_movabsRexAndOpcode equ 20h
+eq_IPicData_j2iThunk           equ 22h    ; only present if direct invoke is possible
+; IPIC data size is either 22h or 2ah, due to the optional j2iThunk.
+; It's omitted here since it would be unused anyway.
 
 %macro LoadHelperIndex 2 ; targetReg,helperIndexSym
 %ifdef WINDOWS
         mov     %1, dword [%2] ;&targetReg, dword ptr[&helperIndexSym]
 %else
-        mov     %1, dword [rel %2] ;&targetReg, dword ptr[rip+&helperIndexSym]
+        mov     %1, dword [rel + %2] ;&targetReg, dword ptr[rip+&helperIndexSym]
 %endif
 %endmacro
 
