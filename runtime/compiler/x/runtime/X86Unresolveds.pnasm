@@ -37,74 +37,76 @@
 
       %include "jilconsts.inc"
 
-      segment .text
+      segment _TEXT
 
-      global interpreterUnresolvedStaticGlue
-      global interpreterUnresolvedSpecialGlue
-      global updateInterpreterDispatchGlueSite
-      global interpreterVoidStaticGlue
-      global interpreterSyncVoidStaticGlue
-      global interpreterEAXStaticGlue
-      global interpreterSyncEAXStaticGlue
-      global interpreterEDXEAXStaticGlue
-      global interpreterSyncEDXEAXStaticGlue
-      global interpreterST0FStaticGlue
-      global interpreterSyncST0FStaticGlue
-      global interpreterST0DStaticGlue
-      global interpreterSyncST0DStaticGlue
+      global _interpreterUnresolvedStaticGlue
+      global _interpreterUnresolvedSpecialGlue
+      global _updateInterpreterDispatchGlueSite
+      global _interpreterVoidStaticGlue
+      global _interpreterSyncVoidStaticGlue
+      global _interpreterEAXStaticGlue
+      global _interpreterSyncEAXStaticGlue
+      global _interpreterEDXEAXStaticGlue
+      global _interpreterSyncEDXEAXStaticGlue
+      global _interpreterST0FStaticGlue
+      global _interpreterSyncST0FStaticGlue
+      global _interpreterST0DStaticGlue
+      global _interpreterSyncST0DStaticGlue
 
-      global interpreterUnresolvedStringGlue
-      global interpreterUnresolvedMethodTypeGlue
-      global interpreterUnresolvedMethodHandleGlue
-      global interpreterUnresolvedCallSiteTableEntryGlue
-      global interpreterUnresolvedMethodTypeTableEntryGlue
-      global interpreterUnresolvedClassGlue
-      global interpreterUnresolvedClassFromStaticFieldGlue
-      global interpreterUnresolvedStaticFieldGlue
-      global interpreterUnresolvedStaticFieldSetterGlue
-      global interpreterUnresolvedFieldGlue
-      global interpreterUnresolvedFieldSetterGlue
+      global _interpreterUnresolvedStringGlue
+      global _interpreterUnresolvedMethodTypeGlue
+      global _interpreterUnresolvedMethodHandleGlue
+      global _interpreterUnresolvedCallSiteTableEntryGlue
+      global _interpreterUnresolvedMethodTypeTableEntryGlue
+      global _interpreterUnresolvedClassGlue
+      global _interpreterUnresolvedClassFromStaticFieldGlue
+      global _interpreterUnresolvedStaticFieldGlue
+      global _interpreterUnresolvedStaticFieldSetterGlue
+      global _interpreterUnresolvedFieldGlue
+      global _interpreterUnresolvedFieldSetterGlue
+      global _interpreterUnresolvedConstantDynamicGlue
 
-      global MTUnresolvedInt32Load
-      global MTUnresolvedInt64Load
-      global MTUnresolvedFloatLoad
-      global MTUnresolvedDoubleLoad
-      global MTUnresolvedAddressLoad
+      global _MTUnresolvedInt32Load
+      global _MTUnresolvedInt64Load
+      global _MTUnresolvedFloatLoad
+      global _MTUnresolvedDoubleLoad
+      global _MTUnresolvedAddressLoad
 
-      global MTUnresolvedInt32Store
-      global MTUnresolvedInt64Store
-      global MTUnresolvedFloatStore
-      global MTUnresolvedDoubleStore
-      global MTUnresolvedAddressStore
+      global _MTUnresolvedInt32Store
+      global _MTUnresolvedInt64Store
+      global _MTUnresolvedFloatStore
+      global _MTUnresolvedDoubleStore
+      global _MTUnresolvedAddressStore
 
-      extern jitResolveStaticMethod
-      extern jitResolveSpecialMethod
-      extern jitCallCFunction
-      extern jitResolveString
-      extern jitResolveMethodType
-      extern jitResolveMethodHandle
-      extern jitResolveInvokeDynamic
-      extern jitResolveHandleMethod
-      extern jitResolveClass
-      extern jitResolveClassFromStaticField
-      extern jitResolveStaticField
-      extern jitResolveStaticFieldSetter
-      extern jitResolveField
-      extern jitResolveFieldSetter
+      extern _jitResolveStaticMethod
+      extern _jitResolveSpecialMethod
+      extern _jitCallCFunction
+      extern _jitResolveString
+      extern _jitResolveConstantDynamic
+      extern _jitResolveMethodType
+      extern _jitResolveMethodHandle
+      extern _jitResolveInvokeDynamic
+      extern _jitResolveHandleMethod
+      extern _jitResolveClass
+      extern _jitResolveClassFromStaticField
+      extern _jitResolveStaticField
+      extern _jitResolveStaticFieldSetter
+      extern _jitResolveField
+      extern _jitResolveFieldSetter
       ;1179
-      extern jitResolvedFieldIsVolatile
+      extern _jitResolvedFieldIsVolatile
 
-      extern icallVMprJavaSendStatic0
-      extern icallVMprJavaSendStatic1
-      extern icallVMprJavaSendStaticJ
-      extern icallVMprJavaSendStaticF
-      extern icallVMprJavaSendStaticD
-      extern icallVMprJavaSendStaticSync0
-      extern icallVMprJavaSendStaticSync1
-      extern icallVMprJavaSendStaticSyncJ
-      extern icallVMprJavaSendStaticSyncF
-      extern icallVMprJavaSendStaticSyncD
-      extern interpretedDispatchGlueDisp32_unwrapper
+      extern _icallVMprJavaSendStatic0
+      extern _icallVMprJavaSendStatic1
+      extern _icallVMprJavaSendStaticJ
+      extern _icallVMprJavaSendStaticF
+      extern _icallVMprJavaSendStaticD
+      extern _icallVMprJavaSendStaticSync0
+      extern _icallVMprJavaSendStaticSync1
+      extern _icallVMprJavaSendStaticSyncJ
+      extern _icallVMprJavaSendStaticSyncF
+      extern _icallVMprJavaSendStaticSyncD
+      extern _interpretedDispatchGlueDisp32_unwrapper
 
 %ifdef WINDOWS
       extern j9thread_self
@@ -112,7 +114,7 @@
       extern vmThreadTLSKey:dword
 %endif
 
-      extern memoryFence
+      extern _memoryFence
 
 
 %macro CheckIfMethodCompiledAndPatch 1 ;macro helperName
@@ -156,7 +158,7 @@ retn ;mergedStaticGlueCallFixer2 endp
 ; (5) call interpreterUnresolved{Static|Special}Glue ; replaced with "mov edi, 0xaabbccdd"
 ; (3) NOP
 ; ---
-; (5) call updateInterpreterDispatchGlueSite ; replaced with "JMP disp32"
+; (5) call _updateInterpreterDispatchGlueSite ; replaced with "JMP disp32"
 ; (2) dw 2-byte glue method helper index
 ; (4) dd cpAddr
 ; (4) dd cpIndex
@@ -173,7 +175,7 @@ retn ;mergedStaticGlueCallFixer2 endp
 ; across the call to the lookup helper.
 ;
       align 16
-interpreterUnresolvedStaticGlue: ;proc near
+_interpreterUnresolvedStaticGlue: ;proc near
       pop edi ; RA in snippet (see [1] above)
 
       push dword  [edi+14] ; p3) cpIndex
@@ -181,7 +183,7 @@ interpreterUnresolvedStaticGlue: ;proc near
       push dword  [edi+10] ; p2) cpAddr
                                                                ; 10 = 3 (NOP) + 5 (CALL) + 2 (DW)
       push dword  [esp+8] ; p1) RA in mainline code
-      CallHelperUseReg jitResolveStaticMethod,eax
+      CallHelperUseReg _jitResolveStaticMethod,eax
 
       ; The interpreter may low-tag the result to avoid populating the constant pool--whack it.
       ;
@@ -193,7 +195,7 @@ interpreterUnresolvedStaticGlue: ;proc near
       ; Patch the call that brought us here into a load of the resolved RAM method into EDI.
       ;
       mov ebx, eax
-      MoveHelper eax, interpreterUnresolvedStaticGlue
+      MoveHelper eax, _interpreterUnresolvedStaticGlue
 
 mergeInterpreterUnresolvedDispatch:
 
@@ -233,11 +235,11 @@ mergeInterpreterUnresolvedDispatch:
       push edi
       ret
 
-;interpreterUnresolvedStaticGlue endp
+;_interpreterUnresolvedStaticGlue endp
 
 
       align 16
-interpreterUnresolvedSpecialGlue: ;proc near
+_interpreterUnresolvedSpecialGlue: ;proc near
       pop edi ; RA in snippet (see [1] above)
 
       push dword  [edi+14] ; p3) cpIndex
@@ -245,20 +247,20 @@ interpreterUnresolvedSpecialGlue: ;proc near
       push dword  [edi+10] ; p2) cpAddr
                                                                ; 10 = 3 (NOP) + 5 (CALL) + 2 (DW)
       push dword  [esp+8] ; p1) RA in mainline code
-      CallHelperUseReg jitResolveSpecialMethod,eax
+      CallHelperUseReg _jitResolveSpecialMethod,eax
 
       push ebx ; preserve
       push ecx ; preserve
 
       mov ebx, eax
-      MoveHelper eax, interpreterUnresolvedSpecialGlue
+      MoveHelper eax, _interpreterUnresolvedSpecialGlue
 
       jmp mergeInterpreterUnresolvedDispatch
 
-retn ;interpreterUnresolvedSpecialGlue endp
+retn ;_interpreterUnresolvedSpecialGlue endp
 
 
-; updateInterpreterDispatchGlueSite
+; _updateInterpreterDispatchGlueSite
 ;
 ; Now that a resolved RAM method is available, determine the appropriate interpreter
 ; dispatch glue code to call and then patch the snippet to jump to it directly.
@@ -268,7 +270,7 @@ retn ;interpreterUnresolvedSpecialGlue endp
 ; [1] The RAM method is in EDI on entry. It was loaded by the preceding instruction.
 ;
       align 16
-updateInterpreterDispatchGlueSite: ;proc near
+_updateInterpreterDispatchGlueSite: ;proc near
 
       mov edx, dword [esp] ; edx = snippet RA
 
@@ -279,9 +281,9 @@ updateInterpreterDispatchGlueSite: ;proc near
       push edx ; p3) EA of return value in TLS area
       lea edx, [esp+4]
       push edx ; p2) EA parms in TLS area
-      MoveHelper edx, interpretedDispatchGlueDisp32_unwrapper
+      MoveHelper edx, _interpretedDispatchGlueDisp32_unwrapper
       push edx ; p1) helper address
-      call jitCallCFunction
+      call _jitCallCFunction
       add esp, 8 ; tear down descriptor
       pop eax ; eax = return value (disp32 to dispatch glue)
 
@@ -300,7 +302,7 @@ updateInterpreterDispatchGlueSite: ;proc near
       ; esp+0 : esi
       ;
       mov ebx, eax
-      MoveHelper eax, updateInterpreterDispatchGlueSite
+      MoveHelper eax, _updateInterpreterDispatchGlueSite
 
       ; Construct the call instruction in edx:eax that should have brought
       ; us to this helper + the following 3 bytes.
@@ -337,7 +339,7 @@ updateInterpreterDispatchGlueSite: ;proc near
       pop ebx ; restore
       ret
 
-;updateInterpreterDispatchGlueSite endp
+;_updateInterpreterDispatchGlueSite endp
 
          align 16
 ;1179
@@ -352,7 +354,7 @@ checkReferenceVolatility: ;proc near
       push edx ; us to this snippet + the following 3 bytes.
       push esi ; The RA in mainline code
 
-      ; jitResolvedFieldIsVolatile requires us to restore ebp before calling it
+      ; _jitResolvedFieldIsVolatile requires us to restore ebp before calling it
       ;
       mov ebp, dword  [esp + 28] ; [esp + 4 + 24]
 
@@ -373,7 +375,7 @@ checkReferenceVolatility: ;proc near
       ; call the volatile check
       ;
       xor eax, eax
-      CallHelperUseReg jitResolvedFieldIsVolatile, eax
+      CallHelperUseReg _jitResolvedFieldIsVolatile, eax
 
       ;clear ebp which will be used as to tell if we need to patch over a barrier in the mainline code.
       ;
@@ -424,9 +426,9 @@ patchBarrierWithNop:
       ; determine what kind of fence we are dealing with: mfence or LOCK OR [ESP] (on legacy systems)
       ;
       mov edx, dword  [esp + 28]
-      mov edx, J9TR_VMThread_javaVM[edx]
-      mov edx, J9TR_JavaVMJitConfig[edx]
-      mov edx, J9TR_JitConfig_runtimeFlags[edx]
+      mov edx, [edx+J9TR_VMThread_javaVM]
+      mov edx, [edx+J9TR_JavaVMJitConfig]
+      mov edx, [edx+J9TR_JitConfig_runtimeFlags]
       test edx, J9TR_runtimeFlags_PatchingFenceType
       jz short doLOCKORESP
 
@@ -539,54 +541,54 @@ restoreRegs:
 ;1179
 
          align 16
-interpreterVoidStaticGlue: ;proc near
-         CheckIfMethodCompiledAndPatch icallVMprJavaSendStatic0
-retn ;interpreterVoidStaticGlue endp
+_interpreterVoidStaticGlue: ;proc near
+         CheckIfMethodCompiledAndPatch _icallVMprJavaSendStatic0
+retn ;_interpreterVoidStaticGlue endp
 
          align 16
-interpreterSyncVoidStaticGlue: ;proc near
-         CheckIfMethodCompiledAndPatch icallVMprJavaSendStaticSync0
-retn ; interpreterSyncVoidStaticGlue endp
+_interpreterSyncVoidStaticGlue: ;proc near
+         CheckIfMethodCompiledAndPatch _icallVMprJavaSendStaticSync0
+retn ; _interpreterSyncVoidStaticGlue endp
 
          align 16
-interpreterEAXStaticGlue: ;proc near
-         CheckIfMethodCompiledAndPatch icallVMprJavaSendStatic1
-retn ;interpreterEAXStaticGlue endp
+_interpreterEAXStaticGlue: ;proc near
+         CheckIfMethodCompiledAndPatch _icallVMprJavaSendStatic1
+retn ;_interpreterEAXStaticGlue endp
 
          align 16
-interpreterSyncEAXStaticGlue: ;proc near
-         CheckIfMethodCompiledAndPatch icallVMprJavaSendStaticSync1
-retn ;interpreterSyncEAXStaticGlue endp
+_interpreterSyncEAXStaticGlue: ;proc near
+         CheckIfMethodCompiledAndPatch _icallVMprJavaSendStaticSync1
+retn ;_interpreterSyncEAXStaticGlue endp
 
          align 16
-interpreterEDXEAXStaticGlue: ;proc near
-         CheckIfMethodCompiledAndPatch icallVMprJavaSendStaticJ
-retn ;interpreterEDXEAXStaticGlue endp
+_interpreterEDXEAXStaticGlue: ;proc near
+         CheckIfMethodCompiledAndPatch _icallVMprJavaSendStaticJ
+retn ;_interpreterEDXEAXStaticGlue endp
 
          align 16
-interpreterSyncEDXEAXStaticGlue: ;proc near
-         CheckIfMethodCompiledAndPatch icallVMprJavaSendStaticSyncJ
-retn ;interpreterSyncEDXEAXStaticGlue endp
+_interpreterSyncEDXEAXStaticGlue: ;proc near
+         CheckIfMethodCompiledAndPatch _icallVMprJavaSendStaticSyncJ
+retn ;_interpreterSyncEDXEAXStaticGlue endp
 
          align 16
-interpreterST0FStaticGlue: ;proc near
-         CheckIfMethodCompiledAndPatch icallVMprJavaSendStaticF
-retn ;interpreterST0FStaticGlue endp
+_interpreterST0FStaticGlue: ;proc near
+         CheckIfMethodCompiledAndPatch _icallVMprJavaSendStaticF
+retn ;_interpreterST0FStaticGlue endp
 
          align 16
-interpreterSyncST0FStaticGlue: ;proc near
-         CheckIfMethodCompiledAndPatch icallVMprJavaSendStaticSyncF
-retn ;interpreterSyncST0FStaticGlue endp
+_interpreterSyncST0FStaticGlue: ;proc near
+         CheckIfMethodCompiledAndPatch _icallVMprJavaSendStaticSyncF
+retn ;_interpreterSyncST0FStaticGlue endp
 
          align 16
-interpreterST0DStaticGlue: ;proc near
-         CheckIfMethodCompiledAndPatch icallVMprJavaSendStaticD
-retn ;interpreterST0DStaticGlue endp
+_interpreterST0DStaticGlue: ;proc near
+         CheckIfMethodCompiledAndPatch _icallVMprJavaSendStaticD
+retn ;_interpreterST0DStaticGlue endp
 
          align 16
-interpreterSyncST0DStaticGlue: ;proc near
-         CheckIfMethodCompiledAndPatch icallVMprJavaSendStaticSyncD
-retn ;interpreterSyncST0DStaticGlue endp
+_interpreterSyncST0DStaticGlue: ;proc near
+         CheckIfMethodCompiledAndPatch _icallVMprJavaSendStaticSyncD
+retn ;_interpreterSyncST0DStaticGlue endp
 
 
 ; --------------------------------------------------------------------------------
@@ -745,98 +747,105 @@ retn ;interpreterSyncST0DStaticGlue endp
 ; code.
 ;
       align 16
-interpreterUnresolvedStringGlue: ;proc near
+_interpreterUnresolvedStringGlue: ;proc near
       DataResolvePrologue
-      DispatchUnresolvedDataHelper jitResolveString
+      DispatchUnresolvedDataHelper _jitResolveString
 ; int 3
       jmp commonUnresolvedCode
-retn ;interpreterUnresolvedStringGlue endp
+retn ;_interpreterUnresolvedStringGlue endp
+
+      align 16
+_interpreterUnresolvedConstantDynamicGlue: ; proc near
+      DataResolvePrologue
+      DispatchUnresolvedDataHelper jitResolveConstantDynamic
+;      int 3
+      jmp commonUnresolvedCode
+retn ;interpreterUnresolvedConstantDynamicGlue endp
+
+      align 16
+_interpreterUnresolvedMethodTypeGlue: ;proc near
+      DataResolvePrologue
+      DispatchUnresolvedDataHelper _jitResolveMethodType
+; int 3
+      jmp commonUnresolvedCode
+retn ;_interpreterUnresolvedMethodTypeGlue endp
 
 
       align 16
-interpreterUnresolvedMethodTypeGlue: ;proc near
+_interpreterUnresolvedMethodHandleGlue: ;proc near
       DataResolvePrologue
-      DispatchUnresolvedDataHelper jitResolveMethodType
+      DispatchUnresolvedDataHelper _jitResolveMethodHandle
 ; int 3
       jmp commonUnresolvedCode
-retn ;interpreterUnresolvedMethodTypeGlue endp
+retn ;_interpreterUnresolvedMethodHandleGlue endp
 
 
       align 16
-interpreterUnresolvedMethodHandleGlue: ;proc near
+_interpreterUnresolvedCallSiteTableEntryGlue: ;proc near
       DataResolvePrologue
-      DispatchUnresolvedDataHelper jitResolveMethodHandle
+      DispatchUnresolvedDataHelper _jitResolveInvokeDynamic
 ; int 3
       jmp commonUnresolvedCode
-retn ;interpreterUnresolvedMethodHandleGlue endp
+retn ;_interpreterUnresolvedCallSiteTableEntryGlue endp
 
 
       align 16
-interpreterUnresolvedCallSiteTableEntryGlue: ;proc near
+_interpreterUnresolvedMethodTypeTableEntryGlue: ;proc near
       DataResolvePrologue
-      DispatchUnresolvedDataHelper jitResolveInvokeDynamic
+      DispatchUnresolvedDataHelper _jitResolveHandleMethod
 ; int 3
       jmp commonUnresolvedCode
-retn ;interpreterUnresolvedCallSiteTableEntryGlue endp
+retn ;_interpreterUnresolvedMethodTypeTableEntryGlue endp
 
 
       align 16
-interpreterUnresolvedMethodTypeTableEntryGlue: ;proc near
+_interpreterUnresolvedClassGlue: ;proc near
       DataResolvePrologue
-      DispatchUnresolvedDataHelper jitResolveHandleMethod
+      DispatchUnresolvedDataHelper _jitResolveClass
 ; int 3
       jmp commonUnresolvedCode
-retn ;interpreterUnresolvedMethodTypeTableEntryGlue endp
+retn ;_interpreterUnresolvedClassGlue endp
 
 
       align 16
-interpreterUnresolvedClassGlue: ;proc near
+_interpreterUnresolvedClassFromStaticFieldGlue: ;proc near
       DataResolvePrologue
-      DispatchUnresolvedDataHelper jitResolveClass
+      DispatchUnresolvedDataHelper _jitResolveClassFromStaticField
 ; int 3
       jmp commonUnresolvedCode
-retn ;interpreterUnresolvedClassGlue endp
+retn ;_interpreterUnresolvedClassFromStaticFieldGlue endp
 
 
       align 16
-interpreterUnresolvedClassFromStaticFieldGlue: ;proc near
+_interpreterUnresolvedStaticFieldGlue: ;proc near
       DataResolvePrologue
-      DispatchUnresolvedDataHelper jitResolveClassFromStaticField
+      DispatchUnresolvedDataHelper _jitResolveStaticField
 ; int 3
       jmp commonUnresolvedCode
-retn ;interpreterUnresolvedClassFromStaticFieldGlue endp
+retn ;_interpreterUnresolvedStaticFieldGlue endp
 
 
       align 16
-interpreterUnresolvedStaticFieldGlue: ;proc near
+_interpreterUnresolvedStaticFieldSetterGlue: ;proc near
       DataResolvePrologue
-      DispatchUnresolvedDataHelper jitResolveStaticField
+      DispatchUnresolvedDataHelper _jitResolveStaticFieldSetter
 ; int 3
       jmp commonUnresolvedCode
-retn ;interpreterUnresolvedStaticFieldGlue endp
+retn ;_interpreterUnresolvedStaticFieldSetterGlue endp
+
+      align 16
+_interpreterUnresolvedFieldGlue: ;proc near
+      DataResolvePrologue
+      DispatchUnresolvedDataHelper _jitResolveField
+; int 3
+      jmp commonUnresolvedCode
+retn ;_interpreterUnresolvedFieldGlue endp
 
 
       align 16
-interpreterUnresolvedStaticFieldSetterGlue: ;proc near
+_interpreterUnresolvedFieldSetterGlue: ;proc near
       DataResolvePrologue
-      DispatchUnresolvedDataHelper jitResolveStaticFieldSetter
-; int 3
-      jmp commonUnresolvedCode
-retn ;interpreterUnresolvedStaticFieldSetterGlue endp
-
-      align 16
-interpreterUnresolvedFieldGlue: ;proc near
-      DataResolvePrologue
-      DispatchUnresolvedDataHelper jitResolveField
-; int 3
-      jmp commonUnresolvedCode
-retn ;interpreterUnresolvedFieldGlue endp
-
-
-      align 16
-interpreterUnresolvedFieldSetterGlue: ;proc near
-      DataResolvePrologue
-      DispatchUnresolvedDataHelper jitResolveFieldSetter
+      DispatchUnresolvedDataHelper _jitResolveFieldSetter
 ; int 3
 
 commonUnresolvedCode:
@@ -915,7 +924,7 @@ commonUnresolvedCode:
 
 patchDisp32:
       mov dword  [esi+edx+1], edi ; patch the disp32 field in the snippet
-      call memoryFence ; make sure all stores crossing a line are issued
+      call _memoryFence ; make sure all stores crossing a line are issued
 
 disp32AlreadyPatched:
 
@@ -1065,39 +1074,39 @@ executeSnippetCode:
       popfd ; restore
       ret 8 ; execute patched instruction in snippet
 
-retn ;interpreterUnresolvedFieldSetterGlue endp
+retn ;_interpreterUnresolvedFieldSetterGlue endp
 
 
 
-MTUnresolvedInt32Load: ;proc near
-retn ;MTUnresolvedInt32Load endp
+_MTUnresolvedInt32Load: ;proc near
+retn ;_MTUnresolvedInt32Load endp
 
-MTUnresolvedInt64Load: ;proc near
-retn ;MTUnresolvedInt64Load endp
+_MTUnresolvedInt64Load: ;proc near
+retn ;_MTUnresolvedInt64Load endp
 
-MTUnresolvedFloatLoad: ;proc near
-retn ;MTUnresolvedFloatLoad endp
+_MTUnresolvedFloatLoad: ;proc near
+retn ;_MTUnresolvedFloatLoad endp
 
-MTUnresolvedDoubleLoad: ;proc near
-retn ;MTUnresolvedDoubleLoad endp
+_MTUnresolvedDoubleLoad: ;proc near
+retn ;_MTUnresolvedDoubleLoad endp
 
-MTUnresolvedAddressLoad: ;proc near
-retn ;MTUnresolvedAddressLoad endp
+_MTUnresolvedAddressLoad: ;proc near
+retn ;_MTUnresolvedAddressLoad endp
 
-MTUnresolvedInt32Store: ;proc near
-retn ;MTUnresolvedInt32Store endp
+_MTUnresolvedInt32Store: ;proc near
+retn ;_MTUnresolvedInt32Store endp
 
-MTUnresolvedInt64Store: ;proc near
-retn ;MTUnresolvedInt64Store endp
+_MTUnresolvedInt64Store: ;proc near
+retn ;_MTUnresolvedInt64Store endp
 
-MTUnresolvedFloatStore: ;proc near
-retn ;MTUnresolvedFloatStore endp
+_MTUnresolvedFloatStore: ;proc near
+retn ;_MTUnresolvedFloatStore endp
 
-MTUnresolvedDoubleStore: ;proc near
-retn ;MTUnresolvedDoubleStore endp
+_MTUnresolvedDoubleStore: ;proc near
+retn ;_MTUnresolvedDoubleStore endp
 
-MTUnresolvedAddressStore: ;proc near
-retn ;MTUnresolvedAddressStore endp
+_MTUnresolvedAddressStore: ;proc near
+retn ;_MTUnresolvedAddressStore endp
 
 ;_TEXT ends
 
@@ -1120,76 +1129,78 @@ eq_offsetof_J9Object_clazz equ   16     ; offset of class pointer in a J9Object
 
 %include "jilconsts.inc"
 
-segment .text
+segment _TEXT
 
-      global interpreterUnresolvedStaticGlue
-      global interpreterUnresolvedSpecialGlue
-      global updateInterpreterDispatchGlueSite
-      global interpreterVoidStaticGlue
-      global interpreterEAXStaticGlue
-      global interpreterRAXStaticGlue
-      global interpreterXMM0FStaticGlue
-      global interpreterXMM0DStaticGlue
-      global interpreterSyncVoidStaticGlue
-      global interpreterSyncEAXStaticGlue
-      global interpreterSyncRAXStaticGlue
-      global interpreterSyncXMM0FStaticGlue
-      global interpreterSyncXMM0DStaticGlue
+      global _interpreterUnresolvedStaticGlue
+      global _interpreterUnresolvedSpecialGlue
+      global _updateInterpreterDispatchGlueSite
+      global _interpreterVoidStaticGlue
+      global _interpreterEAXStaticGlue
+      global _interpreterRAXStaticGlue
+      global _interpreterXMM0FStaticGlue
+      global _interpreterXMM0DStaticGlue
+      global _interpreterSyncVoidStaticGlue
+      global _interpreterSyncEAXStaticGlue
+      global _interpreterSyncRAXStaticGlue
+      global _interpreterSyncXMM0FStaticGlue
+      global _interpreterSyncXMM0DStaticGlue
 
-      global interpreterUnresolvedStringGlue
-      global interpreterUnresolvedMethodTypeGlue
-      global interpreterUnresolvedMethodHandleGlue
-      global interpreterUnresolvedCallSiteTableEntryGlue
-      global interpreterUnresolvedMethodTypeTableEntryGlue
-      global interpreterUnresolvedClassGlue
-      global interpreterUnresolvedClassFromStaticFieldGlue
-      global interpreterUnresolvedStaticFieldGlue
-      global interpreterUnresolvedStaticFieldSetterGlue
-      global interpreterUnresolvedFieldGlue
-      global interpreterUnresolvedFieldSetterGlue
+      global _interpreterUnresolvedStringGlue
+      global _interpreterUnresolvedMethodTypeGlue
+      global _interpreterUnresolvedMethodHandleGlue
+      global _interpreterUnresolvedCallSiteTableEntryGlue
+      global _interpreterUnresolvedMethodTypeTableEntryGlue
+      global _interpreterUnresolvedClassGlue
+      global _interpreterUnresolvedClassFromStaticFieldGlue
+      global _interpreterUnresolvedStaticFieldGlue
+      global _interpreterUnresolvedStaticFieldSetterGlue
+      global _interpreterUnresolvedFieldGlue
+      global _interpreterUnresolvedFieldSetterGlue
+      global _interpreterUnresolvedConstantDynamicGlue
 
-      global MTUnresolvedInt32Load
-      global MTUnresolvedInt64Load
-      global MTUnresolvedFloatLoad
-      global MTUnresolvedDoubleLoad
-      global MTUnresolvedAddressLoad
+      global _MTUnresolvedInt32Load
+      global _MTUnresolvedInt64Load
+      global _MTUnresolvedFloatLoad
+      global _MTUnresolvedDoubleLoad
+      global _MTUnresolvedAddressLoad
 
-      global MTUnresolvedInt32Store
-      global MTUnresolvedInt64Store
-      global MTUnresolvedFloatStore
-      global MTUnresolvedDoubleStore
-      global MTUnresolvedAddressStore
+      global _MTUnresolvedInt32Store
+      global _MTUnresolvedInt64Store
+      global _MTUnresolvedFloatStore
+      global _MTUnresolvedDoubleStore
+      global _MTUnresolvedAddressStore
 
-      extern jitResolveStaticMethod
-      extern jitResolveSpecialMethod
-      extern jitCallCFunction
-      extern jitResolveString
-      extern jitResolveMethodType
-      extern jitResolveMethodHandle
-      extern jitResolveInvokeDynamic
-      extern jitResolveHandleMethod
-      extern jitResolveClass
-      extern jitResolveClassFromStaticField
-      extern jitResolveStaticField
-      extern jitResolveStaticFieldSetter
-      extern jitResolveField
-      extern jitResolveFieldSetter
+      extern _jitResolveStaticMethod
+      extern _jitResolveSpecialMethod
+      extern _jitCallCFunction
+      extern _jitResolveString
+      extern _jitResolveConstantDynamic
+      extern _jitResolveMethodType
+      extern _jitResolveMethodHandle
+      extern _jitResolveInvokeDynamic
+      extern _jitResolveHandleMethod
+      extern _jitResolveClass
+      extern _jitResolveClassFromStaticField
+      extern _jitResolveStaticField
+      extern _jitResolveStaticFieldSetter
+      extern _jitResolveField
+      extern _jitResolveFieldSetter
       ;1179
-      extern jitResolvedFieldIsVolatile
+      extern _jitResolvedFieldIsVolatile
 
-      extern icallVMprJavaSendStatic0
-      extern icallVMprJavaSendStatic1
-      extern icallVMprJavaSendStaticJ
-      extern icallVMprJavaSendStaticF
-      extern icallVMprJavaSendStaticD
-      extern icallVMprJavaSendStaticSync0
-      extern icallVMprJavaSendStaticSync1
-      extern icallVMprJavaSendStaticSyncJ
-      extern icallVMprJavaSendStaticSyncF
-      extern icallVMprJavaSendStaticSyncD
+      extern _icallVMprJavaSendStatic0
+      extern _icallVMprJavaSendStatic1
+      extern _icallVMprJavaSendStaticJ
+      extern _icallVMprJavaSendStaticF
+      extern _icallVMprJavaSendStaticD
+      extern _icallVMprJavaSendStaticSync0
+      extern _icallVMprJavaSendStaticSync1
+      extern _icallVMprJavaSendStaticSyncJ
+      extern _icallVMprJavaSendStaticSyncF
+      extern _icallVMprJavaSendStaticSyncD
 
-      extern adjustTrampolineInterpretedDispatchGlueDisp32_unwrapper
-      extern mcc_callPointPatching_unwrapper
+      extern _adjustTrampolineInterpretedDispatchGlueDisp32_unwrapper
+      extern _mcc_callPointPatching_unwrapper
 
 
 %macro CheckIfMethodCompiledAndPatch 1 ; helperName
@@ -1207,7 +1218,7 @@ segment .text
 ; The unresolved {Static|Special} interpreted dispatch snippet look like:
 ; align 8
 ; (10) call interpreterUnresolved{Static|Special}Glue ; replaced with "mov rdi, 0x0000aabbccddeeff"
-; (5) call updateInterpreterDispatchGlueSite ; replaced with "JMP disp32"
+; (5) call _updateInterpreterDispatchGlueSite ; replaced with "JMP disp32"
 ; (2) dw 2-byte glue method helper index
 ; (8) dq cpAddr
 ; (4) dd cpIndex
@@ -1229,7 +1240,7 @@ segment .text
 ; across the call to the lookup helper.
 ;
       align 16
-interpreterUnresolvedStaticGlue: ;proc
+_interpreterUnresolvedStaticGlue: ;proc
       pop rdi ; RA in snippet (see [2] above)
 
       ; Attempt to resolve static method.
@@ -1239,7 +1250,7 @@ interpreterUnresolvedStaticGlue: ;proc
                                                                ; 12 = 5 + 5 (call update) + 2 (DW)
       mov edx, dword [rdi+20] ; p3) rdx = cpIndex
                                                                ; 20 = 5 + 5 (call update) + 2 (DW) + 8 (cpAddr)
-      CallHelperUseReg jitResolveStaticMethod,rax
+      CallHelperUseReg _jitResolveStaticMethod,rax
 
       ; The interpreter may low-tag the result to avoid populating the constant pool--whack it.
       ;
@@ -1259,11 +1270,11 @@ mergeInterpreterUnresolvedDispatch:
       mov qword [rdi], rax
       ret
 
-ret ;interpreterUnresolvedStaticGlue endp
+ret ;_interpreterUnresolvedStaticGlue endp
 
 
       align 16
-interpreterUnresolvedSpecialGlue: ;proc
+_interpreterUnresolvedSpecialGlue: ;proc
       pop rdi ; RA in snippet
 
       ; Attempt to resolve special method.
@@ -1273,13 +1284,13 @@ interpreterUnresolvedSpecialGlue: ;proc
                                                                ; 12 = 5 + 5 (call update) + 2 (DW)
       mov edx, dword [rdi+20] ; p3) rdx = cpIndex
                                                                ; 20 = 5 + 5 (call update) + 2 (DW) + 8 (cpAddr)
-      CallHelperUseReg jitResolveSpecialMethod,rax
+      CallHelperUseReg _jitResolveSpecialMethod,rax
       jmp mergeInterpreterUnresolvedDispatch
 
-ret ;interpreterUnresolvedSpecialGlue endp
+ret ;_interpreterUnresolvedSpecialGlue endp
 
 
-; updateInterpreterDispatchGlueSite
+; _updateInterpreterDispatchGlueSite
 ;
 ; Now that a resolved RAM method is available, determine the appropriate interpreter
 ; dispatch glue code to call and then patch the snippet to jump to it directly (or
@@ -1295,7 +1306,7 @@ ret ;interpreterUnresolvedSpecialGlue endp
 ; already occured at this point.
 ;
       align 16
-updateInterpreterDispatchGlueSite: ;proc
+_updateInterpreterDispatchGlueSite: ;proc
       mov rcx, qword [rsp] ; rcx = snippet RA
 
       sub rsp, 8 ; descriptor+32: return value
@@ -1305,10 +1316,10 @@ updateInterpreterDispatchGlueSite: ;proc
       mov rdx, qword  [rcx+2] ; 2 = (DW index)
       push rdx ; descriptor+8: cpAddr
       push rdi ; descriptor+0: RAM method
-      MoveHelper rax, adjustTrampolineInterpretedDispatchGlueDisp32_unwrapper ; p1) helper address
+      MoveHelper rax, _adjustTrampolineInterpretedDispatchGlueDisp32_unwrapper ; p1) helper address
       lea rsi, [rsp] ; p2) EA parms in TLS area
       lea rdx, [rsp+32] ; p3) EA of return value in TLS area
-      call jitCallCFunction
+      call _jitCallCFunction
       add rsp, 32 ; tear down descriptor
       pop rax ; rax = return value (disp32)
 
@@ -1335,7 +1346,7 @@ updateInterpreterDispatchGlueSite: ;proc
       sub qword [rsp], 5 ; re-run the calling instruction
       ret
 
-ret ;updateInterpreterDispatchGlueSite endp
+ret ;_updateInterpreterDispatchGlueSite endp
 
 
 ; mergedStaticGlueCallFixer
@@ -1363,10 +1374,10 @@ mergedStaticGlueCallFixer2: ;proc
       push rcx ; descriptor+16: compiled method PC
       push rsi ; descriptor+8: call site
       push rdi ; descriptor+0: RAM method
-      MoveHelper rax, mcc_callPointPatching_unwrapper ; p1) rax = helper
+      MoveHelper rax, _mcc_callPointPatching_unwrapper ; p1) rax = helper
       lea rsi, [rsp] ; p2) rsi = EA of descriptor
       lea rdx, [rsp] ; p3) rdx = EA of return value
-      call jitCallCFunction
+      call _jitCallCFunction
       add rsp, 32 ; tear down descriptor
       jmp rcx ; Dispatch compiled method through the interpreted entry
                                                                ; point. This is because the linkage registers may not be
@@ -1384,54 +1395,54 @@ ret ;mergedStaticGlueCallFixer2 endp
 ; compiled method directly.
 ;
       align 16
-interpreterVoidStaticGlue: ;proc
-      CheckIfMethodCompiledAndPatch icallVMprJavaSendStatic0
-ret ;interpreterVoidStaticGlue endp
+_interpreterVoidStaticGlue: ;proc
+      CheckIfMethodCompiledAndPatch _icallVMprJavaSendStatic0
+ret ;_interpreterVoidStaticGlue endp
 
       align 16
-interpreterSyncVoidStaticGlue: ;proc
-      CheckIfMethodCompiledAndPatch icallVMprJavaSendStaticSync0
-ret ;interpreterSyncVoidStaticGlue endp
+_interpreterSyncVoidStaticGlue: ;proc
+      CheckIfMethodCompiledAndPatch _icallVMprJavaSendStaticSync0
+ret ;_interpreterSyncVoidStaticGlue endp
 
       align 16
-interpreterEAXStaticGlue: ;proc
-      CheckIfMethodCompiledAndPatch icallVMprJavaSendStatic1
-ret ;interpreterEAXStaticGlue endp
+_interpreterEAXStaticGlue: ;proc
+      CheckIfMethodCompiledAndPatch _icallVMprJavaSendStatic1
+ret ;_interpreterEAXStaticGlue endp
 
       align 16
-interpreterSyncEAXStaticGlue: ;proc
-      CheckIfMethodCompiledAndPatch icallVMprJavaSendStaticSync1
-ret ;interpreterSyncEAXStaticGlue endp
+_interpreterSyncEAXStaticGlue: ;proc
+      CheckIfMethodCompiledAndPatch _icallVMprJavaSendStaticSync1
+ret ;_interpreterSyncEAXStaticGlue endp
 
       align 16
-interpreterRAXStaticGlue: ;proc
-      CheckIfMethodCompiledAndPatch icallVMprJavaSendStaticJ
-ret ;interpreterRAXStaticGlue endp
+_interpreterRAXStaticGlue: ;proc
+      CheckIfMethodCompiledAndPatch _icallVMprJavaSendStaticJ
+ret ;_interpreterRAXStaticGlue endp
 
       align 16
-interpreterSyncRAXStaticGlue: ;proc
-      CheckIfMethodCompiledAndPatch icallVMprJavaSendStaticSyncJ
-ret ;interpreterSyncRAXStaticGlue endp
+_interpreterSyncRAXStaticGlue: ;proc
+      CheckIfMethodCompiledAndPatch _icallVMprJavaSendStaticSyncJ
+ret ;_interpreterSyncRAXStaticGlue endp
 
       align 16
-interpreterXMM0FStaticGlue: ;proc
-      CheckIfMethodCompiledAndPatch icallVMprJavaSendStaticF
-ret ;interpreterXMM0FStaticGlue endp
+_interpreterXMM0FStaticGlue: ;proc
+      CheckIfMethodCompiledAndPatch _icallVMprJavaSendStaticF
+ret ;_interpreterXMM0FStaticGlue endp
 
       align 16
-interpreterSyncXMM0FStaticGlue: ;proc
-      CheckIfMethodCompiledAndPatch icallVMprJavaSendStaticSyncF
-ret ;interpreterSyncXMM0FStaticGlue endp
+_interpreterSyncXMM0FStaticGlue: ;proc
+      CheckIfMethodCompiledAndPatch _icallVMprJavaSendStaticSyncF
+ret ;_interpreterSyncXMM0FStaticGlue endp
 
       align 16
-interpreterXMM0DStaticGlue: ;proc
-      CheckIfMethodCompiledAndPatch icallVMprJavaSendStaticD
-ret ;interpreterXMM0DStaticGlue endp
+_interpreterXMM0DStaticGlue: ;proc
+      CheckIfMethodCompiledAndPatch _icallVMprJavaSendStaticD
+ret ;_interpreterXMM0DStaticGlue endp
 
       align 16
-interpreterSyncXMM0DStaticGlue: ;proc
-      CheckIfMethodCompiledAndPatch icallVMprJavaSendStaticSyncD
-ret ;interpreterSyncXMM0DStaticGlue endp
+_interpreterSyncXMM0DStaticGlue: ;proc
+      CheckIfMethodCompiledAndPatch _icallVMprJavaSendStaticSyncD
+ret ;_interpreterSyncXMM0DStaticGlue endp
 
 
 ; --------------------------------------------------------------------------------
@@ -1544,7 +1555,7 @@ checkReferenceVolatility: ; proc
       push rbx
       push r9
 
-      ; jitResolvedFieldIsVolatile requires us to restore ebp before calling it
+      ; _jitResolvedFieldIsVolatile requires us to restore ebp before calling it
       ;
       mov rbp, qword  [rsp + 240] ; [rsp + 176 + 8 + 56]
                                                                 ; [rsp + rbp stack slot + proc RA + local reg preservation]
@@ -1560,7 +1571,7 @@ checkReferenceVolatility: ; proc
 
       ; call the volatile check
       ;
-      CallHelperUseReg jitResolvedFieldIsVolatile,rax
+      CallHelperUseReg _jitResolvedFieldIsVolatile,rax
 
       ; if this field is not volatile, patch the barrier with a nop
       ;
@@ -1762,97 +1773,104 @@ ret ;checkReferenceVolatility endp
 ; across the resolution helper.
 
       align 16
-interpreterUnresolvedStringGlue: ;proc
+_interpreterUnresolvedStringGlue: ;proc
       DataResolvePrologue
-      DispatchUnresolvedDataHelper jitResolveString
+      DispatchUnresolvedDataHelper _jitResolveString
 ; int 3
       jmp commonUnresolvedCode
-ret ;interpreterUnresolvedStringGlue endp
+ret ;_interpreterUnresolvedStringGlue endp
+
+      align 16
+_interpreterUnresolvedConstantDynamicGlue: ; proc
+      DataResolvePrologue
+      DispatchUnresolvedDataHelper jitResolveConstantDynamic
+;      int 3
+      jmp commonUnresolvedCode
+ret ;interpreterUnresolvedConstantDynamicGlue endp
+
+      align 16
+_interpreterUnresolvedMethodTypeGlue: ;proc
+      DataResolvePrologue
+      DispatchUnresolvedDataHelper _jitResolveMethodType
+; int 3
+      jmp commonUnresolvedCode
+ret ;_interpreterUnresolvedMethodTypeGlue endp
 
 
       align 16
-interpreterUnresolvedMethodTypeGlue: ;proc
+_interpreterUnresolvedMethodHandleGlue: ;proc
       DataResolvePrologue
-      DispatchUnresolvedDataHelper jitResolveMethodType
+      DispatchUnresolvedDataHelper _jitResolveMethodHandle
 ; int 3
       jmp commonUnresolvedCode
-ret ;interpreterUnresolvedMethodTypeGlue endp
+ret ;_interpreterUnresolvedMethodHandleGlue endp
 
 
       align 16
-interpreterUnresolvedMethodHandleGlue: ;proc
+_interpreterUnresolvedCallSiteTableEntryGlue: ;proc
       DataResolvePrologue
-      DispatchUnresolvedDataHelper jitResolveMethodHandle
+      DispatchUnresolvedDataHelper _jitResolveInvokeDynamic
 ; int 3
       jmp commonUnresolvedCode
-ret ;interpreterUnresolvedMethodHandleGlue endp
+ret ;_interpreterUnresolvedCallSiteTableEntryGlue endp
 
 
       align 16
-interpreterUnresolvedCallSiteTableEntryGlue: ;proc
+_interpreterUnresolvedMethodTypeTableEntryGlue: ;proc
       DataResolvePrologue
-      DispatchUnresolvedDataHelper jitResolveInvokeDynamic
+      DispatchUnresolvedDataHelper _jitResolveHandleMethod
 ; int 3
       jmp commonUnresolvedCode
-ret ;interpreterUnresolvedCallSiteTableEntryGlue endp
+ret ;_interpreterUnresolvedMethodTypeTableEntryGlue endp
 
 
       align 16
-interpreterUnresolvedMethodTypeTableEntryGlue: ;proc
+_interpreterUnresolvedClassGlue: ;proc
       DataResolvePrologue
-      DispatchUnresolvedDataHelper jitResolveHandleMethod
+      DispatchUnresolvedDataHelper _jitResolveClass
 ; int 3
       jmp commonUnresolvedCode
-ret ;interpreterUnresolvedMethodTypeTableEntryGlue endp
+ret ;_interpreterUnresolvedClassGlue endp
 
 
       align 16
-interpreterUnresolvedClassGlue: ;proc
+_interpreterUnresolvedClassFromStaticFieldGlue: ;proc
       DataResolvePrologue
-      DispatchUnresolvedDataHelper jitResolveClass
+      DispatchUnresolvedDataHelper _jitResolveClassFromStaticField
 ; int 3
       jmp commonUnresolvedCode
-ret ;interpreterUnresolvedClassGlue endp
+ret ;_interpreterUnresolvedClassFromStaticFieldGlue endp
 
 
       align 16
-interpreterUnresolvedClassFromStaticFieldGlue: ;proc
+_interpreterUnresolvedStaticFieldGlue: ;proc
       DataResolvePrologue
-      DispatchUnresolvedDataHelper jitResolveClassFromStaticField
+      DispatchUnresolvedDataHelper _jitResolveStaticField
 ; int 3
       jmp commonUnresolvedCode
-ret ;interpreterUnresolvedClassFromStaticFieldGlue endp
+ret ;_interpreterUnresolvedStaticFieldGlue endp
 
 
       align 16
-interpreterUnresolvedStaticFieldGlue: ;proc
+_interpreterUnresolvedStaticFieldSetterGlue: ;proc
       DataResolvePrologue
-      DispatchUnresolvedDataHelper jitResolveStaticField
+      DispatchUnresolvedDataHelper _jitResolveStaticFieldSetter
 ; int 3
       jmp commonUnresolvedCode
-ret ;interpreterUnresolvedStaticFieldGlue endp
-
+ret ;_interpreterUnresolvedStaticFieldSetterGlue endp
 
       align 16
-interpreterUnresolvedStaticFieldSetterGlue: ;proc
+_interpreterUnresolvedFieldGlue: ;proc
       DataResolvePrologue
-      DispatchUnresolvedDataHelper jitResolveStaticFieldSetter
+      DispatchUnresolvedDataHelper _jitResolveField
 ; int 3
       jmp commonUnresolvedCode
-ret ;interpreterUnresolvedStaticFieldSetterGlue endp
+ret ;_interpreterUnresolvedFieldGlue endp
 
       align 16
-interpreterUnresolvedFieldGlue: ;proc
+_interpreterUnresolvedFieldSetterGlue: ;proc
       DataResolvePrologue
-      DispatchUnresolvedDataHelper jitResolveField
-; int 3
-      jmp commonUnresolvedCode
-ret ;interpreterUnresolvedFieldGlue endp
-
-      align 16
-interpreterUnresolvedFieldSetterGlue: ;proc
-      DataResolvePrologue
-      DispatchUnresolvedDataHelper jitResolveFieldSetter
+      DispatchUnresolvedDataHelper _jitResolveFieldSetter
 ; int 3
 
 commonUnresolvedCode:
@@ -2027,38 +2045,38 @@ noVolatileCheck4Byte:
       lea rsp, [rsp+8] ; skip over RA in snippet--mispredict
       ret
 
-ret ;interpreterUnresolvedFieldSetterGlue endp
+ret ;_interpreterUnresolvedFieldSetterGlue endp
 
 
-MTUnresolvedInt32Load: ;proc
-ret ;MTUnresolvedInt32Load endp
+_MTUnresolvedInt32Load: ;proc
+ret ;_MTUnresolvedInt32Load endp
 
-MTUnresolvedInt64Load: ;proc
-ret ;MTUnresolvedInt64Load endp
+_MTUnresolvedInt64Load: ;proc
+ret ;_MTUnresolvedInt64Load endp
 
-MTUnresolvedFloatLoad: ;proc
-ret ;MTUnresolvedFloatLoad endp
+_MTUnresolvedFloatLoad: ;proc
+ret ;_MTUnresolvedFloatLoad endp
 
-MTUnresolvedDoubleLoad: ;proc
-ret ;MTUnresolvedDoubleLoad endp
+_MTUnresolvedDoubleLoad: ;proc
+ret ;_MTUnresolvedDoubleLoad endp
 
-MTUnresolvedAddressLoad: ;proc
-ret ;MTUnresolvedAddressLoad endp
+_MTUnresolvedAddressLoad: ;proc
+ret ;_MTUnresolvedAddressLoad endp
 
-MTUnresolvedInt32Store: ;proc
-ret ;MTUnresolvedInt32Store endp
+_MTUnresolvedInt32Store: ;proc
+ret ;_MTUnresolvedInt32Store endp
 
-MTUnresolvedInt64Store: ;proc
-ret ;MTUnresolvedInt64Store endp
+_MTUnresolvedInt64Store: ;proc
+ret ;_MTUnresolvedInt64Store endp
 
-MTUnresolvedFloatStore: ;proc
-ret ;MTUnresolvedFloatStore endp
+_MTUnresolvedFloatStore: ;proc
+ret ;_MTUnresolvedFloatStore endp
 
-MTUnresolvedDoubleStore: ;proc
-ret ;MTUnresolvedDoubleStore endp
+_MTUnresolvedDoubleStore: ;proc
+ret ;_MTUnresolvedDoubleStore endp
 
-MTUnresolvedAddressStore: ;proc
-ret ;MTUnresolvedAddressStore endp
+_MTUnresolvedAddressStore: ;proc
+ret ;_MTUnresolvedAddressStore endp
 ;_TEXT ends
 
 ;; !TR_HOST_64BIT
