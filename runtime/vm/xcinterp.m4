@@ -165,7 +165,11 @@ START_PROC(c_cInterpreter)
 	mov uword ptr J9TR_ELS_jitFPRegisterStorageBase[_rax],_rbx
 C_FUNCTION_SYMBOL(cInterpreter):
 	mov _rax,uword ptr J9TR_VMThread_javaVM[_rbp]
+ifdef({OSX},{
+	call qword ptr J9TR_JavaVM_bytecodeLoop[rax]
+},{
 	CALL_C_WITH_VMTHREAD(uword ptr J9TR_JavaVM_bytecodeLoop[_rax],0)
+})
 	cmp _rax,J9TR_bcloop_exit_interpreter
 	je SHORT_JMP cInterpExit
 	RESTORE_PRESERVED_REGS
