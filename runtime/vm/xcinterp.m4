@@ -166,7 +166,11 @@ START_PROC(c_cInterpreter)
 C_FUNCTION_SYMBOL(cInterpreter):
 	mov _rax,uword ptr J9TR_VMThread_javaVM[_rbp]
 ifdef({OSX},{
-	call qword ptr J9TR_JavaVM_bytecodeLoop[rax]
+	mov rdi,rbp
+	mov qword ptr [rsp],rbp
+	mov rbp,qword ptr [rsp]
+	call qword ptr 192[rax]
+	mov rbp,qword ptr [rsp]
 },{
 	CALL_C_WITH_VMTHREAD(uword ptr J9TR_JavaVM_bytecodeLoop[_rax],0)
 })
