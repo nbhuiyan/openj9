@@ -53,7 +53,7 @@ eq_LORBinaryWord                  equ 083f0h
 eq_IsFloatOp                      equ 000040000h
 eq_CompressedPointer              equ 040000000h
 eq_isOwningObjectNeeded           equ 000040000h
-eq_ObjectClassMask                equ -256 ;hack!! this is supposed to be read from jilconsts.inc: J9TR_RequiredClassAlignment
+eq_ObjectClassMask                equ -J9TR_RequiredClassAlignment
 
 ; --------------------------------------------------------------------------------
 ;                                    32-BIT
@@ -124,7 +124,7 @@ eq_IPicData_j2iThunk           equ 22h    ; only present if direct invoke is pos
         and     %3, eq_ObjectClassMask ;&ClassPtrReg32, eq_ObjectClassMask
 %else
         mov     %2, qword [%1 + J9TR_J9Object_class] ;&ClassPtrReg64, qword ptr[&ObjectReg+J9TR_J9Object_class]
-        and     %3, eq_ObjectClassMask ;&ClassPtrReg64, eq_ObjectClassMask
+        and     %2, eq_ObjectClassMask ;&ClassPtrReg64, eq_ObjectClassMask
 %endif
 %endmacro
 
