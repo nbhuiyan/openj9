@@ -2449,7 +2449,7 @@ _populateVPicVTableDispatch:  ;proc
       or rcx, 0ff00e9h ; JMP4 + CALLMem opcodes
       mov ch, byte [rdi+eq_VPicData_callMemRex] ; REX from snippet
       ror rcx, 24
-      mov cl, byte [rdi+eq_VPicData_callMemRex] ; ModRM from snippet
+      mov cl, byte [rdi+eq_VPicData_callMemModRM] ; ModRM from snippet
       rol rcx, 16
       mov rdi, 0e9000000000000e8h
 

@@ -107,7 +107,7 @@ eq_J9Monitor_CNTFLCClearMask  equ 0FFFFFFFFFFFFFF05h
 ; lockword address <= _rcx
 ; vmthread         <= _rbp
 %macro TryLock 0
-    push bp
+    push rbp
     lea  rbp, [rbp + eq_J9Monitor_RESINCBits] ; make thread ID + RES + INC_DEC value
 
     ; Set _rax to the lock word value that allows a monitor to be reserved (the
