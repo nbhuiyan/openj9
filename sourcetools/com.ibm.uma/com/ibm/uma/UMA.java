@@ -657,6 +657,8 @@ public class UMA {
 				break;
 			}
 			buffer.append("UMA_TARGET_NAME=" + artifact.getTargetNameWithScope() + "\n");
+
+			buffer.append("UMA_LIB_NAME=" + platform.getTargetNameWithRelease(artifact) + "\n");
 			
 			if ( artifact.getTargetPath() != null ) {
 				buffer.append("UMA_TARGET_PATH=" + UMA_PATH_TO_ROOT_VAR + artifact.getTargetPath()+"\n");

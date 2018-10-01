@@ -223,6 +223,10 @@ SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-excepti
 				<include-if condition="spec.linux.*"/>
 			</vpath>
 
+			<vpath pattern="%" path="$(OMR_DIR)/port/osx" augmentIncludes="true" type="relativepath">
+				<include-if condition="spec.osx.*"/>
+			</vpath>
+
 			<vpath pattern="%" path="../port/sysvipc" augmentIncludes="true" type="relativepath">
 				<exclude-if condition="spec.win_x86.*"/>
 			</vpath>

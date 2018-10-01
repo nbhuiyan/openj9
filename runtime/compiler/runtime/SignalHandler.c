@@ -991,7 +991,7 @@ UDATA jit390Handler(J9VMThread* vmThread, U_32 sigType, void* sigInfo)
       /* end of trying to catch traps */
       if (TRAP_TYPE_UNKNOWN == trapType)
          {
-#if defined(LINUX)
+#if defined(LINUX) || defined(OSX)
          /* Linux handles PD signals differently so we include illegal instruction exceptions (e.g. ZAP exceptions will be SIGILL) */
          if (sigType & J9PORT_SIG_FLAG_SIGFPE || sigType & J9PORT_SIG_FLAG_SIGILL)
 #else
@@ -1104,7 +1104,7 @@ UDATA jit390Handler(J9VMThread* vmThread, U_32 sigType, void* sigInfo)
                      {
                      isDAAException = true;
                      }
-#if defined(LINUX)
+#if defined(LINUX) || defined(OSX)
                   else if (ptr[0] == 0xFD)     /* DP divide by zero linux only*/
                      {
                      isDAAException = true;
@@ -1112,7 +1112,7 @@ UDATA jit390Handler(J9VMThread* vmThread, U_32 sigType, void* sigInfo)
 #endif
                   }
                }
-#if defined(LINUX)
+#if defined(LINUX) || defined(OSX)
             else if (J9PORT_SIG_FLAG_SIGILL == sigType && DXC == (U_8)0x00)
                {
                /* CVB fixed point divide exception on Linux is Illegal Instruction Exception */
@@ -1180,7 +1180,7 @@ UDATA jit390Handler(J9VMThread* vmThread, U_32 sigType, void* sigInfo)
             vmThread->tempSlot = (UDATA) (*entryPointRegister);
 
             /* Work item 51875 : Return address is given by GPR7 in ZOS but controlPC in Linux */
-#if defined(LINUX)
+#if defined(LINUX) || defined(OSX)
             UDATA returnTargetAModeTagged = 0;
             if(isSkipDAAException)
                {
@@ -1743,7 +1743,7 @@ UDATA jitAMD64Handler(J9VMThread* vmThread, U_32 sigType, void *sigInfo)
 			switch (sigType) {
 			case J9PORT_SIG_FLAG_SIGFPE_DIV_BY_ZERO:
 			case J9PORT_SIG_FLAG_SIGFPE_INT_DIV_BY_ZERO:
-#if !defined(LINUX)
+#if !defined(LINUX) || !defined(OSX)
 			case J9PORT_SIG_FLAG_SIGFPE_INT_OVERFLOW:
 #endif
 				if (jitAMD64isDivInstruction(rip)) {

@@ -20,21 +20,22 @@ OpenJDK Assembly Exception [2].
 
 SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
 -->
-<spec xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ibm.com/j9/builder/spec" xsi:schemaLocation="http://www.ibm.com/j9/builder/spec spec-v1.xsd" id="osx_x86-64">
-	<name>OSX</name>
+<spec xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ibm.com/j9/builder/spec" xsi:schemaLocation="http://www.ibm.com/j9/builder/spec spec-v1.xsd" id="osx_x86-64_cmprssptrs">
+	<name>OSX Compressed Pointers</name>
 	<asmBuilderName>OSX</asmBuilderName>
 	<cpuArchitecture>x86</cpuArchitecture>
 	<os>osx</os>
 	<defaultJCL>Sidecar</defaultJCL>
 	<defaultSizes>desktop (256M + big OS stack)</defaultSizes>
-	<priority>200</priority>
+	<priority>250</priority>
 	<owners>
-		<owner>charlie_gracie@ca.ibm.com</owner>
+		<owner>todo</owner>
 	</owners>
 	<properties>
 		<property name="SE6_extension" value="tar.gz"/>
 		<property name="SE6_package" value="xa64"/>
 		<property name="aotTarget" value="amd64-osx"/>
+		<property name="complianceTestingJavaLibraryPath" value="osx_x86-64"/>
 		<property name="complianceTestingSupported" value="true"/>
 		<property name="directoryDelimiter" value="/"/>
 		<property name="graph_arch.cpu" value="{$spec.arch.cpuISA$}"/>
@@ -42,18 +43,16 @@ SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-excepti
 		<property name="graph_commands.unix.remote_host" value=""/>
 		<property name="graph_datamines" value="commands.unix.datamine,site-ottawa.datamine,use.local.datamine"/>
 		<property name="graph_label.classlib" value="150"/>
-		<property name="graph_label.java5" value="j9vmxa6424"/>
-		<property name="graph_label.java6" value="pxa6460"/>
-		<property name="graph_label.java60_26" value="pxa6460_26"/>
+		<property name="graph_label.java5" value="j9vmxa64cmprssptrs24"/>
+		<property name="graph_label.java6" value="pxa64cmprssptrs60"/>
+		<property name="graph_label.java60_26" value="pxa64cmprssptrs60_26"/>
 		<property name="graph_label.java6_rebuilt_extension" value="zip"/>
-		<property name="graph_label.java7" value="pxa6470"/>
-		<property name="graph_label.java70_27" value="pxa6470_27"/>
-		<property name="graph_label.java7_raw" value="jdk7-osx-x64"/>
-		<property name="graph_label.java8" value="pxa6480"/>
-		<property name="graph_label.java8_raw" value="jdk8-osx-x64"/>
-		<property name="graph_label.java9" value="pxa6490"/>
+		<property name="graph_label.java7" value="pxa64cmprssptrs70"/>
+		<property name="graph_label.java70_27" value="pxa64cmprssptrs70_27"/>
+		<property name="graph_label.java8" value="pxa64cmprssptrs80"/>
+		<property name="graph_label.java9" value="pxa64cmprssptrs90"/>
 		<property name="graph_label.osid" value="osx"/>
-		<property name="graph_label.profile" value=""/>
+		<property name="graph_label.profile" value="_cmprssptrs"/>
 		<property name="graph_make_parallel_arg" value="-j `numberOfCPUs`"/>
 		<property name="graph_req.arch0" value="arch:x86"/>
 		<property name="graph_req.arch1" value="arch:64bit"/>
@@ -72,12 +71,11 @@ SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-excepti
 		<property name="graph_variant.trailingID" value=""/>
 		<property name="isReallyUnix" value="true"/>
 		<property name="j2seRuntimeDir" value="jre/lib/amd64"/>
-		<property name="j2seTags" value="pxa6460,j9vmxa6424"/>
-		<property name="j9BuildName" value="osx_x86-64"/>
+		<property name="j2seTags" value="pxa64cmprssptrs60,j9vmxa64cmprssptrs24"/>
 		<property name="j9dt.compileTarget" value="makefile"/>
 		<property name="j9dt.make" value="gmake"/>
 		<property name="j9dt.toolsTarget" value="buildtools.mk"/>
-		<property name="javatestPlatform" value="osx_x86-64"/>
+		<property name="javatestPlatform" value="osx_x86-64_cr"/>
 		<property name="jclMaxSecurityPolicyDefine" value=" &quot;-Djava.security.policy=http://jcl1.ottawa.ibm.com/testres/java.policy&quot;"/>
 		<property name="jclMemoryMax" value="-Xmx64m"/>
 		<property name="jclOSStackSizeMax" value=""/>
@@ -85,11 +83,9 @@ SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-excepti
 		<property name="jitTestingOptLevel" value="optlevel=warm"/>
 		<property name="localRootPath" value="$(J9_UNIX_ROOT)"/>
 		<property name="longLimitCmd" value=""/>
-		<property name="main_shortname" value="oa64"/>
+		<property name="main_shortname" value="xa64"/>
 		<property name="os.lineDelimiter" value="unix"/>
 		<property name="platform_arch" value="amd64"/>
-		<property name="sun.jdk7.platform_id" value="osx-x64"/>
-		<property name="sun.jdk8.platform_id" value="osx-x64"/>
 		<property name="svn_stream" value=""/>
 		<property name="uma_make_cmd_ar" value="ar"/>
 		<property name="uma_make_cmd_as" value="as"/>
@@ -107,9 +103,9 @@ SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-excepti
 		<property name="uma_use_cflags_on_asflag_line" value="true"/>
 	</properties>
 	<features>
+		<feature id="cmprssptrs"/>
 		<feature id="combogc"/>
 		<feature id="core"/>
-		<feature id="crypto"/>
 		<feature id="dbgext"/>
 		<feature id="gpu"/>
 		<feature id="se"/>
@@ -133,9 +129,10 @@ SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-excepti
 		<flag id="build_j2se" value="true"/>
 		<flag id="build_java8" value="true"/>
 		<flag id="build_java9" value="true"/>
+		<flag id="build_openj9" value="true"/>
+		<flag id="build_openj9JDK8" value="true"/>
 		<flag id="build_product" value="true"/>
 		<flag id="build_vmContinuous" value="true"/>
-		<flag id="env_data64" value="true"/>
 		<flag id="env_hasFPU" value="true"/>
 		<flag id="env_littleEndian" value="true"/>
 		<flag id="gc_batchClearTLH" value="true"/>
@@ -146,9 +143,9 @@ SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-excepti
 		<flag id="gc_tlhPrefetchFTA" value="true"/>
 		<flag id="graph_cmdLineTester" value="true"/>
 		<flag id="graph_compile" value="true"/>
+		<flag id="graph_enableModularityTesting" value="true"/>
 		<flag id="graph_enableTesting" value="true"/>
 		<flag id="graph_enableTesting_Java8" value="true"/>
-		<flag id="graph_includeThrstatetest" value="true"/>
 		<flag id="graph_j2seSanity" value="true"/>
 		<flag id="graph_jgrinder" value="true"/>
 		<flag id="graph_plumhall" value="true"/>
@@ -196,8 +193,6 @@ SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-excepti
 		<flag id="module_cpo_controller" value="true"/>
 		<flag id="module_dbginfoserv" value="true"/>
 		<flag id="module_ddr" value="true"/>
-		<flag id="module_ddr_gdb_plugin" value="true"/>
-		<flag id="module_ddrext" value="true"/>
 		<flag id="module_exe" value="true"/>
 		<flag id="module_exe.j9" value="true"/>
 		<flag id="module_gc_modron_eprof" value="true"/>

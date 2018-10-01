@@ -25,29 +25,120 @@ CONFIGURE_ARGS += \
   --enable-debug \
   --enable-OMR_THR_THREE_TIER_LOCKING \
   --enable-OMR_THR_YIELD_ALG \
-  --enable-OMR_THR_SPIN_WAKE_CONTROL \
-  --enable-OMRTHREAD_LIB_UNIX \
-  --enable-OMR_ARCH_X86 \
-  --enable-OMR_ENV_DATA64 \
-  --enable-OMR_ENV_LITTLE_ENDIAN \
-  --enable-OMR_GC_IDLE_HEAP_MANAGER \
-  --enable-OMR_GC_TLH_PREFETCH_FTA \
-  --enable-OMR_PORT_CAN_RESERVE_SPECIFIC_ADDRESS \
-  --enable-OMR_PORT_NUMA_SUPPORT
+  --enable-OMR_THR_SPIN_WAKE_CONTROL
+
+ifeq (osx_x86-64, $(SPEC))
+  CONFIGURE_ARGS += \
+    --enable-OMRTHREAD_LIB_UNIX \
+    --enable-OMR_ARCH_X86 \
+    --enable-OMR_ENV_DATA64 \
+    --enable-OMR_ENV_LITTLE_ENDIAN \
+    --enable-OMR_GC_IDLE_HEAP_MANAGER \
+    --enable-OMR_GC_TLH_PREFETCH_FTA \
+    --enable-OMR_PORT_CAN_RESERVE_SPECIFIC_ADDRESS \
+    --enable-OMR_PORT_NUMA_SUPPORT
+endif
+
+ifeq (osx_x86-64_cmprssptrs, $(SPEC))
+  CONFIGURE_ARGS = \
+    --enable-OMRTHREAD_LIB_UNIX \
+	  --enable-OMR_ARCH_X86 \
+	  --enable-OMR_ENV_DATA64 \
+	  --enable-OMR_ENV_LITTLE_ENDIAN \
+	  --enable-OMR_GC_COMPRESSED_POINTERS \
+	  --enable-OMR_GC_IDLE_HEAP_MANAGER \
+	  --enable-OMR_GC_TLH_PREFETCH_FTA \
+	  --enable-OMR_INTERP_COMPRESSED_OBJECT_HEADER \
+	  --enable-OMR_INTERP_SMALL_MONITOR_SLOT \
+	  --enable-OMR_PORT_CAN_RESERVE_SPECIFIC_ADDRESS \
+	  --enable-OMR_PORT_NUMA_SUPPORT
+endif
+
+ifeq (osx_x86-64_cmprssptrs_cs, $(SPEC))
+  CONFIGURE_ARGS += \
+		--enable-OMRTHREAD_LIB_UNIX \
+		--enable-OMR_ARCH_X86 \
+		--enable-OMR_ENV_DATA64 \
+		--enable-OMR_ENV_LITTLE_ENDIAN \
+		--enable-OMR_GC_COMPRESSED_POINTERS \
+		--enable-OMR_GC_TLH_PREFETCH_FTA \
+		--enable-OMR_GC_CONCURRENT_SCAVENGER \
+		--enable-OMR_INTERP_COMPRESSED_OBJECT_HEADER \
+		--enable-OMR_INTERP_SMALL_MONITOR_SLOT \
+		--enable-OMR_PORT_CAN_RESERVE_SPECIFIC_ADDRESS \
+		--enable-OMR_PORT_NUMA_SUPPORT
+endif
+
+ifeq (osx_x86-64_cmprssptrs_panama, $(SPEC))
+  CONFIGURE_ARGS += \
+		--enable-OMRTHREAD_LIB_UNIX \
+		--enable-OMR_ARCH_X86 \
+		--enable-OMR_ENV_DATA64 \
+		--enable-OMR_ENV_LITTLE_ENDIAN \
+		--enable-OMR_GC_COMPRESSED_POINTERS \
+		--enable-OMR_GC_IDLE_HEAP_MANAGER \
+		--enable-OMR_GC_TLH_PREFETCH_FTA \
+		--enable-OMR_INTERP_COMPRESSED_OBJECT_HEADER \
+		--enable-OMR_INTERP_SMALL_MONITOR_SLOT \
+		--enable-OMR_PORT_CAN_RESERVE_SPECIFIC_ADDRESS \
+		--enable-OMR_PORT_NUMA_SUPPORT \
+		--enable-OMR_JITBUILDER
+endif
+
+ifeq (osx_x86-64_cmprssptrs_purec, $(SPEC))
+	CONFIGURE_ARGS += \
+		--enable-OMRTHREAD_LIB_UNIX \
+		--enable-OMR_ARCH_X86 \
+		--enable-OMR_ENV_DATA64 \
+		--enable-OMR_ENV_LITTLE_ENDIAN \
+		--enable-OMR_GC_COMPRESSED_POINTERS \
+		--enable-OMR_GC_TLH_PREFETCH_FTA \
+		--enable-OMR_INTERP_COMPRESSED_OBJECT_HEADER \
+		--enable-OMR_INTERP_SMALL_MONITOR_SLOT \
+		--enable-OMR_PORT_CAN_RESERVE_SPECIFIC_ADDRESS \
+		--enable-OMR_PORT_NUMA_SUPPORT
+endif
+
+ifeq (osx_x86-64_codecov, $(SPEC))
+  CONFIGURE_ARGS += \
+	  --enable-OMRTHREAD_LIB_UNIX \
+		--enable-OMR_ARCH_X86 \
+		--enable-OMR_ENV_DATA64 \
+		--enable-OMR_ENV_LITTLE_ENDIAN \
+		--enable-OMR_GC_TLH_PREFETCH_FTA \
+		--enable-OMR_PORT_CAN_RESERVE_SPECIFIC_ADDRESS \
+		--enable-OMR_PORT_NUMA_SUPPORT
+endif
+
+ifeq (osx_x86-64_purec, $(SPEC))
+	CONFIGURE_ARGS += \
+		--enable-OMRTHREAD_LIB_UNIX \
+		--enable-OMR_ARCH_X86 \
+		--enable-OMR_ENV_DATA64 \
+		--enable-OMR_ENV_LITTLE_ENDIAN \
+		--enable-OMR_GC_TLH_PREFETCH_FTA \
+		--enable-OMR_PORT_CAN_RESERVE_SPECIFIC_ADDRESS \
+		--enable-OMR_PORT_NUMA_SUPPORT
+endif
 
 CONFIGURE_ARGS += libprefix=lib exeext= solibext=.dylib arlibext=.a objext=.o
 
+ifeq (default,$(origin CC))
+	CC=cc
+endif
 ifeq (default,$(origin CXX))
 	CXX=c++
 endif
 
+CONFIGURE_ARGS += 'AR=$(AR)'
 CONFIGURE_ARGS += 'AS=$(AS)'
 CONFIGURE_ARGS += 'CC=$(CC)'
+CONFIGURE_ARGS += 'CCLINKEXE=$(CC)'
+CONFIGURE_ARGS += 'CCLINKSHARED=$(CC)'
 CONFIGURE_ARGS += 'CXX=$(CXX)'
-CONFIGURE_ARGS += 'CCLINK=$$(CC)'
-CONFIGURE_ARGS += 'CXXLINKSHARED=$$(CC)'
-CONFIGURE_ARGS += 'CXXLINKEXE=$$(CXX)'
-CONFIGURE_ARGS += 'AR=$(AR)'
+CONFIGURE_ARGS += 'CXXLINKEXE=$(CXX)'
+CONFIGURE_ARGS += 'CXXLINKSHARED=$(CXX)'
+CONFIGURE_ARGS += 'RM=$(RM)'
 
 CONFIGURE_ARGS += 'OMR_HOST_OS=osx'
 CONFIGURE_ARGS += 'OMR_HOST_ARCH=x86'

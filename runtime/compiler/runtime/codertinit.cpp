@@ -178,7 +178,7 @@ J9JITConfig * codert_onload(J9JavaVM * javaVM)
 
    J9HookInterface * * vmHooks = javaVM->internalVMFunctions->getVMHookInterface(javaVM);
 
-   #if defined(LINUX)
+   #if defined(LINUX) || defined(OSX)
    static char * sigstopOnLoad = feGetEnv("TR_SIGSTOPOnLoad");
    if (sigstopOnLoad)
       {

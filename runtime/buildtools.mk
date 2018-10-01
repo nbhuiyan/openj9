@@ -100,13 +100,13 @@ TRACEGEN_DEFINITION_TDF_FILES := $(strip $(call findAllFiles,.,*.tdf))
 TRACEGEN_DEFINITION_SENTINELS := $(patsubst %.tdf,%.tracesentinel,$(TRACEGEN_DEFINITION_TDF_FILES))
 
 %.tracesentinel : %.tdf
-	./tracegen -treatWarningAsError -generatecfiles -force -threshold $(TRC_THRESHOLD) -file $<
+	./omr/tracegen -treatWarningAsError -generatecfiles -force -threshold $(TRC_THRESHOLD) -file $<
 	touch $@
 
 # process TDF files to generate RAS tracing headers and C files
 trace_merge : buildtrace
 	@$(MAKE) -f buildtools.mk 'SPEC=$(SPEC)' $(TRACEGEN_DEFINITION_SENTINELS)
-	./tracemerge -majorversion 5 -minorversion 1 -root .
+	./omr/tracemerge -majorversion 5 -minorversion 1 -root .
 	touch $@
 
 tracing : trace_merge
@@ -123,7 +123,7 @@ HOOK_DEFINITION_SENTINELS := $(patsubst %.hdf,%.hooksentinel, $(HOOK_DEFINITION_
 
 # process HDF files to generate hook header files
 %.hooksentinel : %.hdf
-	./hookgen $<
+	./omr/hookgen $<
 	touch $@
 
 hooktool : buildhook

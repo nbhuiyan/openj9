@@ -1750,7 +1750,7 @@ J9::Options::fePreProcess(void * base)
                UDATA hugePreferredPageSize = 0;
    #if defined(TR_TARGET_POWER)
                preferredPageSize = 65536;
-   #elif (defined(LINUX) && defined(TR_TARGET_X86))
+   #elif ((defined(LINUX) || defined(OSX)) && defined(TR_TARGET_X86))
                preferredPageSize = 2097152;
                hugePreferredPageSize = 0x40000000;
    #elif (defined(TR_TARGET_S390))

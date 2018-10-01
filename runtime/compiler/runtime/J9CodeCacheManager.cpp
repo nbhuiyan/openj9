@@ -305,7 +305,7 @@ J9::CodeCacheManager::allocateCodeCacheSegment(size_t segmentSize,
    if (preferredStartAddress)
       {
    // J9PORT_VMEM_ADDRESS_HINT is only supported for default pages and linux
-#if defined(LINUX)
+#if defined(LINUX) || defined(OSX)
       if (largeCodePageSize == 0)
          {
          vmemParams.options |= J9PORT_VMEM_ADDRESS_HINT;
@@ -378,7 +378,7 @@ J9::CodeCacheManager::allocateCodeCacheSegment(size_t segmentSize,
       vmemParams.options &= ~(J9PORT_VMEM_STRICT_ADDRESS);
       vmemParams.options &= ~(J9PORT_VMEM_ADDRESS_HINT);
       // for Linux allocate using QUICK method based on smaps
-#if defined(LINUX)
+#if defined(LINUX) || defined(OSX)
       vmemParams.options |= J9PORT_VMEM_ALLOC_QUICK;
 #endif
       codeCacheSegment =

@@ -9281,7 +9281,7 @@ portLibCall_sysinfo_has_resumable_trap_handler()
 
    /* X86 */
    #if defined(TR_HOST_X86) && defined(TR_TARGET_X86)
-      #if defined(J9HAMMER) || defined(WINDOWS) || defined(LINUX) // LINUX_POST22
+      #if defined(J9HAMMER) || defined(WINDOWS) || defined(LINUX) || defined(OSX)// LINUX_POST22
          return true;
       #else
          return false;
@@ -9358,7 +9358,7 @@ portLibCall_sysinfo_number_bytes_read_inaccessible()
 
    /* X86 */
    #if defined(TR_HOST_X86) && defined(TR_TARGET_X86)
-      #if defined(J9HAMMER) || defined(WINDOWS) || defined(LINUX) // LINUX_POST22
+      #if defined(J9HAMMER) || defined(WINDOWS) || defined(LINUX) || defined(OSX) // LINUX_POST22
          return 4096;
       #else
          return 0;
@@ -9389,7 +9389,7 @@ portLibCall_sysinfo_number_bytes_write_inaccessible()
 
    /* X86 */
    #if defined(TR_HOST_X86) && defined(TR_TARGET_X86)
-      #if defined(J9HAMMER) || defined(WINDOWS) || defined(LINUX) // LINUX_POST22
+      #if defined(J9HAMMER) || defined(WINDOWS) || defined(LINUX) || defined(OSX) // LINUX_POST22
          return 4096;
       #else
          return 0;

@@ -3561,7 +3561,7 @@ int32_t getAvailableVirtualMemoryMB(TR::CompilationInfo *compInfo, J9VMThread *v
 
    TRC_JIT_getAvailableVirtualMemoryMBExit(vmThread);
    return 0;
-#elif defined(LINUX)
+#elif defined(LINUX) || defined(OSX)
 
    // Having TR::Options::_userSpaceVirtualMemoryMB < 1 means to determine the
    // userspace size dynamically. However this isn't implemented on Linux so

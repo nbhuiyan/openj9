@@ -3103,7 +3103,7 @@ IDATA J9THREAD_PROC compilationThreadProc(void *entryarg)
    return result;
    }
 
-#if defined(LINUX)
+#if defined(LINUX) || defined(OSX)
 #include "sched.h"
 #endif
 
@@ -6141,7 +6141,7 @@ void TR::CompilationInfo::queueForcedAOTUpgrade(TR_MethodToBeCompiled *originalE
 void
 TR::CompilationInfoPerThreadBase::generatePerfToolEntry()
    {
-#if defined(LINUX)
+#if defined(LINUX) || defined(OSX)
    TR_ASSERT(getCompilation() && getMetadata(), "generatePerfToolEntry() must be executed only for successful compilations");
    // At this point we have the compilationQueueMonitor so we don't run into concurrency issues
    static bool firstAttempt = true;
@@ -10514,7 +10514,7 @@ TR::CompilationInfo::computeFreePhysicalMemory(bool &incompleteInfo)
          freeHostPhysicalMemorySizeB += memInfo.hostCached;
       else
          incomplete = true;
-#if defined(LINUX)
+#if defined(LINUX) || defined(OSX)
       if (memInfo.buffered != OMRPORT_MEMINFO_NOT_AVAILABLE)
          freePhysicalMemory += memInfo.buffered;
       else

@@ -22,7 +22,7 @@
 
 #if defined(WIN32)
 #include <windows.h>
-#elif defined(LINUX) || defined(AIXPPC) /* WIN32 */
+#elif defined(LINUX) || defined(AIXPPC) || defined(OSX) /* WIN32 */
 #include <sys/mman.h>
 #endif /* LINUX || AIXPPC */
 
@@ -44,7 +44,7 @@ flushProcessWriteBuffers(J9JavaVM *vm)
 	if (NULL != vm->flushFunction) {
 		((VOID (WINAPI*)(void))vm->flushFunction)();
 	}
-#elif defined(LINUX) || defined(AIXPPC) /* WIN32 */
+#elif defined(LINUX) || defined(AIXPPC) || defined(OSX) /* WIN32 */
 	if (NULL != vm->flushMutex) {
 		omrthread_monitor_enter(vm->flushMutex);
 		void *addr = vm->exclusiveGuardPage.address;
