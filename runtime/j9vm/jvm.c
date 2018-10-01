@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (c) 2002, 2018 IBM Corp. and others
  *
- * This program and the accompanying materials are made available under
+ * This program and the accompanying materials are made aailable under
  * the terms of the Eclipse Public License 2.0 which accompanies this
  * distribution and is available at https://www.eclipse.org/legal/epl-2.0/
  * or the Apache License, Version 2.0 which accompanies this distribution and
@@ -1074,7 +1074,7 @@ preloadLibraries(void)
 	/* detect if we're in a subdir or not */
 	jvmDLLNameBuffer = jvmBufferCat(jvmDLLNameBuffer, "/lib");
 	jvmDLLNameBuffer = jvmBufferCat(jvmDLLNameBuffer, vmDllName);
-	jvmDLLNameBuffer = jvmBufferCat(jvmDLLNameBuffer, ".so");
+	jvmDLLNameBuffer = jvmBufferCat(jvmDLLNameBuffer, J9PORT_LIBRARY_SUFFIX);
 
 	if(-1 != stat (jvmBufferData(jvmDLLNameBuffer), &statBuf)) {
 		jvmInSubdir = TRUE;
