@@ -76,12 +76,12 @@ eq_IPicData_cmpRegImm4ModRM    equ 10h
 
 J9PreservedFPRStackSize    equ   80
 
-%macro LoadClassPointerFromObjectHeader 3 ;ObjectReg, ClassPtrReg64, ClassPtrReg32
+%macro LoadClassPointerFromObjectHeader 3 ;args: ObjectReg, ClassPtrReg64, ClassPtrReg32
         mov     %3, dword [%1+J9TR_J9Object_class]
         and     %3, eq_ObjectClassMask
 %endmacro
 
-%else
+%else ; ifndef TR_HOST_64BIT
 
 ; --------------------------------------------------------------------------------
 ;                                    64-BIT
@@ -105,11 +105,11 @@ eq_IPicData_j2iThunk           equ 22h    ; only present if direct invoke is pos
 ; IPIC data size is either 22h or 2ah, due to the optional j2iThunk.
 ; It's omitted here since it would be unused anyway.
 
-%macro LoadHelperIndex 2 ; targetReg,helperIndexSym
+%macro LoadHelperIndex 2 ; args: targetReg, helperIndexSym
 %ifdef WINDOWS
-        mov     %1, dword [%2] ;&targetReg, dword ptr[&helperIndexSym]
+        mov     %1, dword [%2]
 %else
-        mov     %1, dword [rel + %2] ;&targetReg, dword ptr[rip+&helperIndexSym]
+        mov     %1, dword [rel + %2]
 %endif
 %endmacro
 
@@ -120,12 +120,12 @@ eq_IPicData_j2iThunk           equ 22h    ; only present if direct invoke is pos
 ;
 %macro LoadClassPointerFromObjectHeader 3 ;ObjectReg, ClassPtrReg64, ClassPtrReg32
 %ifdef ASM_J9VM_INTERP_COMPRESSED_OBJECT_HEADER
-        mov     %3, dword [%1 + J9TR_J9Object_class] ;&ClassPtrReg32, dword ptr[&ObjectReg+J9TR_J9Object_class]  ; read only 32 bits and zero extend
-        and     %3, eq_ObjectClassMask ;&ClassPtrReg32, eq_ObjectClassMask
+        mov     %3, dword [%1 + J9TR_J9Object_class] ; read only 32 bits and zero extend
+        and     %3, eq_ObjectClassMask
 %else
-        mov     %2, qword [%1 + J9TR_J9Object_class] ;&ClassPtrReg64, qword ptr[&ObjectReg+J9TR_J9Object_class]
-        and     %2, eq_ObjectClassMask ;&ClassPtrReg64, eq_ObjectClassMask
+        mov     %2, qword [%1 + J9TR_J9Object_class]
+        and     %2, eq_ObjectClassMask
 %endif
 %endmacro
 
-%endif
+%endif ; ifndef TR_HOST_64BIT
