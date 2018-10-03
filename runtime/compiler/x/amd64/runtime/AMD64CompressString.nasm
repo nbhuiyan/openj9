@@ -29,7 +29,7 @@ J9TR_ObjectColorBlack equ 03h
 
     segment .text
 
-%else ; not TR_HOST_64BIT
+%else ; TR_HOST_64BIT
 
 segment .data
 IA32ArrayCopy:
