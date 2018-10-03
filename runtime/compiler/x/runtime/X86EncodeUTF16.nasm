@@ -72,19 +72,19 @@ _encodeUTF16Big_shufmask:
 ;    xmm4    byte shuffle mask (big-endian only)
 
                 align 16
-%1: ;helperName
+%1:                                      ; helperName
                 ; Remember original count -
                 ; will subtract at return to compute number converted
                 mov rax, rdx
                 cmp rdx, 0
-                je Lend_%1 ;helpername
-                sub rdi, rsi  ; relative to _rsi, only advance _rsi
+                je Lend_%1               ; helpername
+                sub rdi, rsi             ; relative to _rsi, only advance _rsi
                 cmp rdx, SSE_MIN_CHARS
-                jl Lresidue_loop_%1 ;helperName
+                jl Lresidue_loop_%1      ; helperName
 
-Lprealign_%1: ;helperName
+Lprealign_%1:                            ; helperName
                 test rsi, 0fh
-                jz Laligned16_%1 ;&helperName
+                jz Laligned16_%1         ; helperName
 
                 mov cx, word [rsi]
 
@@ -92,7 +92,7 @@ Lprealign_%1: ;helperName
                 mov bx, cx
                 and bx, SURROGATE_MASK
                 cmp bx, SURROGATE_BITS
-                je Lend_%1 ;helperName
+                je Lend_%1               ; helperName
 
                 ; not surrogate
 %if %2 ;bigEndian
@@ -101,12 +101,12 @@ Lprealign_%1: ;helperName
                 mov word [rsi + rdi], cx
                 add rsi, 2
                 dec rdx
-                jg Lprealign_%1 ;&helperName
-                jmp Lend_%1 ;&helperName
+                jg Lprealign_%1          ; helperName
+                jmp Lend_%1              ; helperName
 
-Laligned16_%1: ;helperName:
+Laligned16_%1:                           ; helperName
                 sub rdx, 8
-                jl Lresidue_%1 ;&helperName
+                jl Lresidue_%1           ; helperName
 
                 ; initialize constant vectors:
                 ; SURROGATE_MASK
@@ -124,7 +124,7 @@ Laligned16_%1: ;helperName:
                 movdqa xmm4, oword [rel _encodeUTF16Big_shufmask]
 %endif
 
-L8_at_a_time_%1: ;&helperName:
+L8_at_a_time_%1:                         ; helperName
                 ; read 8 chars
                 ; should this use movdqu, start once 8-byte aligned?
                 movdqa xmm2, oword [rsi]
@@ -133,8 +133,8 @@ L8_at_a_time_%1: ;&helperName:
                 movdqa xmm3, xmm2
                 pand xmm3, xmm0
                 pcmpeqw xmm3, xmm1
-                ptest xmm3, xmm3    ; SSE4.1
-                jnz Lresidue_%1 ;&helperName
+                ptest xmm3, xmm3         ; SSE4.1
+                jnz Lresidue_%1          ; helperName
 
                 ; no surrogates
 %if %2 ;&bigEndian
@@ -146,21 +146,21 @@ L8_at_a_time_%1: ;&helperName:
 
                 add rsi, 16
                 sub rdx, 8
-                jge L8_at_a_time_%1 ;&helperName
+                jge L8_at_a_time_%1      ; helperName
 
-Lresidue_%1: ;&helperName:
+Lresidue_%1:                             ; helperName
                 add rdx, 8
                 cmp rdx, 0
-                je Lend_%1 ;&helperName
+                je Lend_%1               ; helperName
 
-Lresidue_loop_%1: ;&helperName:
+Lresidue_loop_%1:                        ; helperName
                 mov cx, word [rsi]
 
-                ; return if surrogate
+                                         ; return if surrogate
                 mov bx, cx
                 and bx, SURROGATE_MASK
                 cmp bx, SURROGATE_BITS
-                je Lend_%1 ;&helperName
+                je Lend_%1               ; helperName
 
                 ; not surrogate
 %if %2 ;&bigEndian
@@ -169,20 +169,15 @@ Lresidue_loop_%1: ;&helperName:
                 mov word [rsi + rdi], cx
                 add rsi, 2
                 dec rdx
-                jg Lresidue_loop_%1 ;&helperName
+                jg Lresidue_loop_%1     ; helperName
 
 Lend_%1: ;&helperName:
                 sub rax, rdx
                 ret
 
-;&helperName endp
 %endmacro
 
 ; Expand out the two helpers
 
 DefineUTF16EncodeHelper _encodeUTF16Big, 1
 DefineUTF16EncodeHelper _encodeUTF16Little, 0
-
-;_TEXT           ends
-
-;                end
