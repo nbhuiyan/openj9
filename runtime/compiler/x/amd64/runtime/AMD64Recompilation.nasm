@@ -17,7 +17,7 @@
 ; [2] http://openjdk.java.net/legal/assembly-exception.html
 ;
 ; SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
-	
+        
 %ifdef TR_HOST_64BIT
 
 %include "jilconsts.inc"
@@ -38,7 +38,7 @@
                 global _initialInvokeExactThunkGlue
                 global _methodHandleJ2IGlue
 
-segment .text ;_TEXT   segment para 'CODE'
+segment .text
 
 ; Offsets for sampling
 eq_stack_samplingBodyInfo            equ  0
@@ -106,7 +106,7 @@ ret ;exitRecompileMethod endp
 ;
                 align 16
 ;
-_countingRecompileMethod: ; PROC
+_countingRecompileMethod:
 ;
                 pop     rdi ; Return address in snippet
                 saveRegs
@@ -120,7 +120,7 @@ _countingRecompileMethod: ; PROC
 
                 ; J9Method
                 mov     rax, qword [rsi+eq_startPC_BodyInfo]
-		mov	rax, qword [rax+eq_BodyInfo_MethodInfo]
+                mov	rax, qword [rax+eq_BodyInfo_MethodInfo]
                 mov     rax, qword [rax+eq_MethodInfo_J9Method]
 
                 CallHelperUseReg _jitRetranslateMethod,rax
@@ -144,7 +144,7 @@ countingGotStartAddress:
                 add     rdi, rax
                 jmp     exitRecompileMethod
 ;
-ret ;_countingRecompileMethod ENDP
+ret
 ;
 ;
 
@@ -153,7 +153,7 @@ ret ;_countingRecompileMethod ENDP
 ;
                 align 16
 ;
-_samplingRecompileMethod: ; PROC
+_samplingRecompileMethod:
 ;
                 pop     rdi ; Return address in preprologue
                 saveRegs
@@ -166,7 +166,7 @@ _samplingRecompileMethod: ; PROC
 
                 ; J9Method
                 mov     rax, qword [rdi+eq_stack_samplingBodyInfo]
-		mov	rax, qword [rax+eq_BodyInfo_MethodInfo]
+                mov	rax, qword [rax+eq_BodyInfo_MethodInfo]
                 mov     rax, qword [rax+eq_MethodInfo_J9Method]
 
                 CallHelperUseReg _jitRetranslateMethod,rax
@@ -187,13 +187,13 @@ samplingGotStartAddress:
                 jmp     exitRecompileMethod
 ;
 ;
-ret ;_samplingRecompileMethod ENDP
+ret
 ;
 
 
                 align 16
 ;
-_induceRecompilation: ; PROC
+_induceRecompilation:
 ;
                 xchg    rdi, [rsp] ; Return address in snippet
                 push    rsi        ; Preserve
@@ -222,12 +222,12 @@ _induceRecompilation: ; PROC
 
 ;
 ;
-;_induceRecompilation ENDP
+ret
 ;
 
                 align 16
 ;
-_countingPatchCallSite: ; PROC
+_countingPatchCallSite:
 ;
                 xchg    qword [rsp], rdi
                 push    rdx
@@ -244,10 +244,10 @@ _countingPatchCallSite: ; PROC
                 ;    old rdi, rdx, rax on stack
                 ;    no return address on stack
 
-		push    rdi ; HCR: We may need this
+                push    rdi ; HCR: We may need this
                 ; rdi = new jit entry point
                 mov     rdi, qword [rax+eq_startPC_BodyInfo]
-		mov	rdi, qword [rdi+eq_BodyInfo_MethodInfo]
+                mov	rdi, qword [rdi+eq_BodyInfo_MethodInfo]
                 mov     rdi, qword [rdi+eq_MethodInfo_J9Method]
                 mov     rdi, qword [rdi+J9TR_MethodPCStartOffset]   ; rdi = new startPC
 
@@ -280,7 +280,7 @@ patchCallSite:
                 push    rsi                                          ; extraArg
                 push    rax                                          ; pass old startPC to _mcc_AMD64callPointPatching_unwrapper
                 mov     rsi, qword [rax+eq_startPC_BodyInfo]
-		mov     rsi, qword [rsi+eq_BodyInfo_MethodInfo]
+                mov     rsi, qword [rsi+eq_BodyInfo_MethodInfo]
                 mov     rax, qword [rsi+eq_MethodInfo_J9Method]   ; rax = j9method
                 mov     rsi, qword [rax+J9TR_MethodPCStartOffset] ; rsi = new startPC
                 sub     rdx, 5                                       ; call instruction
@@ -308,33 +308,33 @@ finishedPatchCallSite:
                 ret
 
 countingPatchToRecompile:
-		; HCR: we've got our hands on a new j9method that hasn't been compiled yet,
-		; so there's no way to patch the call site without first compiling the new method
-		;
-		; edi points to the DB here:
-		;   CALL  patchCallSite          (5 bytes)
-		;   DB    ??                     (8 bytes of junk)
-		;   JL    recompilationSnippet   (always 6 bytes)
-		;
-		; Restore registers and stack the way they looked originally, then jump to the recompilationSnippet
-		pop     rdi
-		pop     rax
-		add     rdi, 8+6               ; end of JL instruction
-		movsxd  rdx, dword  [rdi-4] ; offset to recompilationSnippet
-		add     rdi, rdx               ; start of recompilationSnippet
-		pop     rdx
-		xchg    qword [rsp], rdi    ; restore edi
-		ret                            ; jump to recompilationSnippet while minimizing damage to return address branch prediction
-		
+                ; HCR: we've got our hands on a new j9method that hasn't been compiled yet,
+                ; so there's no way to patch the call site without first compiling the new method
+                ;
+                ; edi points to the DB here:
+                ;   CALL  patchCallSite          (5 bytes)
+                ;   DB    ??                     (8 bytes of junk)
+                ;   JL    recompilationSnippet   (always 6 bytes)
+                ;
+                ; Restore registers and stack the way they looked originally, then jump to the recompilationSnippet
+                pop     rdi
+                pop     rax
+                add     rdi, 8+6               ; end of JL instruction
+                movsxd  rdx, dword  [rdi-4] ; offset to recompilationSnippet
+                add     rdi, rdx               ; start of recompilationSnippet
+                pop     rdx
+                xchg    qword [rsp], rdi    ; restore edi
+                ret                            ; jump to recompilationSnippet while minimizing damage to return address branch prediction
+                
 ;
 ;
-;_countingPatchCallSite ENDP
+ret
 ;
 
 
                 align 16
 ;
-_samplingPatchCallSite: ; PROC
+_samplingPatchCallSite:
 ;
                 xchg    qword [rsp], rdi
                 push    rdx
@@ -350,10 +350,10 @@ _samplingPatchCallSite: ; PROC
                 ;    old rdi, rdx, rax on stack
                 ;    no return address on stack
 
-		push    rdi ; HCR: We may need this
+                push    rdi ; HCR: We may need this
                 ; rdi = new jit entry point
                 mov     rdi, qword [rax+eq_startPC_BodyInfo]
-		mov	rdi, qword [rdi+eq_BodyInfo_MethodInfo]
+                mov	rdi, qword [rdi+eq_BodyInfo_MethodInfo]
                 mov     rdi, qword [rdi+eq_MethodInfo_J9Method]
                 mov     rdi, qword [rdi+J9TR_MethodPCStartOffset]   ; rdi = new startPC
 
@@ -369,19 +369,19 @@ samplingPatchToRecompile:
                 ; so there's no way to patch the call site without first compiling the new method
                 ;
                 ; Make the world look the way it should for a call to _samplingRecompileMethod
-		pop     rdi
+                pop     rdi
                 pop     rax
                 pop     rdx
                 xchg    qword [rsp], rdi
                 jmp     _samplingRecompileMethod
 ;
 ;
-ret ;_samplingPatchCallSite ENDP
+ret
 ;
 
                 align 16
 ;
-_initialInvokeExactThunkGlue: ; PROC
+_initialInvokeExactThunkGlue:
 ;
                 ; preserve all non-scratch regs
                 push    rax
@@ -398,25 +398,25 @@ _initialInvokeExactThunkGlue: ; PROC
                 mov     rdx, rsp                                        ; parm: result pointer
                 CallHelper _jitCallCFunction
                 pop     rax      ; result jitted entry point
-		pop     rbp
+                pop     rbp
 
                 ; restore regs
                 pop     rdx
                 pop     rsi
 
                 ; Restore rax and jump to address returned by initialInvokeExactThunk
-		; Sadly, this probably kills return address stack branch prediction
-		; TODO:JSR292: check for null and call vm helper to interpret instead
-		xchg    rax, [rsp]
+                ; Sadly, this probably kills return address stack branch prediction
+                ; TODO:JSR292: check for null and call vm helper to interpret instead
+                xchg    rax, [rsp]
                 ret
 ;
 ;
-;_initialInvokeExactThunkGlue ENDP
+ret
 ;
 
                 align 16
 ;
-_methodHandleJ2IGlue: ; PROC
+_methodHandleJ2IGlue:
 ;
                 ; Note: this glue is not called, it is jumped to.  There is no
                 ; return address on the stack.
@@ -450,17 +450,15 @@ _methodHandleJ2IGlue: ; PROC
                 jmp     rdi
 ;
 ;
-ret ;_methodHandleJ2IGlue ENDP
+ret
 ;
 
-        ;_TEXT ends
-%else ;not defined TR_HOST_64BIT
-                CPU P2 ; .686p
-                ;assume cs:flat,ds:flat,ss:flat
-segment .data ;_DATA           segment para use32 public 'DATA'
+%else ; TR_HOST_64BIT
+
+                CPU P2
+
+segment .data
 AMD64PicBuilder:
                 db      00h
-;_DATA           ends
+
 %endif ;TR_HOST_64BIT
-        
-;end
