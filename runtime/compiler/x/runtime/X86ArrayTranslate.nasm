@@ -20,8 +20,6 @@
 
 %include "jilconsts.inc"
 
-; %include x/runtime/X86RegisterMap.inc : TODO: needed for 32bit support
-
 segment .text
 
    global  _arrayTranslateTRTO
@@ -82,8 +80,6 @@ segment .text
       jnz  failedloopTO
    doneTO:   ;EAX is result register
       ret
-
-   ; _arrayTranslateTRTO endp
 
    ; pseudocode:
    ; int i;
@@ -152,7 +148,6 @@ segment .text
       jnz  failedloopOTNoBreak
       jmp  doneOTNoBreak
 
-   ;_arrayTranslateTROTNoBreak endp
 
 
    ; pseudocode:
@@ -244,8 +239,4 @@ segment .text
       jnz  failedloopOT
       jmp doneOT
 
-   ;_arrayTranslateTROT endp
-
-;_TEXT ends
-
-ret ;end
+ret
