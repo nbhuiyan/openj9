@@ -100,15 +100,6 @@ static char const *macroString = "\n\
 		lea %1, [rel %2]\n\
 %endmacro\n\
 \n\
-%macro CompareHelper 2 ; source,helperName\n\
-	   	cmp %1, %2\n\
-%endmacro\n\
-\n\
-%macro CompareHelperUseReg 3 ; source, helperName, register\n\
-		lea %3, [%2]\n\
-	   	cmp %1, %3\n\
-%endmacro\n\
-\n\
 %macro CallHelper 1 ; helperName\n\
 	   	call %1\n\
 %endmacro\n\
@@ -117,29 +108,12 @@ static char const *macroString = "\n\
 	   	call %1\n\
 %endmacro\n\
 \n\
-%macro JumpTableHelper 3 ; temp, index, table\n\
-		lea %1,[%3]\n\
-		jmp qword [%1 + %2 * 8]\n\
+%macro DECLARE_EXTERN 1 ; helperName\n\
+	extern %1\n\
 %endmacro\n\
 \n\
-%macro JumpTableStart 1 ;table\n\
-section _CONST32\n\
-align 16\n\
-%1:\n\
-%endmacro\n\
-\n\
-%macro JumpTableEnd 1 ; table\n\
-; NASM does not use ENDS or equivalent\n\
-%endmacro\n\
-\n\
-%macro ExternHelper 1 ; helperName\n\
-extern %1:near\n\
-%endmacro\n\
-\n\
-%macro GlueHelper 1 ;helperName\n\
-		test    byte [rdi+J9TR_MethodPCStartOffset], J9TR_MethodNotCompiledBit\n\
-	   	jnz     %1\n\
-	   	jmp     mergedStaticGlueCallFixer\n\
+%macro DECLARE_GLOBAL 1 ; helperName\n\
+	global %1\n\
 %endmacro\n\
 \n";
 #else /* J9VM_ENV_DATA64 */
@@ -220,15 +194,6 @@ static char const *macroString = "\n\
 		lea %1, [rel %2]\n\
 %endmacro\n\
 \n\
-%macro CompareHelper 2 ; source,helperName\n\
-	   	cmp %1, %2\n\
-%endmacro\n\
-\n\
-%macro CompareHelperUseReg 3 ; source, helperName, register\n\
-		lea %3, [%2]\n\
-	   	cmp %1, %3\n\
-%endmacro\n\
-\n\
 %macro CallHelper 1 ; helperName\n\
 	   	call %1\n\
 %endmacro\n\
@@ -237,29 +202,14 @@ static char const *macroString = "\n\
 	   	call %1\n\
 %endmacro\n\
 \n\
-%macro JumpTableHelper 3 ; temp, index, table\n\
-		lea %1,[%3]\n\
-		jmp qword [%1 + %2 * 8]\n\
+%macro DECLARE_EXTERN 1 ; helperName\n\
+	extern _%1\n\
+	%define %1 _1\n\
 %endmacro\n\
 \n\
-%macro JumpTableStart 1 ;table\n\
-section _CONST32\n\
-align 16\n\
-%1:\n\
-%endmacro\n\
-\n\
-%macro JumpTableEnd 1 ; table\n\
-; NASM does not use ENDS or equivalent\n\
-%endmacro\n\
-\n\
-%macro ExternHelper 1 ; helperName\n\
-extern %1:near\n\
-%endmacro\n\
-\n\
-%macro GlueHelper 1 ;helperName\n\
-		test    byte [rdi+J9TR_MethodPCStartOffset], J9TR_MethodNotCompiledBit\n\
-	   	jnz     %1\n\
-	   	jmp     mergedStaticGlueCallFixer\n\
+%macro DECLARE_GLOBAL 1 ; helperName\n\
+	global _%1\n\
+	%define %1 _1\n\
 %endmacro\n\
 \n";
 #else /* LINUX */
