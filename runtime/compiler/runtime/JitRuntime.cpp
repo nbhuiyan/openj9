@@ -1106,14 +1106,14 @@ extern "C" void _patchJNICallSite(J9Method *method, uint8_t *pc, uint8_t *newAdd
    }
 #endif
 
-#if defined(OSX)
+#if defined(OSX) || (defined(LINUX) && defined(TR_HOST_64BIT))
 JIT_HELPER(prepareForOSR);
 #else
 JIT_HELPER(_prepareForOSR);
 #endif /* OSX */
 
 #ifdef TR_HOST_X86
-#if defined(OSX)
+#if defined(OSX) || (defined(LINUX) && defined(TR_HOST_64BIT))
 JIT_HELPER(countingRecompileMethod);
 JIT_HELPER(samplingRecompileMethod);
 JIT_HELPER(countingPatchCallSite);
@@ -1209,7 +1209,7 @@ void initializeJitRuntimeHelperTable(char isSMP)
 
 #if defined(J9ZOS390)
    SET_CONST(TR_prepareForOSR,                  (void *)_prepareForOSR);
-#elif defined(OSX)
+#elif defined(OSX) || (defined(LINUX) && defined(TR_HOST_64BIT))
    SET(TR_prepareForOSR,                        (void *)prepareForOSR, TR_Helper);
 #else
    SET(TR_prepareForOSR,                        (void *)_prepareForOSR, TR_Helper);
@@ -1218,7 +1218,7 @@ void initializeJitRuntimeHelperTable(char isSMP)
 #ifdef TR_HOST_X86
 
 #if defined(TR_HOST_64BIT)
-#if defined(OSX)
+#if defined(OSX) || defined(LINUX)
    SET(TR_AMD64samplingRecompileMethod,         (void *)samplingRecompileMethod, TR_Helper);
    SET(TR_AMD64countingRecompileMethod,         (void *)countingRecompileMethod, TR_Helper);
    SET(TR_AMD64samplingPatchCallSite,           (void *)samplingPatchCallSite,   TR_Helper);
@@ -1611,7 +1611,7 @@ uint8_t *compileMethodHandleThunk(j9object_t methodHandle, j9object_t arg, J9VMT
    return startPC;
    }
 
-#if defined(OSX)
+#if defined(OSX) || (defined(LINUX) && defined(TR_HOST_64BIT))
 JIT_HELPER(initialInvokeExactThunkGlue);
 #else
 JIT_HELPER(_initialInvokeExactThunkGlue);
@@ -1683,7 +1683,7 @@ void *initialInvokeExactThunk(j9object_t methodHandle, J9VMThread *vmThread)
    else
       {
       uintptrj_t fieldOffset = fej9->getInstanceFieldOffset(fej9->getObjectClass(thunkTuple), "invokeExactThunk", "J");
-#if defined(OSX)
+#if defined(OSX) || (defined(LINUX) && defined(TR_HOST_64BIT))
       bool success = fej9->compareAndSwapInt64Field(thunkTuple, "invokeExactThunk", (uint64_t)(uintptrj_t)initialInvokeExactThunkGlue, (uint64_t)(uintptrj_t)addressToDispatch);
       
       if (details)
