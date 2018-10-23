@@ -417,11 +417,15 @@ ifeq ($(HOST_ARCH),x)
         SOLINK_FLAGS+=-m64
         SOLINK_SLINK+=dl m
     endif
-    
-    SUPPORT_STATIC_LIBCXX = $(shell $(SOLINK_CMD) -static-libstdc++ 2>&1 | grep "unrecognized option" > /dev/null; echo $$?)
-    ifneq ($(SUPPORT_STATIC_LIBCXX),0)
-        SOLINK_FLAGS+=-static-libstdc++
-    endif
+
+    ifeq ($(OS),osx)
+        SOLINK_FLAGS+=-lstdc++
+    else
+        SUPPORT_STATIC_LIBCXX = $(shell $(SOLINK_CMD) -static-libstdc++ 2>&1 | grep "unrecognized option" > /dev/null; echo $$?)
+        ifneq ($(SUPPORT_STATIC_LIBCXX),0)
+            SOLINK_FLAGS+=-static-libstdc++
+        endif
+    endif # OS == osx
 endif
 
 ifeq ($(HOST_ARCH),p)
