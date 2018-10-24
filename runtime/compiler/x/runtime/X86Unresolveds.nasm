@@ -592,7 +592,7 @@ retn
 ; --------------------------------------------------------------------------------
 
 
-%macro DataResolvePrologue
+%macro DataResolvePrologue 0
       ; local: doneFPRpreservation, preserveX87loop
 
       pushfd                        ; save flags , addr=esp+28

@@ -244,7 +244,7 @@ JIT_HELPER(callGPU);
 // --------------------------------------------------------------------------------
 //                                  X86 COMMON
 // --------------------------------------------------------------------------------
-#if defined(OSX) || (defined(LINUX) && defined(TR_TARGET_64BIT))
+#if defined(OSX) || defined(LINUX)
 JIT_HELPER(doubleToLong);
 JIT_HELPER(doubleToInt);
 JIT_HELPER(floatToLong);
@@ -269,7 +269,7 @@ JIT_HELPER(interpreterUnresolvedFieldGlue);
 JIT_HELPER(interpreterUnresolvedFieldSetterGlue);
 JIT_HELPER(interpreterUnresolvedConstantDynamicGlue);
 
-#if defined(OSX) || (defined(LINUX) && defined(TR_TARGET_64BIT))
+#if defined(OSX) || defined(LINUX)
 JIT_HELPER(SMPinterpreterUnresolvedStaticGlue);
 JIT_HELPER(SMPinterpreterUnresolvedSpecialGlue);
 JIT_HELPER(SMPinterpreterUnresolvedDirectVirtualGlue);
@@ -338,7 +338,7 @@ JIT_HELPER(newPrefetchTLH);
 JIT_HELPER(outlinedNewObject);
 JIT_HELPER(outlinedNewArray);
 
-#if defined(OSX) || (defined(LINUX) && defined(TR_TARGET_64BIT))
+#if defined(OSX) || defined(LINUX)
 JIT_HELPER(arrayTranslateTRTO);
 JIT_HELPER(arrayTranslateTROTNoBreak);
 JIT_HELPER(arrayTranslateTROT);
@@ -386,7 +386,7 @@ JIT_HELPER(_encodeUTF16Little);
 #endif /* OSX */
 
 #ifdef J9VM_OPT_JAVA_CRYPTO_ACCELERATION
-#if defined (OSX) || (defined(LINUX) && defined(TR_TARGET_64BIT))
+#if defined (OSX) || defined(LINUX)
 JIT_HELPER(doAESENCEncrypt);
 JIT_HELPER(doAESENCDecrypt);
 #else

@@ -127,76 +127,49 @@ static char const *macroString = "\n\
 %define _rip\n\
 \n";
 #else /* J9VM_ENV_DATA64 */
-static char const *macroString = "\n\
-ASM_J9VM_USE_GOT = 1\n\
+static char const *macroString ="\n\
+%define ASM_J9VM_USE_GOT 1\n\
 \n\
-LoadGOTInto MACRO register\n\
-.att_syntax\n\
-  call    1f\n\
-  1:\n\
-  pop     %&register\n\
-  add     $_GLOBAL_OFFSET_TABLE_+[.-1b], %&register\n\
-.intel_syntax noprefix\n\
-ENDM\n\
+extern _GLOBAL_OFFSET_TABLE_\n\
 \n\
-MoveHelper MACRO register,helperName\n\
-		LoadGOTInto &register\n\
-		lea &register, &helperName&@GOTOFF[&register]\n\
-ENDM\n\
+%macro LoadGOTInto 1 ; register\n\
+	call %%getgot\n\
+%%getgot:\n\
+	pop %1\n\
+	add %1,_GLOBAL_OFFSET_TABLE_+$$-%%getgot wrt ..gotpc\n\
+%endmacro\n\
 \n\
-CompareHelper MACRO source,helperName\n\
-	   	push esi\n\
-		LoadGOTInto esi\n\
-		lea esi, &helperName&@GOTOFF[&esi]\n\
-	  	cmp &source, esi\n\
-	   	pop esi\n\
-ENDM\n\
+%macro MoveHelper 2 ; register,helperName\n\
+		LoadGOTInto %1\n\
+		mov %1, [%1 + %2 wrt ..gotoff]\n\
+%endmacro\n\
 \n\
-CompareHelperUseReg MACRO source,helperName,register\n\
-		LoadGOTInto &register\n\
-		lea &register, &helperName&@GOTOFF[&register]\n\
-		cmp &source, &register\n\
-ENDM\n\
+%macro CallHelper 1 ; helperName\n\
+		 call %1 wrt ..plt\n\
+%endmacro\n\
 \n\
-CallHelper MACRO helperName\n\
-		 call &helperName&@PLT\n\
-ENDM\n\
+%macro CallHelperUseReg 2; helperName,register\n\
+		 call %1 wrt ..plt\n\
+%endmacro\n\
 \n\
-CallHelperUseReg MACRO helperName,register\n\
-		 call &helperName&@PLT\n\
-ENDM\n\
+%macro DECLARE_EXTERN 1 ; helperName\n\
+	extern %1\n\
+%endmacro\n\
 \n\
-JumpTableHelper MACRO temp,index,table\n\
-			push &temp\n\
-			MoveHelper &temp,&table\n\
-			mov &temp,[&temp&+&index&*4]\n\
-			xchg &temp,[esp]\n\
-			ret\n\
-ENDM\n\
+%macro DECLARE_GLOBAL 1 ; helperName\n\
+	global %1\n\
+%endmacro\n\
 \n\
-JumpTableStart MACRO table\n\
-			              	public &table&\n\
-			              	.data\n\
-			              	align   04h\n\
-table&:\n\
-ENDM\n\
-\n\
-JumpTableEnd MACRO table\n\
-			.text\n\
-ENDM\n\
-\n\
-JumpHelper MACRO helperName\n\
-				jmp       &helperName&@PLT\n\
-ENDM\n\
-\n\
-ExternHelper MACRO helperName\n\
-ENDM\n\
-\n\
-GlueHelper MACRO        	helperName\n\
-	   	       	test      byte ptr[edi+J9TR_MethodPCStartOffset], J9TR_MethodNotCompiledBit\n\
-	   	       	jz       mergedStaticGlueCallFixer\n\
-	   	       	JumpHelper &helperName\n\
-ENDM\n";
+%define _rax eax\n\
+%define _rbx ebx\n\
+%define _rcx ecx\n\
+%define _rdx edx\n\
+%define _rsi esi\n\
+%define _rdi edi\n\
+%define _rsp esp\n\
+%define _rbp ebp\n\
+%define _rip\n\
+\n";
 #endif /* J9VM_ENV_DATA64 */
 #elif defined(OSX) /* LINUX */
 static char const *macroString = "\n\
