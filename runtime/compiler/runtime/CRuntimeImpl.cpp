@@ -41,7 +41,7 @@
 
 // To transfer control to VM during OSR
 extern "C" {
-#if defined(OSX) || (defined(LINUX) && defined(TR_HOST_64BIT))
+#if defined(OSX) || defined(LINUX)
 void prepareForOSR(uintptrj_t vmThreadArg, int32_t currentInlinedSiteIndex, int32_t slotData)
 #else
 void _prepareForOSR(uintptrj_t vmThreadArg, int32_t currentInlinedSiteIndex, int32_t slotData)
