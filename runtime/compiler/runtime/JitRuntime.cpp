@@ -1232,11 +1232,19 @@ void initializeJitRuntimeHelperTable(char isSMP)
    SET(TR_AMD64induceRecompilation,             (void *)_induceRecompilation,     TR_Helper);
 #endif /* OSX */
 #else /* TR_HOST_64BIT */
+#if defined(LINUX)
+   SET(TR_IA32samplingRecompileMethod,          (void *)samplingRecompileMethod, TR_Helper);
+   SET(TR_IA32countingRecompileMethod,          (void *)countingRecompileMethod, TR_Helper);
+   SET(TR_IA32samplingPatchCallSite,            (void *)samplingPatchCallSite,   TR_Helper);
+   SET(TR_IA32countingPatchCallSite,            (void *)countingPatchCallSite,   TR_Helper);
+   SET(TR_IA32induceRecompilation,              (void *)induceRecompilation,     TR_Helper);
+#else 
    SET(TR_IA32samplingRecompileMethod,          (void *)_samplingRecompileMethod, TR_Helper);
    SET(TR_IA32countingRecompileMethod,          (void *)_countingRecompileMethod, TR_Helper);
    SET(TR_IA32samplingPatchCallSite,            (void *)_samplingPatchCallSite,   TR_Helper);
    SET(TR_IA32countingPatchCallSite,            (void *)_countingPatchCallSite,   TR_Helper);
    SET(TR_IA32induceRecompilation,              (void *)_induceRecompilation,     TR_Helper);
+#endif /* LINUX */
 #endif /* TR_HOST_64BIT */
 
 #elif defined(TR_HOST_POWER)
