@@ -1323,7 +1323,7 @@ void initializeCodeRuntimeHelperTable(J9JITConfig *jitConfig, char isSMP)
    SET(TR_IA32floatRemainderSSE,                      (void *)SSEfloatRemainderIA32Thunk,  TR_Helper);
    SET(TR_IA32doubleRemainderSSE,                     (void *)SSEdoubleRemainderIA32Thunk, TR_Helper);
 #ifndef TR_HOST_64BIT
-#ifdef (LINUX)
+#if defined(LINUX)
    SET(TR_IA32double2LongSSE,                         (void *)SSEdouble2LongIA32, TR_Helper);
 #else
    SET(TR_IA32double2LongSSE,                         (void *)_SSEdouble2LongIA32, TR_Helper);
