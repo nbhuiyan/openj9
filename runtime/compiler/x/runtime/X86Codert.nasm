@@ -39,7 +39,7 @@ eq_gpr_size                   equ 8
 %endif
 %else
         ; 32-bit
-        CPU P2
+        ; CPU P2
 
 eq_gpr_size                   equ 4
 eq_vft_pointer_size           equ 4

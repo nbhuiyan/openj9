@@ -26,8 +26,8 @@
 ;
 ; --------------------------------------------------------------------------------
 
-      CPU P2
-      CPU P4
+      ; CPU P2
+      ; CPU P4
 
       eq_offsetof_J9Object_clazz equ 8                            ; offset of class pointer in a J9Object
 
