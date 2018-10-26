@@ -21,7 +21,11 @@
 %ifdef TR_HOST_64BIT
 %include "jilconsts.inc"
 
+%ifdef WINDOWS
+%include "x\amd64\runtime\AMD64CompressString_nasm.inc"
+%else
 %include "x/amd64/runtime/AMD64CompressString_nasm.inc"
+%endif
 
 
 
