@@ -1285,9 +1285,13 @@ void initializeCodeRuntimeHelperTable(J9JITConfig *jitConfig, char isSMP)
 #else // AMD64
 
    // -------------------------------- IA32 ------------------------------------
-
+#if defined(LINUX)
+   SET(TR_IA32longDivide,                             (void *)longDivide,               TR_Helper);
+   SET(TR_IA32longRemainder,                          (void *)longRemainder,            TR_Helper);
+#else
    SET(TR_IA32longDivide,                             (void *)_longDivide,               TR_Helper);
    SET(TR_IA32longRemainder,                          (void *)_longRemainder,            TR_Helper);
+#endif
 
    SET(TR_X86interpreterVoidStaticGlue,               (void *)interpreterVoidStaticGlue,       TR_Helper);
    SET(TR_X86interpreterIntStaticGlue,                (void *)interpreterEAXStaticGlue,        TR_Helper);
@@ -1310,7 +1314,11 @@ void initializeCodeRuntimeHelperTable(J9JITConfig *jitConfig, char isSMP)
    SET(TR_IA32floatRemainderSSE,                      (void *)SSEfloatRemainderIA32Thunk,  TR_Helper);
    SET(TR_IA32doubleRemainderSSE,                     (void *)SSEdoubleRemainderIA32Thunk, TR_Helper);
 #ifndef TR_HOST_64BIT
+#ifdef (LINUX)
+   SET(TR_IA32double2LongSSE,                         (void *)SSEdouble2LongIA32, TR_Helper);
+#else
    SET(TR_IA32double2LongSSE,                         (void *)_SSEdouble2LongIA32, TR_Helper);
+#endif
 #endif
 
    SET(TR_IA32doubleToLong,                           (void *)doubleToLong, TR_Helper);
