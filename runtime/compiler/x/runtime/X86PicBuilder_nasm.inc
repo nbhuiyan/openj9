@@ -106,11 +106,7 @@ eq_IPicData_j2iThunk           equ 22h    ; only present if direct invoke is pos
 ; It's omitted here since it would be unused anyway.
 
 %macro LoadHelperIndex 2 ; args: targetReg, helperIndexSym
-%ifdef WINDOWS
-        mov     %1, dword [%2]
-%else
         mov     %1, dword [rel + %2]
-%endif
 %endmacro
 
 
