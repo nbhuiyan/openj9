@@ -458,8 +458,8 @@ doSSEdoubleRemainder:
         andpd xmm1, oword  [rel + ABSMASK]              ; xmm1 = {|a|, |b|}
         movapd xmm2, [rel NULL_INF_MASK]                ; xmm2 = {+inf, 0.0}
 %else
-        andpd xmm1, QWORD  [_rdx + ABSMASK wrt ..gotoff] ; xmm1 = {|a|, |b|}
-        movapd xmm2, QWORD [_rdx + NULL_INF_MASK wrt ..gotoff]   ; xmm2 = {+inf, 0.0}
+        andpd xmm1,  [_rdx + ABSMASK wrt ..gotoff] ; xmm1 = {|a|, |b|}
+        movapd xmm2, [_rdx + NULL_INF_MASK wrt ..gotoff]   ; xmm2 = {+inf, 0.0}
 %endif
         cmppd xmm2, xmm1, 4                             ; compare xmm2 != xmm1, leave mask in xmm1
 
@@ -470,7 +470,7 @@ doSSEdoubleRemainder:
 %ifndef ASM_J9VM_USE_GOT
         andnpd xmm2, [rel  QNaN] ;qword
 %else
-        andnpd xmm2, QWORD  [_rdx + QNaN wrt ..gotoff]
+        andnpd xmm2,  [_rdx + QNaN wrt ..gotoff]
 %endif
         ; xmm1 = {|a| != +inf ? |a| : QNaN, |b| != 0.0 ? |b| : QNaN}
         orpd xmm1, xmm2
@@ -491,7 +491,7 @@ RETURN_NAN:
 %ifndef ASM_J9VM_USE_GOT
         movapd xmm0, [rel QNaN]                  ; xmm0 = QNaN
 %else
-        movapd xmm0, QWORD  [_rdx + QNaN wrt ..gotoff]     ; xmm0 = QNaN
+        movapd xmm0,  [_rdx + QNaN wrt ..gotoff]     ; xmm0 = QNaN
 %endif
 RETURN_DIVIDEND:                                 ; dividend already in xmm0
 %ifdef ASM_J9VM_USE_GOT
@@ -523,7 +523,7 @@ _dblRemain:
 %ifndef ASM_J9VM_USE_GOT
         andpd xmm1, [rel ABSMASK]                ; xmm1 = |divisor|
 %else
-        andpd xmm1, QWORD  [_rdx + ABSMASK wrt ..gotoff] ; xmm1 = |divisor|
+        andpd xmm1,  [_rdx + ABSMASK wrt ..gotoff] ; xmm1 = |divisor|
 %endif
         movq QWORD  [_rsp], xmm0                  ; store dividend on stack
         movq QWORD  [_rsp+8], xmm1                ; store |divisor| on stack
@@ -539,7 +539,7 @@ L144:                                            ; and fall through to the norma
 %ifndef ASM_J9VM_USE_GOT
         ucomisd xmm1, [rel MAGIC_NUM1]
 %else
-        ucomisd xmm1, QWORD [_rdx + MAGIC_NUM1 wrt ..gotoff]
+        ucomisd xmm1, [_rdx + MAGIC_NUM1 wrt ..gotoff]
 %endif
         jae LARGE_NUMS                           ; if xmm1 >= 0x7fde42d13077b76
 
@@ -553,7 +553,7 @@ L184:
 %ifndef ASM_J9VM_USE_GOT
         andpd xmm4, [rel ABSMASK]                ; xmm4 = |dividend|
 %else
-        andpd xmm4, QWORD [_rdx + ABSMASK wrt ..gotoff]   ; xmm4 = |dividend|
+        andpd xmm4, [_rdx + ABSMASK wrt ..gotoff]   ; xmm4 = |dividend|
 %endif
         movq QWORD  [_rsp], xmm4                  ; store xmm4 on the stack
         mov ebx, eax                             ; ebx = eba
@@ -651,7 +651,7 @@ SMALL_NUMS:
 %ifndef ASM_J9VM_USE_GOT
         mulsd xmm1,  [rel SCALEUP_NUM]                  ; xmm1 = |divisor| * 2^54
 %else
-        mulsd xmm1, QWORD [_rdx + SCALEUP_NUM wrt ..gotoff]      ; xmm1 = |divisor| * 2^54
+        mulsd xmm1, [_rdx + SCALEUP_NUM wrt ..gotoff]      ; xmm1 = |divisor| * 2^54
 %endif
         movq  QWORD  [_rsp+8], xmm1                      ; store xmm1 on the stack
         call _dblRemain
@@ -659,7 +659,7 @@ SMALL_NUMS:
 %ifndef ASM_J9VM_USE_GOT
         mulsd xmm0,  [rel SCALEUP_NUM]                  ; xmm0 = dividend * 2^54
 %else
-        mulsd xmm0, QWORD  [_rdx + SCALEUP_NUM wrt ..gotoff]      ; xmm0 = dividend * 2^54
+        mulsd xmm0,  [_rdx + SCALEUP_NUM wrt ..gotoff]      ; xmm0 = dividend * 2^54
 %endif
         movq  xmm1, QWORD  [_rsp+8]                      ; load divisor from the stack
         movq  QWORD  [_rsp], xmm0                        ; store dividend on the stack
@@ -668,7 +668,7 @@ SMALL_NUMS:
 %ifndef ASM_J9VM_USE_GOT
         mulsd xmm0,  [rel SCALEDOWN_NUM]                ; dividend * 1/2^54
 %else
-        mulsd xmm0, QWORD  [_rdx + SCALEDOWN_NUM wrt ..gotoff]    ; dividend * 1/2^54
+        mulsd xmm0,  [_rdx + SCALEDOWN_NUM wrt ..gotoff]    ; dividend * 1/2^54
 %endif
 
         ; Epilog Start
@@ -686,14 +686,14 @@ LARGE_NUMS:
 %ifndef ASM_J9VM_USE_GOT
         mulsd xmm1,  [rel ONEHALF]                      ; xmm1 *= 0.5 (scaledown)
 %else
-        mulsd xmm1, QWORD  [_rdx + ONEHALF wrt ..gotoff]          ; xmm1 *= 0.5 (scaledown)
+        mulsd xmm1,  [_rdx + ONEHALF wrt ..gotoff]          ; xmm1 *= 0.5 (scaledown)
 %endif
         ; store xmm1 in divisor slot on stack
         movq  QWORD  [_rsp+8], xmm1
 %ifndef ASM_J9VM_USE_GOT
         mulsd xmm0,  [rel ONEHALF]                      ; xmm2 *= 0.5 (scaledown)
 %else
-        mulsd xmm0, QWORD  [_rdx + ONEHALF wrt ..gotoff]          ; xmm2 *= 0.5 (scaledown)
+        mulsd xmm0,  [_rdx + ONEHALF wrt ..gotoff]          ; xmm2 *= 0.5 (scaledown)
 %endif
         movq     QWORD  [_rsp], xmm0                     ; store xmm0 in dividend slot on stack
         call _dblRemain
