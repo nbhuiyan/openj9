@@ -26,7 +26,7 @@
 ;
 ; --------------------------------------------------------------------------------
 
-      CPU PPRO
+      ; CPU PPRO
 
       %include "jilconsts.inc"
       %include "x/runtime/X86PicBuilder_nasm.inc"
