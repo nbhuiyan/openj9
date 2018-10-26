@@ -119,6 +119,16 @@ static char const *macroString = "\n\
 %macro DECLARE_GLOBAL 1 ; helperName\n\
 	global %1\n\
 %endmacro\n\
+\n\
+%define _rax rax\n\
+%define _rbx rbx\n\
+%define _rcx rcx\n\
+%define _rdx rdx\n\
+%define _rsi rsi\n\
+%define _rdi rdi\n\
+%define _rsp rsp\n\
+%define _rbp rbp\n\
+%define _rip\n\
 \n";
 #else /* J9VM_ENV_DATA64 */
 static char const *macroString = "\n\
