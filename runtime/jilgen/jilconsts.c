@@ -124,28 +124,17 @@ static char const *macroString = "\n\
 \n";
 #else /* J9VM_ENV_DATA64 */
 static char const *macroString ="\n\
-%define ASM_J9VM_USE_GOT 1\n\
-\n\
-extern _GLOBAL_OFFSET_TABLE_\n\
-\n\
-%macro LoadGOTInto 1 ; register\n\
-	call %%getgot\n\
-%%getgot:\n\
-	pop %1\n\
-	add %1,_GLOBAL_OFFSET_TABLE_+$$-%%getgot wrt ..gotpc\n\
-%endmacro\n\
 \n\
 %macro MoveHelper 2 ; register,helperName\n\
-		LoadGOTInto %1\n\
-		mov %1, [%1 + %2 wrt ..gotoff]\n\
+		mov %1, [%2]\n\
 %endmacro\n\
 \n\
 %macro CallHelper 1 ; helperName\n\
-		 call %1 wrt ..plt\n\
+		 call %1\n\
 %endmacro\n\
 \n\
 %macro CallHelperUseReg 2; helperName,register\n\
-		 call %1 wrt ..plt\n\
+		 call %1\n\
 %endmacro\n\
 \n\
 %macro DECLARE_EXTERN 1 ; helperName\n\
