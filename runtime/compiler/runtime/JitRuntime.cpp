@@ -1667,7 +1667,7 @@ void *initialInvokeExactThunk(j9object_t methodHandle, J9VMThread *vmThread)
    else
       {
       uintptrj_t fieldOffset = fej9->getInstanceFieldOffset(fej9->getObjectClass(thunkTuple), "invokeExactThunk", "J");
-#if defined(OSX) || defined(LINUX)
+#if defined(TR_HOST_X86)
       bool success = fej9->compareAndSwapInt64Field(thunkTuple, "invokeExactThunk", (uint64_t)(uintptrj_t)initialInvokeExactThunkGlue, (uint64_t)(uintptrj_t)addressToDispatch);
       
       if (details)

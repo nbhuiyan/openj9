@@ -244,17 +244,10 @@ JIT_HELPER(callGPU);
 // --------------------------------------------------------------------------------
 //                                  X86 COMMON
 // --------------------------------------------------------------------------------
-#if defined(OSX) || defined(LINUX)
 JIT_HELPER(doubleToLong);
 JIT_HELPER(doubleToInt);
 JIT_HELPER(floatToLong);
 JIT_HELPER(floatToInt);
-#else
-JIT_HELPER(_doubleToLong);
-JIT_HELPER(_doubleToInt);
-JIT_HELPER(_floatToLong);
-JIT_HELPER(_floatToInt);
-#endif /* OSX */
 
 JIT_HELPER(interpreterUnresolvedClassGlue);
 JIT_HELPER(interpreterUnresolvedClassFromStaticFieldGlue);
@@ -338,15 +331,9 @@ JIT_HELPER(newPrefetchTLH);
 JIT_HELPER(outlinedNewObject);
 JIT_HELPER(outlinedNewArray);
 
-#if defined(OSX) || defined(LINUX)
 JIT_HELPER(arrayTranslateTRTO);
 JIT_HELPER(arrayTranslateTROTNoBreak);
 JIT_HELPER(arrayTranslateTROT);
-#else
-JIT_HELPER(_arrayTranslateTRTO);
-JIT_HELPER(_arrayTranslateTROTNoBreak);
-JIT_HELPER(_arrayTranslateTROT);
-#endif /* OSX */
 
 // --------------------------------------------------------------------------------
 //                                   AMD64
@@ -1294,13 +1281,9 @@ void initializeCodeRuntimeHelperTable(J9JITConfig *jitConfig, char isSMP)
 #else // AMD64
 
    // -------------------------------- IA32 ------------------------------------
-#if defined(LINUX)
+
    SET(TR_IA32longDivide,                             (void *)longDivide,               TR_Helper);
    SET(TR_IA32longRemainder,                          (void *)longRemainder,            TR_Helper);
-#else
-   SET(TR_IA32longDivide,                             (void *)_longDivide,               TR_Helper);
-   SET(TR_IA32longRemainder,                          (void *)_longRemainder,            TR_Helper);
-#endif
 
    SET(TR_X86interpreterVoidStaticGlue,               (void *)interpreterVoidStaticGlue,       TR_Helper);
    SET(TR_X86interpreterIntStaticGlue,                (void *)interpreterEAXStaticGlue,        TR_Helper);
@@ -1322,13 +1305,7 @@ void initializeCodeRuntimeHelperTable(J9JITConfig *jitConfig, char isSMP)
 
    SET(TR_IA32floatRemainderSSE,                      (void *)SSEfloatRemainderIA32Thunk,  TR_Helper);
    SET(TR_IA32doubleRemainderSSE,                     (void *)SSEdoubleRemainderIA32Thunk, TR_Helper);
-#ifndef TR_HOST_64BIT
-#if defined(LINUX)
    SET(TR_IA32double2LongSSE,                         (void *)SSEdouble2LongIA32, TR_Helper);
-#else
-   SET(TR_IA32double2LongSSE,                         (void *)_SSEdouble2LongIA32, TR_Helper);
-#endif
-#endif
 
    SET(TR_IA32doubleToLong,                           (void *)doubleToLong, TR_Helper);
    SET(TR_IA32doubleToInt,                            (void *)doubleToInt,  TR_Helper);
