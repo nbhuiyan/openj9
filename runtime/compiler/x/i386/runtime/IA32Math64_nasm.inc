@@ -19,6 +19,8 @@
 ; SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
 	
         ; CPU P2
+      
+      %include "jilconsts.inc"
 
 segment .text
 
@@ -256,7 +258,7 @@ lrem_path_end:
       jmp     sign_rem                            ; to set the sign
                   
 jitMathHelpersRemainderEnd:
-longRemainder endp    
+ret
 
 
 ;
@@ -268,7 +270,7 @@ longRemainder endp
 ; OUTPUT: EDX:EAX quotient of division
 
        align 16
-longDivide PROC NEAR
+longDivide:
 jitMathHelpersDivideBegin:
 	mov edx, dword [esp + 12]
 	or  edx, dword [esp + 16]

@@ -32,7 +32,11 @@
       eq_offsetof_J9Object_clazz equ 8                            ; offset of class pointer in a J9Object
 
       %include "jilconsts.inc"
+%ifdef WINDOWS
+      %include "x\runtime\X86PicBuilder_nasm.inc"
+%else
       %include "x/runtime/X86PicBuilder_nasm.inc"
+%endif
 
       segment .text
 
@@ -108,7 +112,7 @@
 %ifdef WINDOWS
       DECLARE_EXTERN j9thread_self
       DECLARE_EXTERN j9thread_tls_get
-      DECLARE_EXTERN vmThreadTLSKey:dword
+      DECLARE_EXTERN vmThreadTLSKey
 %endif
 
       DECLARE_EXTERN memoryFence
@@ -216,11 +220,11 @@ mergeInterpreterUnresolvedDispatch:
 
       ; Attempt to patch the code.
       ;
-%ifdef WINDOWS
-      lock cmpxchg8b qword  [edi]
-%else
+;%ifdef WINDOWS
+;      lock cmpxchg8b qword  [edi]
+;%else
       lock cmpxchg8b [edi]
-%endif
+;%endif
 
       pop         ecx                                       ; restore
       pop         ebx                                       ; restore
@@ -321,11 +325,11 @@ updateInterpreterDispatchGlueSite:
 
       ; Attempt to patch the code.
       ;
-%ifdef WINDOWS
-      lock cmpxchg8b qword  [esi]
-%else
+;%ifdef WINDOWS
+;      lock cmpxchg8b qword  [esi]
+;%else
       lock cmpxchg8b [esi]
-%endif
+;%endif
 
       mov dword  [esp+12], esi                              ; update return address to re-run
 
@@ -413,9 +417,9 @@ patchBarrierWithNop:
       mov         bl, byte  [edx]                           ; get instruction length from instruciton descriptor
       and         ebx, 0f0h                                 ; mask size of instruction
       shr         ebx, 4                                    ; shift size to last nibble of byte
-      lea         ebx, dword  [ebx - eq_MemFenceCallLength32] ; get the delta between the RA in the mainline code and
+      lea         ebx,  [ebx - eq_MemFenceCallLength32] ; get the delta between the RA in the mainline code and
                                                             ; the end of the store instruction
-      lea         esi, dword  [esi + ebx]                   ; find the end of the store instruction
+      lea         esi,  [esi + ebx]                   ; find the end of the store instruction
 
       ; determine what kind of fence we are dealing with: mfence or LOCK OR [ESP] (on legacy systems)
       ;
@@ -428,7 +432,7 @@ patchBarrierWithNop:
 
       ; 3 byte memory fence
       ;
-      lea         esi, dword  [esi + 3]                     ; find the 4 byte aligned address
+      lea         esi,  [esi + 3]                     ; find the 4 byte aligned address
       and         esi, 0fffffffch                           ; should now have a 4 byte aligned instruction of the memfence
 
       ;make sure we are patching over an mfence (avoids potential race condition with lock cmpxchg patching)
@@ -450,8 +454,8 @@ doLOCKORESP:
       ; edx:eax original instruction
       ;
       mov         esi, dword  [esp + eq_MemFenceRAOffset32]         ; esp + 128 = RA of mainline code (mfence instruction or nop)
-      lea         esi, dword  [esi + ebx]                           ; find the end of the store instruction
-      lea         esi, dword  [esi + 7]                             ; find the 8 byte aligned address of the lock or [esp]
+      lea         esi,  [esi + ebx]                           ; find the end of the store instruction
+      lea         esi,  [esi + 7]                             ; find the 8 byte aligned address of the lock or [esp]
       and         esi, 0fffffff8h
       mov         eax, dword  [esi]                                 ; construct the edx:eax pair (original instruction)
       mov         edx, dword  [esi + 4]
@@ -459,11 +463,11 @@ doLOCKORESP:
       mov         ecx, edx
       mov         cl, 00h
 
-%ifdef WINDOWS ; write the nop
-      lock cmpxchg8b qword  [esi]
-%else
+;%ifdef WINDOWS ; write the nop
+;      lock cmpxchg8b qword  [esi]
+;%else
       lock cmpxchg8b [esi]
-%endif
+;%endif
       jmp restoreRegs
 
 
@@ -512,11 +516,11 @@ patchMainlineInstruction:
       mov         edx, dword  [esp + 4]                             ; Restore the call instruction (edx:eax) that should have brought
       mov         eax, dword  [esp + 8]                             ; us to this snippet + the following 3 bytes.
 
-%ifdef WINDOWS
-      lock cmpxchg8b qword  [esi - 5]
-%else
+;%ifdef WINDOWS
+;      lock cmpxchg8b qword  [esi - 5]
+;%else
       lock cmpxchg8b [esi - 5]
-%endif
+;%endif
 
       test        ebp, ebp
       jnz         patchBarrierWithNop
@@ -604,7 +608,8 @@ retn
       push        ebx               ; save register, addr=esp+4
       push        eax               ; save register, addr=esp+0
 
-%ifdef WINDOWS
+;%ifdef WINDOWS
+%if 0
       ; Restore the VMThread into ebp
       ;
       call        j9thread_self
@@ -979,11 +984,11 @@ noVolatileCheck:
 
       ; Attempt to patch the code.
       ;
-%ifdef WINDOWS
-      lock cmpxchg8b qword  [esi-5]
-%else
+;%ifdef WINDOWS
+;      lock cmpxchg8b qword  [esi-5]
+;%else
       lock cmpxchg8b [esi-5]
-%endif
+;%endif
 
 doneDataResolution:
 

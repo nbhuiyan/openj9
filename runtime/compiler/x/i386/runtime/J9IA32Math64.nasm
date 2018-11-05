@@ -20,7 +20,11 @@
 
 %ifndef TR_HOST_64BIT
 
+%ifdef WINDOWS
+      %include "x\i386\runtime\IA32Math64_nasm.inc"
+%else
       %include "x/i386/runtime/IA32Math64_nasm.inc"
+%endif
 
 %else
 segment .data

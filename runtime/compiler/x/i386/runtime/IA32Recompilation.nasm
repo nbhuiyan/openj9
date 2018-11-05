@@ -131,7 +131,7 @@ samplingRecompileMethod:
         push    dword  [esp+8]
 
         ; Get the old start address and push it
-        lea     eax, dword [edi+eq_stack_samplingCodeStart]
+        lea     eax, [edi+eq_stack_samplingCodeStart]
         push    eax
 
                 ; Get the J9Method and push it
@@ -145,7 +145,7 @@ samplingRecompileMethod:
                 ; It should now execute normally
         test    eax, eax
         jnz     samplingGotStartAddress
-        lea     edi, dword [edi+eq_stack_samplingCodeStart]
+        lea     edi, [edi+eq_stack_samplingCodeStart]
                 add     esp, 8
 
                 ; Note: If the JIT linkage ever expects EAX to be loaded with the receiver on

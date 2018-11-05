@@ -21,7 +21,11 @@
 %ifndef TR_HOST_64BIT
 
         %include "jilconsts.inc"
+%ifdef WINDOWS
+        %include "x\i386\runtime\IA32CompressString_nasm.inc"
+%else
         %include "x/i386/runtime/IA32CompressString_nasm.inc"
+%endif
 
 J9TR_ObjectColorBlack equ 03h
 
