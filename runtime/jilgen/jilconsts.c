@@ -273,11 +273,13 @@ static char const *macroString = "\n\
 %endmacro\n\
 \n\
 %macro DECLARE_EXTERN 1 ; helperName\n\
-	extern %1\n\
+	extern _%1\n\
+	%define %1 _%1\n\
 %endmacro\n\
 \n\
 %macro DECLARE_GLOBAL 1 ; helperName\n\
-	global %1\n\
+	global _%1\n\
+	%define %1 _%1\n\
 %endmacro\n\
 \n\
 %define _rax eax\n\
