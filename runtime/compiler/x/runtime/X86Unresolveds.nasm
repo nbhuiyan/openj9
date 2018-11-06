@@ -608,12 +608,11 @@ retn
       push        ebx               ; save register, addr=esp+4
       push        eax               ; save register, addr=esp+0
 
-;%ifdef WINDOWS
-%if 0
+%ifdef WINDOWS
       ; Restore the VMThread into ebp
       ;
       call        j9thread_self
-      push        [vmThreadTLSKey]
+      push        dword [vmThreadTLSKey]
       push        eax
       call        j9thread_tls_get
       add         esp, 8

@@ -34,10 +34,10 @@
     DECLARE_GLOBAL jitMethodMonitorExitReservedPrimitive
 
 %ifdef WINDOWS
-    UseFastCall equ 1
+    %define UseFastCall 1
 %else
     %ifdef TR_HOST_32BIT
-        UseFastCall equ 1
+        %define UseFastCall 1
     %endif
 %endif
 
@@ -104,10 +104,10 @@ eq_J9Monitor_CNTFLCClearMask  equ 0FFFFFFFFFFFFFF05h
 
 ; try to obtain the lock
 ; lockword address <= _rcx
-; vmthread         <= _rcx
+; vmthread         <= _rbp
 %macro TryLock 0
-    push _rcx
-    lea  _rcx, [_rcx + eq_J9Monitor_RESINCBits]           ; make thread ID + RES + INC_DEC value
+    push _rbp
+    lea  _rbp, [_rbp + eq_J9Monitor_RESINCBits]           ; make thread ID + RES + INC_DEC value
 
     ; Set _rax to the lock word value that allows a monitor to be reserved (the
     ; reservation bit by default, or 0 for -XlockReservation). This value is
@@ -128,9 +128,9 @@ eq_J9Monitor_CNTFLCClearMask  equ 0FFFFFFFFFFFFFF05h
 %ifdef ASM_J9VM_INTERP_SMALL_MONITOR_SLOT
     lock cmpxchg [_rcx],  ebp                       ; try taking the lock
 %else
-    lock cmpxchg [_rcx], _rcx                        ; try taking the lock
+    lock cmpxchg [_rcx], _rbp                        ; try taking the lock
 %endif
-    pop  _rcx
+    pop  _rbp
 %endmacro
 
 ; We reach the reserved monitor enter code here if the monitor isn't reserved, it's reserved
@@ -146,7 +146,7 @@ eq_J9Monitor_CNTFLCClearMask  equ 0FFFFFFFFFFFFFF05h
     xor  _rax, eq_J9Monitor_RecCountMask            ; reached the max value
     pop  _rax
     jz    .fallback                                ; and call VM helper to resolve it
-    xor  _rax, _rcx                                  ; mask thread ID
+    xor  _rax, _rbp                                  ; mask thread ID
     xor  _rax, eq_J9Monitor_RESBit                  ; mask RES bit
     and  _rax, eq_J9Monitor_CountsClearMask         ; clear the count bits
     jnz   .trylock                                 ; if any bit is set we don't have it reserved by the same thread, or not reserved at all
@@ -192,7 +192,7 @@ eq_J9Monitor_CNTFLCClearMask  equ 0FFFFFFFFFFFFFF05h
 %macro MonitorEnterReservedPrimitive 0
     ; local: fallback, trylock
     ObtainLockWord
-    xor  _rax, _rcx                           ; mask thread ID
+    xor  _rax, _rbp                           ; mask thread ID
     xor  _rax, eq_J9Monitor_RESBit           ; mask RES bit
     and  _rax, eq_J9Monitor_CNTFLCClearMask  ; clear the count bits
     jnz  .trylock                           ; if any bit is set we don't have it reserved by the same thread, or not reserved at all
@@ -246,7 +246,7 @@ eq_J9Monitor_CNTFLCClearMask  equ 0FFFFFFFFFFFFFF05h
     xor  _rax, eq_J9Monitor_RecCountMask            ; reached the max value
     pop  _rax
     jz   .fallback                                 ; and call VM helper to resolve it
-    xor  _rax, _rcx                                  ; mask thread ID
+    xor  _rax, _rbp                                  ; mask thread ID
     xor  _rax, eq_J9Monitor_RESBit                  ; mask RES bit
     and  _rax, eq_J9Monitor_CountsClearMask         ; clear the count bits
     jnz  .fallback                                 ; if any bit is set we don't have it reserved by the same thread, or not reserved at all
@@ -263,7 +263,7 @@ eq_J9Monitor_CNTFLCClearMask  equ 0FFFFFFFFFFFFFF05h
     ObtainLockWord
     test _rax, eq_J9Monitor_RecCountMask            ; check if the recursive count is greater than 1
     jz   .fallback                                 ; branch to VM if 0, weird thing has happened
-    xor  _rax, _rcx                                  ; mask thread ID
+    xor  _rax, _rbp                                  ; mask thread ID
     xor  _rax, eq_J9Monitor_RESBit                  ; mask RES bit
     and  _rax, eq_J9Monitor_CountsClearMask         ; clear the count bits
     jnz  .fallback                                 ; if any bit is set we don't have it reserved by the same thread, or not reserved at all
@@ -279,7 +279,7 @@ eq_J9Monitor_CNTFLCClearMask  equ 0FFFFFFFFFFFFFF05h
     %1:                             ; name
     %3                              ; template
     %ifdef UseFastCall
-        mov  _rcx, _rcx               ; restore the first param - vmthread
+        mov  _rcx, _rbp               ; restore the first param - vmthread
     %endif
     jmp %2                          ; call %2 wrt ..plt ;fallback
 %endmacro
