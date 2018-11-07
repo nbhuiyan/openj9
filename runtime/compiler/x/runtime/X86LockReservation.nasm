@@ -34,10 +34,10 @@
     DECLARE_GLOBAL jitMethodMonitorExitReservedPrimitive
 
 %ifdef WINDOWS
-    UseFastCall equ 1
+    %define UseFastCall 1
 %else
     %ifdef TR_HOST_32BIT
-        UseFastCall equ 1
+        %define UseFastCall 1
     %endif
 %endif
 
