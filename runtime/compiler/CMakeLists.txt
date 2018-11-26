@@ -29,7 +29,8 @@
 
 if(OMR_ARCH_X86)
 	enable_language(ASM_NASM)
-	# We have to manually set thses since older cmake versions dont handle include directories for NASM properly
+	# We have to manually set these since cmake strips tailing slashes off of include directories
+	# and NASM versions before 2.14 require trailing slashes on the include directories to work properly
 	set(asm_inc_dirs
 		"-I${j9vm_SOURCE_DIR}/oti/"
 		"-I${CMAKE_CURRENT_SOURCE_DIR}/"
