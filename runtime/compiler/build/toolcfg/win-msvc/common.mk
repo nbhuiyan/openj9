@@ -209,6 +209,35 @@ endif
 PASM_FLAGS+=$(PASM_FLAGS_EXTRA)
 
 #
+# Setup NASM
+#
+
+NASM_CMD?=nasm
+
+NASM_DEFINES=\
+    TR_HOST_X86 \
+    TR_TARGET_X86 \
+    WINDOWS \
+
+ifeq ($(HOST_BITS),32)
+    NASM_DEFINES+=\
+        TR_HOST_32BIT \
+        TR_TARGET_32BIT
+
+	NASM_OBJ_FORMAT=-fwin32
+else
+    NASM_DEFINES+=\
+        TR_HOST_64BIT \
+        TR_TARGET_64BIT
+
+	NASM_OBJ_FORMAT=-fwin64
+endif
+
+NASM_INCLUDES=\
+    $(J9SRC)/oti \
+    $(J9SRC)/compiler
+
+#
 # Setup RC
 #
 RC_CMD?=$(RC)

@@ -89,21 +89,12 @@ endef # DEF_RULE.pasm
 
 RULE.pasm=$(eval $(DEF_RULE.pasm))
 
-
-### NASM-specific rules
-
-ifeq ($(HOST_BITS),32)
-	OBJ_FORMAT=-fwin32
-else
-	OBJ_FORMAT=-fwin64
-endif
-
 #
 # Compile .nasm file into .o file
 #
 define DEF_RULE.nasm
 $(1): $(2) | jit_createdirs
-	nasm $(OBJ_FORMAT) $$(patsubst %,-D%=1,$$(ASM_DEFINES)) $$(patsubst %,-I%\,$$(subst /,\,$$(ASM_INCLUDES))) -o $$(subst /,\,$$@) $$(subst /,\,$$<)
+	$(NASM_CMD) $(NASM_OBJ_FORMAT) $$(patsubst %,-D%=1,$$(NASM_DEFINES)) $$(patsubst %,-I%\,$$(subst /,\,$$(NASM_INCLUDES))) -o $$(subst /,\,$$@) $$(subst /,\,$$<)
 
 JIT_DIR_LIST+=$(dir $(1))
 
