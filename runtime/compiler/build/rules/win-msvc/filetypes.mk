@@ -94,7 +94,9 @@ RULE.pasm=$(eval $(DEF_RULE.pasm))
 #
 define DEF_RULE.nasm
 $(1): $(2) | jit_createdirs
-	$(NASM_CMD) $(NASM_OBJ_FORMAT) $$(patsubst %,-D%=1,$$(NASM_DEFINES)) $$(patsubst %,-I%\,$$(subst /,\,$$(NASM_INCLUDES))) -o $$(subst /,\,$$@) $$(subst /,\,$$<)
+	$(NASM_CMD) $(NASM_OBJ_FORMAT) $$(patsubst %,-D%=1,$$(NASM_DEFINES)) $$(patsubst %,-I'%/',$$(NASM_INCLUDES)) -o $$@ $$<
+	
+#$(NASM_CMD) $(NASM_OBJ_FORMAT) $$(patsubst %,-D%=1,$$(NASM_DEFINES)) $$(patsubst %,-I'%\',$$(subst /,\,$$(NASM_INCLUDES))) -o $$(subst /,\,$$@) $$(subst /,\,$$<)
 
 JIT_DIR_LIST+=$(dir $(1))
 
