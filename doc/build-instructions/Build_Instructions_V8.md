@@ -1,5 +1,5 @@
 <!--
-Copyright (c) 2017, 2018 IBM Corp. and others
+Copyright (c) 2017, 2019 IBM Corp. and others
 
 This program and the accompanying materials are made available under
 the terms of the Eclipse Public License 2.0 which accompanies this
@@ -356,6 +356,7 @@ OpenJ9 uses the mingw/GCC compiler during the build process. In the `Archive` ca
 - [Freetype2 V2.3 or newer](https://www.freetype.org/)
 - [LLVM/Clang 64bit](http://releases.llvm.org/7.0.0/LLVM-7.0.0-win64.exe)
 - [LLVM/Clang 32bit](http://releases.llvm.org/7.0.0/LLVM-7.0.0-win32.exe)
+- [NASM Assembler](https://www.nasm.us/), which would be installed as one of the packages in the `Devel` category in Cygwin.
 
 Add the binary path of Clang to the `PATH` environment variable to override the older version of clang integrated in Cygwin. e.g.
 ```
