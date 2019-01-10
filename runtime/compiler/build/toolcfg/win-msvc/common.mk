@@ -217,27 +217,32 @@ NASM_CMD?=nasm
 NASM_DEFINES=\
     TR_HOST_X86 \
     TR_TARGET_X86 \
-    WINDOWS \
+    WINDOWS
 
-# Set additional platform-specific defines and output object format
+NASM_INCLUDES=\
+    ../oti \
+    ../compiler \
+    ../compiler/x/runtime
+
 ifeq ($(HOST_BITS),32)
+    NASM_OBJ_FORMAT=-fwin32
+    
     NASM_DEFINES+=\
         TR_HOST_32BIT \
         TR_TARGET_32BIT
-
-	NASM_OBJ_FORMAT=-fwin32
+    
+    NASM_INCLUDES+=\
+        ../compiler/x/i386/runtime
 else
+    NASM_OBJ_FORMAT=-fwin64
+    
     NASM_DEFINES+=\
         TR_HOST_64BIT \
         TR_TARGET_64BIT
 
-	NASM_OBJ_FORMAT=-fwin64
+    NASM_INCLUDES+=\
+        ../compiler/x/amd64/runtime
 endif
-
-# Only require searching for files to include in 2 locations
-NASM_INCLUDES=\
-    $(J9SRC)/oti \
-    $(J9SRC)/compiler
 
 #
 # Setup RC

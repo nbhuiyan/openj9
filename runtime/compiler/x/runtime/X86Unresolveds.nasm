@@ -34,7 +34,7 @@
       %include "jilconsts.inc"
 
 %ifdef WINDOWS
-      %include "x\runtime\X86PicBuilder_nasm.inc"
+      %include "X86PicBuilder_nasm.inc"
 %else
       %include "x/runtime/X86PicBuilder_nasm.inc"
 %endif
@@ -1120,7 +1120,7 @@ retn
       %include "jilconsts.inc"
       
 %ifdef WINDOWS
-      %include "x\runtime\X86PicBuilder_nasm.inc"
+      %include "X86PicBuilder_nasm.inc"
 %else
       %include "x/runtime/X86PicBuilder_nasm.inc"
 %endif
