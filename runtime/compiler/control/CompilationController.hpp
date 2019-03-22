@@ -27,6 +27,7 @@
 #include "control/OptimizationPlan.hpp"
 #include "runtime/CodeCacheManager.hpp"
 #include "env/VMJ9.h"
+#include <vector>
 
 class TR_OptimizationPlan;
 struct TR_MethodToBeCompiled;
@@ -62,6 +63,13 @@ class TR_MethodEvent
    J9Class *    _classNeedingThunk; // for newInstanceImpl
    TR_Hotness   _nextOptLevel; // Used for HWP-based recompilation
    };
+
+class TR_TestCPP11Stuff{
+   public:
+      bool _testFieldInitInClassDecl = true;
+      static std::vector<int> _testArrayOfNonAggregateInit[];
+};
+
 
 
 //-------------------------TR::DefaultCompilationStrategy ----------------------

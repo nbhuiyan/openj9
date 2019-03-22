@@ -44,7 +44,12 @@ TR::CompilationInfo *    TR::CompilationController::_compInfo = 0;
 int32_t                 TR::CompilationController::_verbose = 0;
 bool                    TR::CompilationController::_useController = false;
 
-
+std::vector<int> TR_TestCPP11Stuff::_testArrayOfNonAggregateInit[]= {
+      {1,2,3},
+      {2,3},
+      {3},
+      {}
+   };
 
 //------------------------------------ init -----------------------------------
 // Initializes the compilationController.
