@@ -44,9 +44,34 @@ LINK_GROUP_START:=-Wl,--start-group
 LINK_GROUP_END:=-Wl,--end-group
 endif
 
+JIT_DEPENDENCIES?=$(JIT_PRODUCT_SONAME)
+
+ifeq ($(NEW_JIT_OPTIONS),ON)
+JIT_DEPENDENCIES = options-gen $(JIT_DEPENDENCIES)
+endif
+
+ifeq ($(NEW_JIT_OPTIONS),ON)
+
+JIT_DIR_LIST+=$(FIXED_OBJBASE)/omr/compiler/control
+
+OPTIONS_GENERATOR_OUTPUT_FILES+=\
+	$(FIXED_OBJBASE)/omr/compiler/control/Options.inc \
+	$(FIXED_OBJBASE)/omr/compiler/control/OptionInitializerList.inc \
+	$(FIXED_OBJBASE)/omr/compiler/control/OptionTableProperties.inc \
+	$(FIXED_OBJBASE)/omr/compiler/control/OptionTableEntries.inc \
+	$(FIXED_OBJBASE)/omr/compiler/control/OptionCharMap.inc
+
+
+options-gen: $(OPTIONS_GENERATOR) | jit_createdirs
+	python $(OPTIONS_GENERATOR) -omroptionsdir $(FIXED_SRCBASE)/omr/compiler/control -outputdir $(FIXED_OBJBASE)/omr/compiler/control
+
+jit_cleanobjs::
+	rm -f $(OPTIONS_GENERATOR_OUTPUT_FILES)
+endif
+
 jit: $(JIT_PRODUCT_SONAME)
 
-$(JIT_PRODUCT_SONAME): $(JIT_PRODUCT_OBJECTS) | jit_createdirs
+$(JIT_PRODUCT_SONAME): options-gen | $(JIT_PRODUCT_OBJECTS)
 	$(SOLINK_CMD) -shared $(SOLINK_FLAGS) $(patsubst %,-L%,$(SOLINK_LIBPATH)) -o $@ $(SOLINK_PRE_OBJECTS) $(JIT_PRODUCT_OBJECTS) $(SOLINK_POST_OBJECTS) $(LINK_GROUP_START) $(patsubst %,-l%,$(SOLINK_SLINK)) $(LINK_GROUP_END) $(SOLINK_EXTRA_ARGS)
 
 JIT_DIR_LIST+=$(dir $(JIT_PRODUCT_SONAME))

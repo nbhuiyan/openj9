@@ -373,6 +373,16 @@ JIT_PRODUCT_SOURCE_FILES+=\
     omr/compiler/runtime/OMRCodeCacheMemorySegment.cpp \
     omr/compiler/runtime/OMRRuntimeAssumptions.cpp
 
+ifeq ($(NEW_JIT_OPTIONS),ON)
+    JIT_PRODUCT_BACKEND_SOURCES+=\
+        omr/compiler/control/OMROptionProcessors.cpp \
+        omr/compiler/control/OMRCompilerOptionsManager.cpp \
+        omr/compiler/control/OptionsBuilder.cpp
+
+    #JIT_PRODUCT_SOURCE_FILES+=\
+    #    compiler/control/J9CompilerOptionsManager.cpp
+endif
+
 -include $(JIT_MAKE_DIR)/files/extra.mk
 include $(JIT_MAKE_DIR)/files/host/$(HOST_ARCH).mk
 include $(JIT_MAKE_DIR)/files/target/$(TARGET_ARCH).mk
