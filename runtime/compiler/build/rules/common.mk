@@ -31,7 +31,8 @@ endif
 # Define our targets. "jit_cleanobjs" "jit_cleandeps" and "jit_cleandll" are double-colon so they can be appended to
 # throughout the makefile.
 #
-.PHONY: jit jit_createdirs jit_cleanobjs jit_cleandeps jit_cleandll
+.PHONY: options-gen jit jit_createdirs jit_cleanobjs jit_cleandeps jit_cleandll
+options-gen:
 jit:
 jit_createdirs::
 jit_cleanobjs::

@@ -49,9 +49,25 @@ JIT_PRODUCT_RES_SRC=$(JIT_SCRIPT_DIR)/j9jit.rc
 JIT_PRODUCT_RES_OBJ=$(FIXED_OBJBASE)/j9jit.res
 JIT_PRODUCT_OBJECTS+=$(JIT_PRODUCT_RES_OBJ)
 
+JIT_DIR_LIST+=$(FIXED_OBJBASE)/omr/compiler/control
+
+OPTIONS_GENERATOR_OUTPUT_FILES+=\
+	$(FIXED_OBJBASE)/omr/compiler/control/Options.inc \
+	$(FIXED_OBJBASE)/omr/compiler/control/OptionInitializerList.inc \
+	$(FIXED_OBJBASE)/omr/compiler/control/OptionTableProperties.inc \
+	$(FIXED_OBJBASE)/omr/compiler/control/OptionTableEntries.inc \
+	$(FIXED_OBJBASE)/omr/compiler/control/OptionCharMap.inc
+
+
+options-gen: $(OPTIONS_GENERATOR) | jit_createdirs
+	python $(OPTIONS_GENERATOR) -omroptionsdir $(FIXED_SRCBASE)/omr/compiler/control -outputdir $(FIXED_OBJBASE)/omr/compiler/control
+
+jit_cleanobjs::
+	rm -f $(OPTIONS_GENERATOR_OUTPUT_FILES)
+
 jit: $(JIT_PRODUCT_SONAME)
 
-$(JIT_PRODUCT_SONAME): $(JIT_PRODUCT_OBJECTS) | jit_createdirs
+$(JIT_PRODUCT_SONAME): options-gen | $(JIT_PRODUCT_OBJECTS)
 	$(call RM,$@.objlist)
 	$(call GENLIST,$@.objlist,$(SOLINK_PRE_OBJECTS) $(JIT_PRODUCT_OBJECTS) $(SOLINK_POST_OBJECTS))
 	$(SOLINK_CMD) -DLL -subsystem:windows $(SOLINK_FLAGS) $(patsubst %,-libpath:%,$(call FIXPATH,$(SOLINK_LIBPATH))) -OUT:$(call FIXPATH,$@) -MAP:$(call FIXPATH,$@.map) -BASE:$(SOLINK_ORG) -DEF:$(call FIXPATH,$(SOLINK_DEF)) @$(call FIXPATH,$@.objlist) $(call FIXPATH,$(patsubst %,%.lib,$(SOLINK_SLINK))) $(SOLINK_EXTRA_ARGS)

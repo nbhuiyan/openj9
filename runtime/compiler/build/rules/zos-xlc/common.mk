@@ -41,9 +41,26 @@ JIT_PRODUCT_BUILDNAME_SRC=$(FIXED_OBJBASE)/omr/compiler/env/TRBuildName.cpp
 JIT_PRODUCT_BUILDNAME_OBJ=$(FIXED_OBJBASE)/omr/compiler/env/TRBuildName.o
 JIT_PRODUCT_BACKEND_OBJECTS+=$(JIT_PRODUCT_BUILDNAME_OBJ)
 
+
+JIT_DIR_LIST+=$(FIXED_OBJBASE)/omr/compiler/control
+
+OPTIONS_GENERATOR_OUTPUT_FILES+=\
+	$(FIXED_OBJBASE)/omr/compiler/control/Options.inc \
+	$(FIXED_OBJBASE)/omr/compiler/control/OptionInitializerList.inc \
+	$(FIXED_OBJBASE)/omr/compiler/control/OptionTableProperties.inc \
+	$(FIXED_OBJBASE)/omr/compiler/control/OptionTableEntries.inc \
+	$(FIXED_OBJBASE)/omr/compiler/control/OptionCharMap.inc
+
+
+options-gen: $(OPTIONS_GENERATOR) | jit_createdirs
+	python $(OPTIONS_GENERATOR) -omroptionsdir $(FIXED_SRCBASE)/omr/compiler/control -outputdir $(FIXED_OBJBASE)/omr/compiler/control
+
+jit_cleanobjs::
+	rm -f $(OPTIONS_GENERATOR_OUTPUT_FILES)
+
 jit: $(JIT_PRODUCT_SONAME)
 
-$(JIT_PRODUCT_SONAME): $(JIT_PRODUCT_OBJECTS) $(JIT_PRODUCT_BACKEND_LIBRARY) | jit_createdirs
+$(JIT_PRODUCT_SONAME): options-gen | $(JIT_PRODUCT_OBJECTS) $(JIT_PRODUCT_BACKEND_LIBRARY)
 	$(SOLINK_CMD) $(SOLINK_FLAGS) $(patsubst %,-L%,$(SOLINK_LIBPATH)) -o $@ $(SOLINK_PRE_OBJECTS) $(JIT_PRODUCT_OBJECTS) $(SOLINK_POST_OBJECTS) $(JIT_PRODUCT_BACKEND_LIBRARY) $(patsubst %,-l%,$(SOLINK_SLINK)) $(SOLINK_EXTRA_ARGS) > $@.linkmap
 
 JIT_DIR_LIST+=$(dir $(JIT_PRODUCT_SONAME))

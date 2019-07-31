@@ -387,6 +387,12 @@ JIT_PRODUCT_SOURCE_FILES+=\
     compiler/net/ProtobufTypeConvert.cpp \
     compiler/net/ServerStream.cpp
 endif
+#ifeq ($(NEW_JIT_OPTIONS),ON)
+    JIT_PRODUCT_BACKEND_SOURCES+=\
+        omr/compiler/control/OMROptionProcessors.cpp \
+        omr/compiler/control/OMRCompilerOptionsManager.cpp \
+        omr/compiler/control/OptionsBuilder.cpp
+#endif
 
 -include $(JIT_MAKE_DIR)/files/extra.mk
 include $(JIT_MAKE_DIR)/files/host/$(HOST_ARCH).mk

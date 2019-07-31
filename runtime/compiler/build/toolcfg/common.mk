@@ -43,10 +43,21 @@ PRODUCT_INCLUDES=\
     $(J9SRC)/oti \
     $(J9SRC)/util
 
+#ifeq ($(NEW_JIT_OPTIONS),ON)
+    PRODUCT_INCLUDES+=\
+        $(FIXED_OBJBASE)/omr/compiler
+#endif
+
 PRODUCT_DEFINES+=\
     BITVECTOR_BIT_NUMBERING_MSB \
     UT_DIRECT_TRACE_REGISTRATION \
     J9_PROJECT_SPECIFIC
+
+#ifeq ($(NEW_JIT_OPTIONS),ON)
+    PRODUCT_DEFINES+=\
+        NEW_OPTIONS \
+        NEW_OPTIONS_DEBUG
+#endif
 
 ifdef ASSUMES
     PRODUCT_DEFINES+=PROD_WITH_ASSUMES
@@ -101,6 +112,9 @@ include $(JIT_MAKE_DIR)/toolcfg/target/$(TARGET_BITS).mk
 
 # The script used to generate TRBuildName.cpp.
 GENERATE_VERSION_SCRIPT ?= $(OMR_DIR)/tools/compiler/scripts/generateVersion.pl
+#ifeq ($(NEW_JIT_OPTIONS),ON)
+    OPTIONS_GENERATOR ?= $(OMR_DIR)/compiler/control/options-gen.py
+#endif
 
 #
 # Now this is the big tool config file. This is where all the includes and defines
