@@ -3265,6 +3265,37 @@ static char *suffixedName(char *baseName, char typeSuffix, char *buf, int32_t bu
 void
 TR_J9ByteCodeIlGenerator::genInvokeDynamic(int32_t callSiteIndex)
    {
+#if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
+
+   if (comp()->compileRelocatableCode())
+      {
+      comp()->failCompilation<J9::AOTHasInvokeHandle>("COMPILATION_AOT_HAS_INVOKEHANDLE 0");
+      }
+
+   if (comp()->getOption(TR_FullSpeedDebug) && !isPeekingMethod())
+      comp()->failCompilation<J9::FSDHasInvokeHandle>("FSD_HAS_INVOKEHANDLE 0");
+
+   TR::Node *receiver = pop();
+
+   TR_ResolvedMethod * owningMethod = _methodSymbol->getResolvedMethod();
+   if (!owningMethod->isUnresolvedCallSiteTableEntry(callSiteIndex))
+      {
+      J9InvokeCacheEntry *invokeCache = (J9InvokeCacheEntry *) _methodSymbol->getResolvedMethod()->callSiteTableEntryAddress(callSiteIndex);
+      TR_ASSERT_FATAL(invokeCache, "failed to retrieve InvokeCache entry");
+      TR_ResolvedMethod * targetMethod = fej9()->createResolvedMethod(_trMemory, (TR_OpaqueMethodBlock *) fej9()->targetMethodFromMemberName((uintptr_t)invokeCache->target), owningMethod);
+      if (targetMethod)
+         symRef = symRefTab()->findOrCreateMethodSymbol(_methodSymbol->getResolvedMethodIndex(), -1, targetMethod, TR::MethodSymbol::Static);
+      }
+
+   // Emit the call
+   //
+   TR::Node* callNode = genInvokeHandle(symRef, receiver);
+
+   _invokeDynamicCalls->set(_bcIndex);
+
+
+#else
+
    if (comp()->compileRelocatableCode())
       {
       comp()->failCompilation<J9::AOTHasInvokeHandle>("COMPILATION_AOT_HAS_INVOKEHANDLE 0");
@@ -3298,11 +3329,37 @@ TR_J9ByteCodeIlGenerator::genInvokeDynamic(int32_t callSiteIndex)
    TR::Node* callNode = genInvokeHandle(symRef, receiver);
 
    _invokeDynamicCalls->set(_bcIndex);
+
+#endif // J9VM_OPT_OPENJDK_METHODHANDLE
    }
 
 TR::Node *
 TR_J9ByteCodeIlGenerator::genInvokeHandle(int32_t cpIndex)
    {
+#if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
+   if (comp()->compileRelocatableCode())
+      {
+      comp()->failCompilation<J9::AOTHasInvokeHandle>("COMPILATION_AOT_HAS_INVOKEHANDLE 1");
+      }
+
+   if (comp()->getOption(TR_FullSpeedDebug) && !isPeekingMethod())
+      comp()->failCompilation<J9::FSDHasInvokeHandle>("FSD_HAS_INVOKEHANDLE 1");
+
+   J9InvokeCacheEntry *invokeCache = (J9InvokeCacheEntry *) fej9()->methodTypeTableEntryAddress(cpIndex);
+   TR_ASSERT_FATAL(invokeCache, "Unable to retrieve InvokeCacheEntry")
+
+   TR_ResolvedMethod * targetMethod = fej9()->createResolvedMethod(_trMemory, (TR_OpaqueMethodBlock *) fej9()->targetMethodFromMemberName((uintptr_t)invokeCache->target), _methodSymbol->getResolvedMethod());
+
+   TR::SymbolReference * invokeExactSymRef = symRefTab()->findOrCreateMethodSymbol(_methodSymbol->getResolvedMethodIndex(), cpIndex, targetMethod, TR::MethodSymbol::Static);
+
+   // Emit the call
+   //
+   TR::Node* callNode = genInvokeHandle(invokeExactSymRef);
+
+   _invokeHandleCalls->set(_bcIndex);
+
+   return callNode;
+#else
    if (comp()->compileRelocatableCode())
       {
       comp()->failCompilation<J9::AOTHasInvokeHandle>("COMPILATION_AOT_HAS_INVOKEHANDLE 1");
@@ -3320,6 +3377,7 @@ TR_J9ByteCodeIlGenerator::genInvokeHandle(int32_t cpIndex)
    _invokeHandleCalls->set(_bcIndex);
 
    return callNode;
+#endif // J9VM_OPT_OPENJDK_METHODHANDLE
    }
 
 TR::Node *
@@ -3391,6 +3449,7 @@ TR_J9ByteCodeIlGenerator::genHandleTypeCheck(TR::Node* handle, TR::Node* expecte
     return zerochkNode;
     }
 
+// todo: gotta remove it
 TR::Node *
 TR_J9ByteCodeIlGenerator::genInvokeHandleGeneric(int32_t cpIndex)
    {

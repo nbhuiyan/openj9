@@ -757,6 +757,12 @@ public:
 
    bool hasMethodTypesSideTable();
 
+#if defined(VMJ9_OPT_OPENJDK_METHODHANDLE)
+   J9Method* targetMethodFromMemberName(uintptr_t memberName);
+   J9Method* targetMethodFromMethodHandle(uintptr_t methodHandle);
+#endif
+
+
    // JSR292 }}}
 
    virtual uintptr_t getFieldOffset( TR::Compilation * comp, TR::SymbolReference* classRef, TR::SymbolReference* fieldRef);
@@ -1265,4 +1271,3 @@ inline TR_PersistentMemory * persistentMemory(J9JITConfig * jitConfig) { return 
 bool signalOutOfMemory(J9JITConfig *);
 
 #endif // VMJ9
-

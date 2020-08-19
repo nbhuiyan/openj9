@@ -123,7 +123,9 @@ private:
    void         genInvokeInterface(int32_t);
    void         genInvokeDynamic(int32_t callSiteIndex);
    TR::Node *    genInvokeHandle(int32_t cpIndex);
+#if !defined(VMJ9_OPT_OPENJDK_METHODHANDLE)
    TR::Node *    genInvokeHandleGeneric(int32_t cpIndex);
+#endif
 
    TR::Node *    genHandleTypeCheck(TR::Node *handle, TR::Node *expectedType);
 
@@ -415,4 +417,3 @@ private:
    };
 
 #endif
-

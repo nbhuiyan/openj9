@@ -69,7 +69,9 @@ TR_J9ByteCodeIlGenerator::TR_J9ByteCodeIlGenerator(
      _couldOSRAtNextBC(false),
      _processedOSRNodes(NULL),
      _invokeHandleCalls(NULL),
+#if !defined(J9VM_OPT_OPENJDK_METHODHANDLE)
      _invokeHandleGenericCalls(NULL),
+#endif
      _invokeDynamicCalls(NULL),
      _ilGenMacroInvokeExactCalls(NULL),
      _methodHandleInvokeCalls(NULL)
@@ -361,7 +363,9 @@ TR_J9ByteCodeIlGenerator::genILFromByteCodes()
    //
    _methodHandleInvokeCalls = new (trStackMemory()) TR_BitVector(0, trMemory(), stackAlloc, growable);
    _invokeHandleCalls = new (trStackMemory()) TR_BitVector(0, trMemory(), stackAlloc, growable);
+#if !defined(VMJ9_OPT_OPENJDK_METHODHANDLE)
    _invokeHandleGenericCalls = new (trStackMemory()) TR_BitVector(0, trMemory(), stackAlloc, growable);
+#endif
    _invokeDynamicCalls = new (trStackMemory()) TR_BitVector(0, trMemory(), stackAlloc, growable);
    _ilGenMacroInvokeExactCalls = new (trStackMemory()) TR_BitVector(0, trMemory(), stackAlloc, growable);
 
@@ -3105,6 +3109,8 @@ void TR_J9ByteCodeIlGenerator::expandInvokeDynamic(TR::TreeTop *tree)
  *     logic is enabled for invocations outside of thunk archetype.
  *
  */
+
+// todo, rename this to expandinvokehanlde
 void TR_J9ByteCodeIlGenerator::expandInvokeHandleGeneric(TR::TreeTop *tree)
    {
    TR_ASSERT(!comp()->compileRelocatableCode(), "in expandInvokeHandleGeneric under AOT\n");
@@ -3176,6 +3182,7 @@ void TR_J9ByteCodeIlGenerator::expandInvokeHandleGeneric(TR::TreeTop *tree)
  *  \param tree
  *     Tree of the invokeExact call.
  */
+
 void TR_J9ByteCodeIlGenerator::expandInvokeExact(TR::TreeTop *tree)
    {
    TR_ASSERT(!comp()->compileRelocatableCode(), "in expandInvokeExact under AOT\n");
