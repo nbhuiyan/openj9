@@ -245,7 +245,6 @@ private:
    TR::Node *    genCompressedRefs(TR::Node *, bool genTT = true, int32_t isLoad = 1);
    void         abortForUnresolvedValueTypeOp(const char* bytecodeName, const char* refType);
 
-#if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
 
    // IlGenerator
    //

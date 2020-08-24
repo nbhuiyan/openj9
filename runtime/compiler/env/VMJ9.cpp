@@ -4755,6 +4755,14 @@ TR_J9VMBase::methodHandle_jitInvokeExactThunk(uintptr_t methodHandle)
 
 // Liqun's API -- todo: exclude from own commit
 #if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
+
+void*
+TR_J9VMBase::getAddressAt(uintptr_t object, uintptr_t offset)
+   {
+   TR_ASSERT(haveAccess(), "Must haveAccess in getAddressAt");
+   return J9OBJECT_ADDRESS_LOAD(vmThread(), object, offset);
+   }
+
 TR_OpaqueMethodBlock*
 TR_J9VMBase::targetMethodFromMemberName(TR::Compilation* comp, TR::KnownObjectTable::Index objIndex)
    {

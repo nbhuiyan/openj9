@@ -464,7 +464,7 @@ J9::SymbolReferenceTable::findOrCreateMethodTypeTableEntrySymbol(TR::ResolvedMet
    TR_SymRefIterator i(aliasBuilder.methodTypeTableEntrySymRefs(), self());
    TR_ResolvedMethod *owningMethod = owningMethodSymbol->getResolvedMethod();
 #if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
-   J9InvokeCacheEntry *invokeCache = (J9InvokeCacheEntry *) fej9()->methodTypeTableEntryAddress(cpIndex);
+   J9InvokeCacheEntry *invokeCache = (J9InvokeCacheEntry *) owningMethod->methodTypeTableEntryAddress(cpIndex);
    void *entryLocation = (void *) invokeCache->appendix;
 #else
    void *entryLocation = owningMethod->methodTypeTableEntryAddress(cpIndex);

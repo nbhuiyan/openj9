@@ -3275,14 +3275,10 @@ TR_J9ByteCodeIlGenerator::genInvokeDynamic(int32_t callSiteIndex)
 #if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
 
    TR_ResolvedMethod * owningMethod = _methodSymbol->getResolvedMethod();
-   if (!owningMethod->isUnresolvedCallSiteTableEntry(callSiteIndex))
-      {
-      J9InvokeCacheEntry *invokeCache = (J9InvokeCacheEntry *) _methodSymbol->getResolvedMethod()->callSiteTableEntryAddress(callSiteIndex);
-      TR_ASSERT_FATAL(invokeCache, "failed to retrieve InvokeCache entry");
-      TR_ResolvedMethod * targetMethod = fej9()->createResolvedMethod(_trMemory, fej9()->targetMethodFromMemberName((uintptr_t)invokeCache->target), owningMethod);
-      if (targetMethod)
-         symRef = symRefTab()->findOrCreateMethodSymbol(_methodSymbol->getResolvedMethodIndex(), -1, targetMethod, TR::MethodSymbol::Static);
-      }
+   J9InvokeCacheEntry *invokeCache = (J9InvokeCacheEntry *) _methodSymbol->getResolvedMethod()->callSiteTableEntryAddress(callSiteIndex);
+   TR_ASSERT_FATAL(invokeCache, "failed to retrieve InvokeCache entry");
+   TR_ResolvedMethod * targetMethod = fej9()->createResolvedMethod(_trMemory, fej9()->targetMethodFromMemberName((uintptr_t)invokeCache->target), owningMethod);
+   TR::SymbolReference * symRef = symRefTab()->findOrCreateMethodSymbol(_methodSymbol->getResolvedMethodIndex(), -1, targetMethod, TR::MethodSymbol::Static);
 
    // Push the appendix object to stack
 
@@ -3339,8 +3335,8 @@ TR_J9ByteCodeIlGenerator::genInvokeHandle(int32_t cpIndex)
       comp()->failCompilation<J9::FSDHasInvokeHandle>("FSD_HAS_INVOKEHANDLE 1");
 #if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
 
-   J9InvokeCacheEntry *invokeCache = (J9InvokeCacheEntry *) fej9()->methodTypeTableEntryAddress(cpIndex);
-   TR_ASSERT_FATAL(invokeCache, "Unable to retrieve InvokeCacheEntry")
+   J9InvokeCacheEntry *invokeCache = (J9InvokeCacheEntry *) _methodSymbol->getResolvedMethod()->methodTypeTableEntryAddress(cpIndex);
+   TR_ASSERT_FATAL(invokeCache, "Unable to retrieve InvokeCacheEntry");
 
    TR_ResolvedMethod * targetMethod = fej9()->createResolvedMethod(_trMemory, fej9()->targetMethodFromMemberName((uintptr_t)invokeCache->target), _methodSymbol->getResolvedMethod());
 
@@ -3353,7 +3349,7 @@ TR_J9ByteCodeIlGenerator::genInvokeHandle(int32_t cpIndex)
 
    // Emit the call
    //
-   TR::Node* callNode = genInvokeDirect(invokeExactSymRef); // use geninvokedirect instead
+   TR::Node* callNode = genInvokeDirect(invokeExactSymRef);
 
    _invokeHandleCalls->set(_bcIndex);
 
@@ -3411,7 +3407,7 @@ TR_J9ByteCodeIlGenerator::genInvokeHandle(TR::SymbolReference *invokeExactSymRef
 
 #if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
 TR::Node *
-TR_J9ByteCodeIlGenerator::appendixObjectFromInvokeDynamicSideTableSymbol(int32_t callSiteIndex)
+TR_J9BytecodeIlGenerator::appendixObjectFromInvokeDynamicSideTableSymbol(int32_t callSiteIndex)
    {
    TR::SymbolReference *symRef = symRefTab()->findOrCreateCallSiteTableEntrySymbol(_methodSymbol, callSiteIndex);
    TR::Node * load = loadSymbol(TR::aload, symRef);

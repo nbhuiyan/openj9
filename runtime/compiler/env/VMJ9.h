@@ -759,6 +759,7 @@ public:
 
 // Liqun's API - TODO - do not include in own commit
 #if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
+   void* getAddressAt(uintptr_t object, uintptr_t offset);
    /*
     * \brief
     *    Return MemberName.vmtarget, a J9method pointer for method represented by `memberName`

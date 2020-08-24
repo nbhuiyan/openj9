@@ -611,19 +611,20 @@ InterpreterEmulator::visitInvokedynamic()
    int32_t callSiteIndex = next2Bytes();
    TR_ResolvedMethod * owningMethod = _methodSymbol->getResolvedMethod();
 
-   J9InvokeCacheEntry *invokeCache = (J9InvokeCacheEntry *) _methodSymbol->getResolvedMethod()->callSiteTableEntryAddress(callSiteIndex);
+   J9InvokeCacheEntry *invokeCache = (J9InvokeCacheEntry *) owningMethod->callSiteTableEntryAddress(callSiteIndex);
    if (!invokeCache) return; // unresolved
 
    // add appendix object to knot and push to stack
    TR::KnownObjectTable *knot = comp()->getOrCreateKnownObjectTable();
-   push(new (trStackMemory()) knot->getOrCreateIndexAt((uintptr_t*) invokeCache->appendix));
+   push(new (trStackMemory()) KnownObjOperand(knot->getOrCreateIndexAt((uintptr_t*) invokeCache->appendix)));
 
-   TR_ResolvedMethod * targetMethod = fej9()->createResolvedMethod(this->_trMemory(), fej9()->targetMethodFromMemberName((uintptr_t) invokeCache->target), owningMethod);
+   TR_J9VMBase *fej9 = comp()->fej9();
+   TR_ResolvedMethod * targetMethod = fej9->createResolvedMethod(this->trMemory(), fej9->targetMethodFromMemberName((uintptr_t) invokeCache->target), owningMethod);
 
    bool allconsts = false;
-   if (targetMethod->numberOfExplicitParameters() > 0 && targetMethod->numberOfExplicitParameters() <= _pca.getNumPrevConstArgs(resolvedMethod->numberOfExplicitParameters()))
+   if (targetMethod->numberOfExplicitParameters() > 0 && targetMethod->numberOfExplicitParameters() <= _pca.getNumPrevConstArgs(targetMethod->numberOfExplicitParameters()))
          allconsts = true;
-   TR_CallSite *callsite = new (comp()->trHeapMemory()) TR_DirectCallSite((_calltarget->_calleeMethod, callNodeTreeTop,   parent,
+   TR_CallSite *callsite = new (comp()->trHeapMemory()) TR_DirectCallSite(_calltarget->_calleeMethod, callNodeTreeTop,   parent,
                                                                         callNode, interfaceMethod, targetMethod->classOfMethod(),
                                                                         -1, -1, targetMethod,
                                                                         resolvedSymbol, isIndirectCall, isInterface, *_newBCInfo, comp(),
@@ -655,8 +656,8 @@ InterpreterEmulator::visitInvokedynamic()
                                                                         _recursionDepth, allconsts);
 
       findTargetAndUpdateInfoForCallsite(callsite);
-#endif //J9VM_OPT_OPENJDK_METHODHANDLE
       }
+#endif //J9VM_OPT_OPENJDK_METHODHANDLE
    }
 
 #if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
@@ -675,19 +676,20 @@ InterpreterEmulator::visitInvokehandle()
    int32_t cpIndex = next2Bytes();
    TR_ResolvedMethod * owningMethod = _methodSymbol->getResolvedMethod();
 
-   J9InvokeCacheEntry *invokeCache = (J9InvokeCacheEntry *) (J9InvokeCacheEntry *) fej9()->methodTypeTableEntryAddress(cpIndex);
+   J9InvokeCacheEntry *invokeCache = (J9InvokeCacheEntry *) owningMethod->methodTypeTableEntryAddress(cpIndex);
    if (!invokeCache) return; // unresolved
 
    // add appendix object to knot and push to stack
    TR::KnownObjectTable *knot = comp()->getOrCreateKnownObjectTable();
-   push(new (trStackMemory()) knot->getOrCreateIndexAt((uintptr_t*) invokeCache->appendix));
+   push(new (trStackMemory()) KnownObjOperand(knot->getOrCreateIndexAt((uintptr_t*) invokeCache->appendix)));
 
-   TR_ResolvedMethod * targetMethod = fej9()->createResolvedMethod(this->_trMemory(), fej9()->targetMethodFromMemberName((uintptr_t) invokeCache->target), owningMethod);
+   TR_J9VMBase *fej9 = comp()->fej9();
+   TR_ResolvedMethod * targetMethod = fej9->createResolvedMethod(this->trMemory(), fej9->targetMethodFromMemberName((uintptr_t) invokeCache->target), owningMethod);
 
    bool allconsts = false;
-   if (targetMethod->numberOfExplicitParameters() > 0 && targetMethod->numberOfExplicitParameters() <= _pca.getNumPrevConstArgs(resolvedMethod->numberOfExplicitParameters()))
+   if (targetMethod->numberOfExplicitParameters() > 0 && targetMethod->numberOfExplicitParameters() <= _pca.getNumPrevConstArgs(targetMethod->numberOfExplicitParameters()))
          allconsts = true;
-   TR_CallSite *callsite = new (comp()->trHeapMemory()) TR_DirectCallSite((_calltarget->_calleeMethod, callNodeTreeTop,   parent,
+   TR_CallSite *callsite = new (comp()->trHeapMemory()) TR_DirectCallSite(_calltarget->_calleeMethod, callNodeTreeTop,   parent,
                                                                         callNode, interfaceMethod, targetMethod->classOfMethod(),
                                                                         -1, cpIndex, targetMethod,
                                                                         resolvedSymbol, isIndirectCall, isInterface, *_newBCInfo, comp(),
