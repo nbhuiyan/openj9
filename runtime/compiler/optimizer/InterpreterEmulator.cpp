@@ -614,14 +614,18 @@ InterpreterEmulator::visitInvokedynamic()
    J9InvokeCacheEntry *invokeCache = (J9InvokeCacheEntry *) _methodSymbol->getResolvedMethod()->callSiteTableEntryAddress(callSiteIndex);
    if (!invokeCache) return; // unresolved
 
-   TR_ResolvedMethod * targetMethod = fej9()->createMethodHandleArchetypeSpecimen(this->_trMemory(), (TR_OpaqueMethodBlock *) fej9()->targetMethodFromMemberName((uintptr_t) invokeCache->target), owningMethod);
+   // add appendix object to knot and push to stack
+   TR::KnownObjectTable *knot = comp()->getOrCreateKnownObjectTable();
+   push(new (trStackMemory()) knot->getOrCreateIndexAt((uintptr_t*) invokeCache->appendix));
+
+   TR_ResolvedMethod * targetMethod = fej9()->createResolvedMethod(this->_trMemory(), fej9()->targetMethodFromMemberName((uintptr_t) invokeCache->target), owningMethod);
 
    bool allconsts = false;
    if (targetMethod->numberOfExplicitParameters() > 0 && targetMethod->numberOfExplicitParameters() <= _pca.getNumPrevConstArgs(resolvedMethod->numberOfExplicitParameters()))
          allconsts = true;
    TR_CallSite *callsite = new (comp()->trHeapMemory()) TR_DirectCallSite((_calltarget->_calleeMethod, callNodeTreeTop,   parent,
                                                                         callNode, interfaceMethod, targetMethod->classOfMethod(),
-                                                                        -1, callSiteIndex, targetMethod,
+                                                                        -1, -1, targetMethod,
                                                                         resolvedSymbol, isIndirectCall, isInterface, *_newBCInfo, comp(),
                                                                         _recursionDepth, allconsts);
 
@@ -674,7 +678,11 @@ InterpreterEmulator::visitInvokehandle()
    J9InvokeCacheEntry *invokeCache = (J9InvokeCacheEntry *) (J9InvokeCacheEntry *) fej9()->methodTypeTableEntryAddress(cpIndex);
    if (!invokeCache) return; // unresolved
 
-   TR_ResolvedMethod * targetMethod = fej9()->createMethodHandleArchetypeSpecimen(this->_trMemory(), (TR_OpaqueMethodBlock *) fej9()->targetMethodFromMemberName((uintptr_t) invokeCache->target), owningMethod);
+   // add appendix object to knot and push to stack
+   TR::KnownObjectTable *knot = comp()->getOrCreateKnownObjectTable();
+   push(new (trStackMemory()) knot->getOrCreateIndexAt((uintptr_t*) invokeCache->appendix));
+
+   TR_ResolvedMethod * targetMethod = fej9()->createResolvedMethod(this->_trMemory(), fej9()->targetMethodFromMemberName((uintptr_t) invokeCache->target), owningMethod);
 
    bool allconsts = false;
    if (targetMethod->numberOfExplicitParameters() > 0 && targetMethod->numberOfExplicitParameters() <= _pca.getNumPrevConstArgs(resolvedMethod->numberOfExplicitParameters()))
@@ -979,7 +987,6 @@ InterpreterEmulator::visitInvokeinterface()
    findTargetAndUpdateInfoForCallsite(callsite);
    }
 
-//todo?
 void
 InterpreterEmulator::findTargetAndUpdateInfoForCallsite(TR_CallSite *callsite)
    {

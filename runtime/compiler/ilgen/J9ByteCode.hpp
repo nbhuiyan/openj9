@@ -80,7 +80,7 @@ enum TR_J9ByteCode
    J9BCgetstatic, J9BCputstatic,
    J9BCgetfield, J9BCputfield,
    J9BCinvokevirtual, J9BCinvokespecial, J9BCinvokestatic, J9BCinvokeinterface, J9BCinvokedynamic, J9BCinvokehandle, J9BCinvokespecialsplit,
-#if !defined(VMJ9_OPT_OPENJDK_METHODHANDLE)
+#if !defined(J9VM_OPT_OPENJDK_METHODHANDLE)
    J9BCinvokehandlegeneric,
 #endif
 

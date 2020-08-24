@@ -6747,6 +6747,9 @@ TR_ResolvedJ9Method::handleUnresolvedVirtualMethodInCP(int32_t cpIndex, bool * u
    {
    }
 
+//todo - update
+
+//call kind - static
 TR_ResolvedMethod *
 TR_ResolvedJ9Method::getResolvedDynamicMethod(TR::Compilation * comp, I_32 callSiteIndex, bool * unresolvedInCP)
    {

@@ -757,9 +757,34 @@ public:
 
    bool hasMethodTypesSideTable();
 
-#if defined(VMJ9_OPT_OPENJDK_METHODHANDLE)
-   J9Method* targetMethodFromMemberName(uintptr_t memberName);
-   J9Method* targetMethodFromMethodHandle(uintptr_t methodHandle);
+// Liqun's API - TODO - do not include in own commit
+#if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
+   /*
+    * \brief
+    *    Return MemberName.vmtarget, a J9method pointer for method represented by `memberName`
+    *    Caller must acquire VM access
+    */
+   TR_OpaqueMethodBlock* targetMethodFromMemberName(uintptr_t memberName);
+   /*
+    * \brief
+    *    Return MemberName.vmtarget, a J9method pointer for method represented by `memberName`
+    *    VM access is not required
+    */
+   TR_OpaqueMethodBlock* targetMethodFromMemberName(TR::Compilation* comp, TR::KnownObjectTable::Index objIndex);
+   /*
+    * \brief
+    *    Return MethodHandle.form.vmentry.vmtarget, J9method for the underlying java method
+    *    The J9Method is the target to be invoked intrinsically by MethodHandle.invokeBasic
+    *    Caller must acquire VM access
+    */
+   TR_OpaqueMethodBlock* targetMethodFromMethodHandle(uintptr_t methodHandle);
+   /*
+    * \brief
+    *    Return MethodHandle.form.vmentry.vmtarget, J9method for the underlying java method
+    *    The J9Method is the target to be invoked intrinsically by MethodHandle.invokeBasic
+    *    VM access is not required
+    */
+   TR_OpaqueMethodBlock* targetMethodFromMethodHandle(TR::Compilation* comp, TR::KnownObjectTable::Index objIndex);
 #endif
 
 

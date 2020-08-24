@@ -122,9 +122,11 @@ private:
    void         genInvokeVirtual(int32_t);
    void         genInvokeInterface(int32_t);
    void         genInvokeDynamic(int32_t callSiteIndex);
-   TR::Node *    genInvokeHandle(int32_t cpIndex);
-#if !defined(VMJ9_OPT_OPENJDK_METHODHANDLE)
-   TR::Node *    genInvokeHandleGeneric(int32_t cpIndex);
+   TR::Node *   genInvokeHandle(int32_t cpIndex);
+   TR::Node *   genInvokeHandleGeneric(int32_t cpIndex);
+#if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
+   TR::Node *   appendixObjectFromInvokeDynamicSideTableSymbol(int32_t callSiteIndex);
+   TR::Node *   appendixObjectFromInvokeHandleSideTableSymbol(int32_t cpIndex);
 #endif
 
    TR::Node *    genHandleTypeCheck(TR::Node *handle, TR::Node *expectedType);
@@ -242,6 +244,8 @@ private:
    bool         valueMayBeModified(TR::Node *, TR::Node *);
    TR::Node *    genCompressedRefs(TR::Node *, bool genTT = true, int32_t isLoad = 1);
    void         abortForUnresolvedValueTypeOp(const char* bytecodeName, const char* refType);
+
+#if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
 
    // IlGenerator
    //

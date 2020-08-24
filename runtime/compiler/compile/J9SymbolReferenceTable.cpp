@@ -415,7 +415,12 @@ J9::SymbolReferenceTable::findOrCreateCallSiteTableEntrySymbol(TR::ResolvedMetho
    TR::SymbolReference *symRef;
    TR_SymRefIterator i(aliasBuilder.callSiteTableEntrySymRefs(), self());
    TR_ResolvedMethod *owningMethod = owningMethodSymbol->getResolvedMethod();
+#if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
+   J9InvokeCacheEntry *invokeCache = (J9InvokeCacheEntry *) owningMethod->callSiteTableEntryAddress(callSiteIndex);
+   void *entryLocation = (void *) invokeCache->appendix;
+#else
    void *entryLocation = owningMethod->callSiteTableEntryAddress(callSiteIndex);
+#endif
    for (symRef = i.getNext(); symRef; symRef = i.getNext())
       if (  owningMethodSymbol->getResolvedMethodIndex() == symRef->getOwningMethodIndex()
          && symRef->getSymbol()->castToStaticSymbol()->getStaticAddress() == entryLocation)
@@ -458,7 +463,12 @@ J9::SymbolReferenceTable::findOrCreateMethodTypeTableEntrySymbol(TR::ResolvedMet
    TR::SymbolReference *symRef;
    TR_SymRefIterator i(aliasBuilder.methodTypeTableEntrySymRefs(), self());
    TR_ResolvedMethod *owningMethod = owningMethodSymbol->getResolvedMethod();
+#if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
+   J9InvokeCacheEntry *invokeCache = (J9InvokeCacheEntry *) fej9()->methodTypeTableEntryAddress(cpIndex);
+   void *entryLocation = (void *) invokeCache->appendix;
+#else
    void *entryLocation = owningMethod->methodTypeTableEntryAddress(cpIndex);
+#endif
    for (symRef = i.getNext(); symRef; symRef = i.getNext())
       if (  owningMethodSymbol->getResolvedMethodIndex() == symRef->getOwningMethodIndex()
          && symRef->getSymbol()->castToStaticSymbol()->getStaticAddress() == entryLocation)
