@@ -616,10 +616,15 @@ InterpreterEmulator::visitInvokedynamic()
 
    // add appendix object to knot and push to stack
    TR::KnownObjectTable *knot = comp()->getOrCreateKnownObjectTable();
-   push(new (trStackMemory()) KnownObjOperand(knot->getOrCreateIndexAt((uintptr_t*) invokeCache->appendix)));
+   if (knot) push(new (trStackMemory()) KnownObjOperand(knot->getOrCreateIndexAt((uintptr_t*) (&invokeCache->appendix))));
 
    TR_J9VMBase *fej9 = comp()->fej9();
-   TR_ResolvedMethod * targetMethod = fej9->createResolvedMethod(this->trMemory(), fej9->targetMethodFromMemberName((uintptr_t) invokeCache->target), owningMethod);
+   TR_OpaqueMethodBlock* targetMethodObj = 0;
+      {
+      TR::VMAccessCriticalSection i(fej9);
+      targetMethodObj = fej9->targetMethodFromMemberName((uintptr_t) &(invokeCache->target));
+      }
+   TR_ResolvedMethod * targetMethod = fej9->createResolvedMethod(this->trMemory(), targetMethodObj, owningMethod);
 
    bool allconsts = false;
    if (targetMethod->numberOfExplicitParameters() > 0 && targetMethod->numberOfExplicitParameters() <= _pca.getNumPrevConstArgs(targetMethod->numberOfExplicitParameters()))
@@ -681,10 +686,15 @@ InterpreterEmulator::visitInvokehandle()
 
    // add appendix object to knot and push to stack
    TR::KnownObjectTable *knot = comp()->getOrCreateKnownObjectTable();
-   push(new (trStackMemory()) KnownObjOperand(knot->getOrCreateIndexAt((uintptr_t*) invokeCache->appendix)));
+   if (knot) push(new (trStackMemory()) KnownObjOperand(knot->getOrCreateIndexAt((uintptr_t*) (&invokeCache->appendix))));
 
    TR_J9VMBase *fej9 = comp()->fej9();
-   TR_ResolvedMethod * targetMethod = fej9->createResolvedMethod(this->trMemory(), fej9->targetMethodFromMemberName((uintptr_t) invokeCache->target), owningMethod);
+   TR_OpaqueMethodBlock * targetMethodObj = 0;
+      {
+      TR::VMAccessCriticalSection vmAccess(fej9);
+      targetMethodObj = fej9->targetMethodFromMemberName((uintptr_t) invokeCache->target);
+      }
+   TR_ResolvedMethod * targetMethod = fej9->createResolvedMethod(this->trMemory(), targetMethodObj, owningMethod);
 
    bool allconsts = false;
    if (targetMethod->numberOfExplicitParameters() > 0 && targetMethod->numberOfExplicitParameters() <= _pca.getNumPrevConstArgs(targetMethod->numberOfExplicitParameters()))

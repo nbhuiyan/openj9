@@ -6747,9 +6747,6 @@ TR_ResolvedJ9Method::handleUnresolvedVirtualMethodInCP(int32_t cpIndex, bool * u
    {
    }
 
-//todo - update
-
-//call kind - static
 TR_ResolvedMethod *
 TR_ResolvedJ9Method::getResolvedDynamicMethod(TR::Compilation * comp, I_32 callSiteIndex, bool * unresolvedInCP)
    {
@@ -6760,6 +6757,17 @@ TR_ResolvedJ9Method::getResolvedDynamicMethod(TR::Compilation * comp, I_32 callS
 #else
    TR_ResolvedMethod *result = NULL;
 
+#if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
+   TR_ResolvedMethod * owningMethod = comp->getCurrentMethod();
+   J9InvokeCacheEntry *invokeCache = (J9InvokeCacheEntry *) owningMethod->callSiteTableEntryAddress(callSiteIndex);
+   if (!invokeCache)
+      comp->failCompilation<TR::CompilationException>("unable to retrieve side table entry for invokeDynamic");
+      {
+      TR::VMAccessCriticalSection getResolvedDynamicMethod(fej9());
+      TR_OpaqueMethodBlock * targetJ9MethodBlock = fej9()->targetMethodFromMemberName((uintptr_t)(&invokeCache->target),owningMethod);
+      result = fej9()->createResolvedMethod(comp->trMemory(), targetJ9MethodBlock, owningMethod);
+      }
+#else
    // JSR292: "Dynamic methods" differ from other kinds because the bytecode doesn't
    // contain a CP index.  Rather, it contains an index into the class's call site table,
    // which it a table used only for invokedynamic.
@@ -6790,9 +6798,9 @@ TR_ResolvedJ9Method::getResolvedDynamicMethod(TR::Compilation * comp, I_32 callS
       TR_OpaqueMethodBlock *dummyInvokeExact = _fe->getMethodFromName("java/lang/invoke/MethodHandle", "invokeExact", JSR292_invokeExactSig);
       result = _fe->createResolvedMethodWithSignature(comp->trMemory(), dummyInvokeExact, NULL, utf8Data(signature), J9UTF8_LENGTH(signature), this);
       }
-
+#endif /* J9VM_OPT_OPENJDK_METHODHANDLE */
    return result;
-#endif
+#endif /* TURN_OFF_INLINING */
    }
 
 TR_ResolvedMethod *
@@ -6805,6 +6813,17 @@ TR_ResolvedJ9Method::getResolvedHandleMethod(TR::Compilation * comp, I_32 cpInde
 #else
    TR_ResolvedMethod *result = NULL;
 
+#if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
+   TR_ResolvedMethod * owningMethod = comp->getCurrentMethod();
+   J9InvokeCacheEntry *invokeCache = (J9InvokeCacheEntry *) owningMethod->methodTypeTableEntryAddress(cpIndex);
+   if (!invokeCache)
+      comp->failCompilation<TR::CompilationException>("unable to retrieve side table entry for invokeHandle");
+      {
+      TR::VMAccessCriticalSection getResolvedHandleMethod(fej9());
+      TR_OpaqueMethodBlock * targetJ9MethodBlock = fej9()->targetMethodFromMemberName((uintptr_t)(&invokeCache->target),owningMethod);
+      result = fej9()->createResolvedMethod(comp->trMemory(), targetJ9MethodBlock, owningMethod);
+      }
+#else
    // JSR292: "Handle methods" differ from other kinds because the CP entry is
    // not a MethodRef, but rather a MethodTypeRef.
 
@@ -6826,7 +6845,7 @@ TR_ResolvedJ9Method::getResolvedHandleMethod(TR::Compilation * comp, I_32 cpInde
       char   *signature = utf8Data(J9ROMNAMEANDSIGNATURE_SIGNATURE(nameAndSig), signatureLength);
       result = _fe->createResolvedMethodWithSignature(comp->trMemory(), dummyInvokeExact, NULL, signature, signatureLength, this);
       }
-
+#endif /* J9VM_OPT_OPENJDK_METHODHANDLE */
    return result;
 #endif
    }
