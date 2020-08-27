@@ -6764,7 +6764,7 @@ TR_ResolvedJ9Method::getResolvedDynamicMethod(TR::Compilation * comp, I_32 callS
       comp->failCompilation<TR::CompilationException>("unable to retrieve side table entry for invokeDynamic");
       {
       TR::VMAccessCriticalSection getResolvedDynamicMethod(fej9());
-      TR_OpaqueMethodBlock * targetJ9MethodBlock = fej9()->targetMethodFromMemberName((uintptr_t)(&invokeCache->target),owningMethod);
+      TR_OpaqueMethodBlock * targetJ9MethodBlock = fej9()->targetMethodFromMemberName((uintptr_t)(&invokeCache->target));
       result = fej9()->createResolvedMethod(comp->trMemory(), targetJ9MethodBlock, owningMethod);
       }
 #else
@@ -6820,7 +6820,7 @@ TR_ResolvedJ9Method::getResolvedHandleMethod(TR::Compilation * comp, I_32 cpInde
       comp->failCompilation<TR::CompilationException>("unable to retrieve side table entry for invokeHandle");
       {
       TR::VMAccessCriticalSection getResolvedHandleMethod(fej9());
-      TR_OpaqueMethodBlock * targetJ9MethodBlock = fej9()->targetMethodFromMemberName((uintptr_t)(&invokeCache->target),owningMethod);
+      TR_OpaqueMethodBlock * targetJ9MethodBlock = fej9()->targetMethodFromMemberName((uintptr_t)(&invokeCache->target));
       result = fej9()->createResolvedMethod(comp->trMemory(), targetJ9MethodBlock, owningMethod);
       }
 #else
