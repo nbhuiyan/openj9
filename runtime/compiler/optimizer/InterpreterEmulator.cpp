@@ -621,8 +621,8 @@ InterpreterEmulator::visitInvokedynamic()
    TR_J9VMBase *fej9 = comp()->fej9();
    TR_OpaqueMethodBlock* targetMethodObj = 0;
       {
-      TR::VMAccessCriticalSection i(fej9);
-      targetMethodObj = fej9->targetMethodFromMemberName((uintptr_t) &(invokeCache->target));
+      TR::VMAccessCriticalSection vmAccess(fej9);
+      targetMethodObj = fej9->targetMethodFromMemberName((uintptr_t) invokeCache->target);
       }
    TR_ResolvedMethod * targetMethod = fej9->createResolvedMethod(this->trMemory(), targetMethodObj, owningMethod);
 
