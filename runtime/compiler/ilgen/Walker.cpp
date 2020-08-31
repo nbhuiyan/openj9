@@ -3278,7 +3278,7 @@ TR_J9ByteCodeIlGenerator::genInvokeDynamic(int32_t callSiteIndex)
 
    // Push the appendix object to stack
    TR::Node *appendix = appendixObjectFromInvokeDynamicSideTableSymbol(callSiteIndex);
-   push(appendix);
+   //push(appendix);
 
    // Emit the call
    //
@@ -3334,7 +3334,7 @@ TR_J9ByteCodeIlGenerator::genInvokeHandle(int32_t cpIndex)
 
    // Push the appendix object to stack
    TR::Node *appendix = appendixObjectFromInvokeHandleSideTableSymbol(cpIndex);
-   push(appendix);
+   //push(appendix);
 
    // Emit the call
    //
