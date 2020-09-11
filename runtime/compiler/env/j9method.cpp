@@ -6383,6 +6383,8 @@ TR_ResolvedJ9Method::getVirtualMethod(TR_J9VMBase *fej9, J9ConstantPool *cp, I_3
    *vTableOffset >>= 8;
    if (J9VTABLE_INITIAL_VIRTUAL_OFFSET == *vTableOffset)
       {
+      if (unresolvedInCP)
+         *unresolvedInCP = true;
       TR::VMAccessCriticalSection resolveVirtualMethodRef(fej9);
       *vTableOffset = fej9->_vmFunctionTable->resolveVirtualMethodRefInto(fej9->vmThread(), cp, cpIndex, J9_RESOLVE_FLAG_JIT_COMPILE_TIME, &ramMethod, NULL);
       }
@@ -6643,6 +6645,34 @@ TR_ResolvedJ9Method::getResolvedSpecialMethod(TR::Compilation * comp, I_32 cpInd
    return resolvedMethod;
    }
 
+bool
+TR_ResolvedJ9Method::forceCompileTimeResolveMethod(I_32 cpIndex)
+   {
+   // Check if the method is invokeBasic, linkToStatic, linkToSpecial, linkToVirtual, linkToInterface
+   // These methods have to be resolved
+   I_32 realCPIndex = jitGetRealCPIndex(_fe->vmThread(), romClassPtr(), methodCPIndex);
+   J9ROMMethodRef *romMethodRef = (J9ROMMethodRef *)(cp()->romConstantPool + realCPIndex);
+   J9ROMNameAndSignature *nameAndSig = J9ROMMETHODREF_NAMEANDSIGNATURE(romMethodRef);
+   int32_t methodNameLength;
+   char   *methodName = utf8Data(J9ROMNAMEANDSIGNATURE_NAME(nameAndSig), methodNameLength);
+
+   I_32 classCPIndex = classCPIndexOfMethod(cpIndex);
+   J9ROMClassRef * classRef = (J9ROMClassRef *)(cp()->romConstantPool + classCPIndex);
+   int32_t classNameLength;
+   char* className = utf8Data(J9ROMCLASSREF_NAME(classRef), classNameLength);
+
+   if (classNameLength == strlen(JSR292_MethodHandle) &&
+       !strncmp(className, JSR292_MethodHandle, classNameLength))
+      {
+      // Compare method name
+      if (methodNameLength == 11 &&
+          !strncmp(methodName, "invokeBasic", methodNameLength))
+         return true;
+      }
+
+   return false;
+   }
+
 TR_ResolvedMethod *
 TR_ResolvedJ9Method::getResolvedPossiblyPrivateVirtualMethod(TR::Compilation * comp, I_32 cpIndex, bool ignoreRtResolve, bool * unresolvedInCP)
    {
@@ -6652,6 +6682,8 @@ TR_ResolvedJ9Method::getResolvedPossiblyPrivateVirtualMethod(TR::Compilation * c
 #else
    TR_ResolvedMethod *resolvedMethod = NULL;
 
+   bool forceCompileTimeResolve = forceCompileTimeResolveMethod(cpIndex);
+
    // See if the constant pool entry is already resolved or not
    //
    if (unresolvedInCP)
@@ -6659,7 +6691,7 @@ TR_ResolvedJ9Method::getResolvedPossiblyPrivateVirtualMethod(TR::Compilation * c
 
    if (!((_fe->_jitConfig->runtimeFlags & J9JIT_RUNTIME_RESOLVE) &&
          !comp->ilGenRequest().details().isMethodHandleThunk() && // cmvc 195373
-         performTransformation(comp, "Setting as unresolved virtual call cpIndex=%d\n",cpIndex) ) || ignoreRtResolve)
+         performTransformation(comp, "Setting as unresolved virtual call cpIndex=%d\n",cpIndex) ) || ignoreRtResolve || forceCompileTimeResolve)
       {
       // only call the resolve if unresolved
       UDATA vTableOffset = 0;
@@ -6682,6 +6714,8 @@ TR_ResolvedJ9Method::getResolvedPossiblyPrivateVirtualMethod(TR::Compilation * c
          }
 
       }
+
+   TR_ASSERT_FATAL(resolvedMethod || !forceCompileTimeResolve, "Method has to be resolved in %s at cpIndex  %d", signature(comp->trMemory()), cpIndex);
 
    if (resolvedMethod == NULL)
       {
