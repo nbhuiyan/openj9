@@ -418,7 +418,11 @@ J9::SymbolReferenceTable::findOrCreateHandleMethodSymbol(TR::ResolvedMethodSymbo
 
 
 TR::SymbolReference *
+#if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
+J9::SymbolReferenceTable::findOrCreateCallSiteTableEntrySymbol(TR::ResolvedMethodSymbol * owningMethodSymbol, int32_t callSiteIndex, bool isMemberNameObject)
+#else
 J9::SymbolReferenceTable::findOrCreateCallSiteTableEntrySymbol(TR::ResolvedMethodSymbol * owningMethodSymbol, int32_t callSiteIndex)
+#endif
    {
    TR::SymbolReference *symRef;
    TR_SymRefIterator i(aliasBuilder.callSiteTableEntrySymRefs(), self());
@@ -427,7 +431,11 @@ J9::SymbolReferenceTable::findOrCreateCallSiteTableEntrySymbol(TR::ResolvedMetho
    J9InvokeCacheEntry *invokeCache = (J9InvokeCacheEntry *) owningMethod->callSiteTableEntryAddress(callSiteIndex);
    if (!invokeCache)
       comp()->failCompilation<TR::CompilationException>("unable to retrieve side table entry for invokeDynamic");
-   void * entryLocation = (void *) (&invokeCache->appendix);
+   void * entryLocation = NULL;
+   if (!isMemberNameObject)
+      entryLocation = (void *) (&invokeCache->appendix);
+   else
+      entryLocation = (void *) (&invokeCache->target);
 #else
    void *entryLocation = owningMethod->callSiteTableEntryAddress(callSiteIndex);
 #endif
@@ -468,7 +476,11 @@ J9::SymbolReferenceTable::findOrCreateCallSiteTableEntrySymbol(TR::ResolvedMetho
 
 
 TR::SymbolReference *
+#if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
+J9::SymbolReferenceTable::findOrCreateMethodTypeTableEntrySymbol(TR::ResolvedMethodSymbol * owningMethodSymbol, int32_t cpIndex, bool isMemberNameObject)
+#else
 J9::SymbolReferenceTable::findOrCreateMethodTypeTableEntrySymbol(TR::ResolvedMethodSymbol * owningMethodSymbol, int32_t cpIndex)
+#endif
    {
    TR::SymbolReference *symRef;
    TR_SymRefIterator i(aliasBuilder.methodTypeTableEntrySymRefs(), self());
@@ -477,7 +489,11 @@ J9::SymbolReferenceTable::findOrCreateMethodTypeTableEntrySymbol(TR::ResolvedMet
    J9InvokeCacheEntry *invokeCache = (J9InvokeCacheEntry *) owningMethod->methodTypeTableEntryAddress(cpIndex);
    if (!invokeCache)
       comp()->failCompilation<TR::CompilationException>("unable to retrieve side table entry for invokeDynamic");
-   void *entryLocation = (void *) (&invokeCache->appendix);
+   void * entryLocation = NULL;
+   if (!isMemberNameObject)
+      entryLocation = (void *) (&invokeCache->appendix);
+   else
+      entryLocation = (void *) (&invokeCache->target);
 #else
    void *entryLocation = owningMethod->methodTypeTableEntryAddress(cpIndex);
 #endif

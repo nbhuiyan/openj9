@@ -125,8 +125,8 @@ private:
    TR::Node *   genInvokeHandle(int32_t cpIndex);
    TR::Node *   genInvokeHandleGeneric(int32_t cpIndex);
 #if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
-   TR::Node *   appendixObjectFromInvokeDynamicSideTableSymbol(int32_t callSiteIndex);
-   TR::Node *   appendixObjectFromInvokeHandleSideTableSymbol(int32_t cpIndex);
+   void         loadFromSideTableForInvokeDynamic(int32_t callSiteIndex);
+   void         loadFromSideTableForInvokeHandle(int32_t cpIndex);
 #endif
 
    TR::Node *    genHandleTypeCheck(TR::Node *handle, TR::Node *expectedType);

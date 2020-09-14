@@ -6764,8 +6764,26 @@ TR_ResolvedJ9Method::getResolvedDynamicMethod(TR::Compilation * comp, I_32 callS
       comp->failCompilation<TR::CompilationException>("unable to retrieve side table entry for invokeDynamic");
       {
       TR::VMAccessCriticalSection getResolvedDynamicMethod(fej9());
-      TR_OpaqueMethodBlock * targetJ9MethodBlock = fej9()->targetMethodFromMemberName((uintptr_t) invokeCache->target);
-      result = fej9()->createResolvedMethod(comp->trMemory(), targetJ9MethodBlock, owningMethod);
+
+      J9Class    *ramClass = constantPoolHdr();
+      J9ROMClass *romClass = romClassPtr();
+
+      if (ramClass->callSites[callSiteIndex] == NULL)
+         {
+         J9SRP                 *namesAndSigs = (J9SRP*)J9ROMCLASS_CALLSITEDATA(romClass);
+         J9ROMNameAndSignature *nameAndSig   = NNSRP_GET(namesAndSigs[callSiteIndex], J9ROMNameAndSignature*);
+         J9UTF8                *signature    = J9ROMNAMEANDSIGNATURE_SIGNATURE(nameAndSig);
+
+         TR_OpaqueMethodBlock *dummyInvoke = _fe->getMethodFromName("java/lang/invoke/MethodHandle", "linkToStatic", "([Ljava/lang/Object;)V");
+         char * methodSigBuf[100];
+         sprintf(methodSigBuf, "%sLjava/lang/Object;Ljava/lang/Object;)V", strtok(utf8Data(signature),")"));
+         result = _fe->createResolvedMethodWithSignature(comp->trMemory(), dummyInvoke, NULL, methodSigBuf, strlen(methodSigBuf), owningMethod);
+         }
+      else
+         {
+         TR_OpaqueMethodBlock * targetJ9MethodBlock = fej9()->targetMethodFromMemberName((uintptr_t) invokeCache->target);
+         result = fej9()->createResolvedMethod(comp->trMemory(), targetJ9MethodBlock, owningMethod);
+         }
       }
 #else
    // JSR292: "Dynamic methods" differ from other kinds because the bytecode doesn't
@@ -6820,8 +6838,26 @@ TR_ResolvedJ9Method::getResolvedHandleMethod(TR::Compilation * comp, I_32 cpInde
       comp->failCompilation<TR::CompilationException>("unable to retrieve side table entry for invokeHandle");
       {
       TR::VMAccessCriticalSection getResolvedHandleMethod(fej9());
-      TR_OpaqueMethodBlock * targetJ9MethodBlock = fej9()->targetMethodFromMemberName((uintptr_t) invokeCache->target);
-      result = fej9()->createResolvedMethod(comp->trMemory(), targetJ9MethodBlock, owningMethod);
+
+      J9Class    *ramClass = constantPoolHdr();
+      J9ROMClass *romClass = romClassPtr();
+
+      if (isUnresolvedMethodTypeTableEntry(cpIndex))
+         {
+         J9ROMMethodRef *romMethodRef = (J9ROMMethodRef *)(cp()->romConstantPool + cpIndex);
+         J9ROMNameAndSignature *nameAndSig = J9ROMMETHODREF_NAMEANDSIGNATURE(romMethodRef);
+         J9UTF8                *signature    = J9ROMNAMEANDSIGNATURE_SIGNATURE(nameAndSig);
+
+         TR_OpaqueMethodBlock *dummyInvoke = _fe->getMethodFromName("java/lang/invoke/MethodHandle", "linkToStatic", "([Ljava/lang/Object;)V");
+         char * methodSigBuf[100];
+         sprintf(methodSigBuf, "%sLjava/lang/Object;Ljava/lang/Object;)V", strtok(utf8Data(signature),")"));
+         result = _fe->createResolvedMethodWithSignature(comp->trMemory(), dummyInvoke, NULL, methodSigBuf, strlen(methodSigBuf), owningMethod);
+         }
+      else
+         {
+         TR_OpaqueMethodBlock * targetJ9MethodBlock = fej9()->targetMethodFromMemberName((uintptr_t) invokeCache->target);
+         result = fej9()->createResolvedMethod(comp->trMemory(), targetJ9MethodBlock, owningMethod);
+         }
       }
 #else
    // JSR292: "Handle methods" differ from other kinds because the CP entry is

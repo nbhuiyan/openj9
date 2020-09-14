@@ -3276,9 +3276,7 @@ TR_J9ByteCodeIlGenerator::genInvokeDynamic(int32_t callSiteIndex)
 
    TR::SymbolReference * targetMethodSymRef = symRefTab()->findOrCreateDynamicMethodSymbol(_methodSymbol, callSiteIndex);
 
-   // Push the appendix object to stack
-   TR::Node *appendix = appendixObjectFromInvokeDynamicSideTableSymbol(callSiteIndex);
-   //push(appendix);
+   loadFromSideTableForInvokeDynamic(callSiteIndex);
 
    // Emit the call
    //
@@ -3332,9 +3330,7 @@ TR_J9ByteCodeIlGenerator::genInvokeHandle(int32_t cpIndex)
 
    TR::SymbolReference * targetMethodSymRef = symRefTab()->findOrCreateHandleMethodSymbol(_methodSymbol, cpIndex);
 
-   // Push the appendix object to stack
-   TR::Node *appendix = appendixObjectFromInvokeHandleSideTableSymbol(cpIndex);
-   //push(appendix);
+   loadFromSideTableForInvokeHandle(cpIndex);
 
    // Emit the call
    //
@@ -3392,34 +3388,36 @@ TR_J9ByteCodeIlGenerator::genInvokeHandle(TR::SymbolReference *invokeExactSymRef
    }
 
 #if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
-TR::Node *
-TR_J9BytecodeIlGenerator::appendixObjectFromInvokeDynamicSideTableSymbol(int32_t callSiteIndex)
+void
+TR_J9BytecodeIlGenerator::loadFromSideTableForInvokeDynamic(int32_t callSiteIndex)
    {
-   TR::SymbolReference *symRef = symRefTab()->findOrCreateCallSiteTableEntrySymbol(_methodSymbol, callSiteIndex);
-   TR::Node * load = loadSymbol(TR::aload, symRef);
-   if (!symRef->isUnresolved())
+   TR::SymbolReference *appendixSymRef = symRefTab()->findOrCreateCallSiteTableEntrySymbol(_methodSymbol, callSiteIndex);
+   TR::Node * appendixNode = loadSymbol(TR::aload, appendixSymRef);
+   if (!appendixSymRef->isUnresolved())
+      appendixNode->setIsNonNull(true);
+   else
       {
-      if (_methodSymbol->getResolvedMethod()->callSiteTableEntryAddress(callSiteIndex))
-         load->setIsNonNull(true);
-      else
-         load->setIsNull(true);
+      TR::SymbolReference *memberNameSymRef = symRefTab()->findOrCreateCallSiteTableEntrySymbol(_methodSymbol, callSiteIndex, true);
+      TR::Node * memberNameNode = loadSymbol(TR::aload, memberNameSymRef);
+      appendixNode->setIsNull(true);
+      memberNameNode->setIsNull(true);
       }
-   return load;
    }
 
-TR::Node *
-TR_J9BytecodeIlGenerator::appendixObjectFromInvokeHandleSideTableSymbol(int32_t cpIndex)
+void
+TR_J9BytecodeIlGenerator::loadFromSideTableForInvokeHandle(int32_t cpIndex)
    {
-   TR::SymbolReference *symRef = symRefTab()->findOrCreateMethodTypeTableEntrySymbol(_methodSymbol, cpIndex);
-   TR::Node * load = loadSymbol(TR::aload, symRef);
-   if (!symRef->isUnresolved())
+   TR::SymbolReference *appendixSymRef = symRefTab()->findOrCreateMethodTypeTableEntrySymbol(_methodSymbol, cpIndex);
+   TR::Node * appendixNode = loadSymbol(TR::aload, appendixSymRef);
+   if (!appendixSymRef->isUnresolved())
+      appendixNode->setIsNonNull(true);
+   else
       {
-      if (_methodSymbol->getResolvedMethod()->methodTypeTableEntryAddress(cpIndex))
-         load->setIsNonNull(true);
-      else
-         load->setIsNull(true);
+      TR::SymbolReference *memberNameSymRef = symRefTab()->findOrCreateMethodTypeTableEntrySymbol(_methodSymbol, callSiteIndex, true);
+      TR::Node * memberNameNode = loadSymbol(TR::aload, memberNameSymRef);
+      appendixNode->setIsNull(true);
+      memberNameNode->setIsNull(true);
       }
-   return load;
    }
 #endif
 
