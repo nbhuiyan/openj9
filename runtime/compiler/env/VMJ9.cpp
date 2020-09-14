@@ -4753,6 +4753,65 @@ TR_J9VMBase::methodHandle_jitInvokeExactThunk(uintptr_t methodHandle)
       "invokeExactThunk");
    }
 
+// Liqun's API -- todo: exclude from own commit
+#if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
+
+void*
+TR_J9VMBase::getAddressAt(uintptr_t object, uintptr_t offset)
+   {
+   TR_ASSERT(haveAccess(), "Must haveAccess in getAddressAt");
+   return J9OBJECT_ADDRESS_LOAD(vmThread(), object, offset);
+   }
+
+TR_OpaqueMethodBlock*
+TR_J9VMBase::targetMethodFromMemberName(TR::Compilation* comp, TR::KnownObjectTable::Index objIndex)
+   {
+   auto knot = comp->getKnownObjectTable();
+   if (knot && !knot->isNull(objIndex))
+      {
+      TR::VMAccessCriticalSection getTarget(this);
+      uintptr_t object = knot->getPointer(objIndex);
+      return targetMethodFromMemberName(object);
+      }
+   return NULL;
+   }
+
+TR_OpaqueMethodBlock*
+TR_J9VMBase::targetMethodFromMemberName(uintptr_t memberName)
+   {
+   TR_ASSERT(haveAccess(), "targetFromMemberName requires VM access");
+   return (TR_OpaqueMethodBlock*)getAddressAt(memberName, vmThread()->javaVM->vmtargetOffset);
+   }
+
+TR_OpaqueMethodBlock*
+TR_J9VMBase::targetMethodFromMethodHandle(TR::Compilation* comp, TR::KnownObjectTable::Index objIndex)
+   {
+   auto knot = comp->getKnownObjectTable();
+   if (objIndex != TR::KnownObjectTable::UNKNOWN &&
+       knot &&
+       !knot->isNull(objIndex))
+      {
+      TR::VMAccessCriticalSection getTarget(this);
+      uintptr_t object = knot->getPointer(objIndex);
+      return targetMethodFromMethodHandle(object);
+      }
+   return NULL;
+   }
+
+TR_OpaqueMethodBlock*
+TR_J9VMBase::targetMethodFromMethodHandle(uintptr_t methodHandle)
+   {
+   TR_ASSERT(haveAccess(), "targetFromMethodHandle requires VM access");
+   uintptr_t form = getReferenceField(
+      methodHandle,
+      "form",             "Ljava/lang/invoke/LambdaForm;");
+   uintptr_t vmentry = getReferenceField(
+      form,
+      "vmentry",             "Ljava/lang/invoke/MemberName;");
+   return targetMethodFromMemberName(vmentry);
+   }
+#endif /* defined(J9VM_OPT_OPENJDK_METHODHANDLE) */
+
 /**
  * \brief
  *    Check if two java/lang/String objects are equal. Equivalent to java/lang/String.equals.
