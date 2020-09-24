@@ -350,6 +350,17 @@ uint8_t *TR::PPCCallSnippet::emitSnippetBody()
 
    TR_RuntimeHelper runtimeHelper = getInterpretedDispatchHelper(methodSymRef, callNode->getDataType(),
                                                                  methodSymbol->isSynchronised(), isNativeStatic, cg());
+
+   if (isNativeStatic && methodSymbol->getRecognizedMethod() == TR::java_lang_invoke_MethodHandle_invokeBasic)
+      {
+      int32_t numExplicitArgs = getSizeOfArguments() - 1;
+      TR::Register * numArgsRegister = cg()->allocateRegister();
+      TR::Register * metaReg = cg()->getMethodMetaDataRegister();
+      TR::MemoryReference * tempSlotMemRef = new(trHeapMemory()) TR::MemoryReference(metaReg, offsetof(J9VMThread, tempSlot), TR::Compiler->om.sizeofReferenceAddress(), cg())
+      cursor = generateTrg1ImmInstruction(cg(), TR::InstOpCode::li, callNode, numArgsRegister, numExplicitArgs, cursor);
+      cursor = generateMemSrc1Instruction(cg(), TR::InstOpCode::Op_st, callNode, tempSlotMemRef, numArgsRegister, cursor);
+      }
+
    glueRef = cg()->symRefTab()->findOrCreateRuntimeHelper(runtimeHelper, false, false, false);
 
    intptr_t helperAddress = (intptr_t)glueRef->getMethodAddress();
@@ -1555,4 +1566,3 @@ TR_Debug::print(TR::FILE *pOutFile, TR::PPCInterfaceCallSnippet * snippet)
    printPrefix(pOutFile, NULL, cursor, sizeof(intptr_t));
    trfprintf(pOutFile, ".long \t" POINTER_PRINTF_FORMAT "\t\t; J2I thunk address for private", *(intptr_t *)cursor);
    }
-
