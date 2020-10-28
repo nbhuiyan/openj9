@@ -3998,6 +3998,13 @@ void TR_ResolvedJ9Method::construct()
       {  TR::unknownMethod}
       };
 
+   static X InvokersMethods[] =
+      {
+      {x(TR::java_lang_invoke_Invokers_checkCustomized,                    "checkCustomized",             "(Ljava/lang/invoke/MethodHandle;)V")},
+      {x(TR::java_lang_invoke_Invokers_checkExactType,                     "checkExactType",              "(Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)V")},
+      {TR::unknownMethod}
+      };
+
    static X AsTypeHandleMethods[] =
       {
       {  TR::java_lang_invoke_AsTypeHandle_convertArgs,   11, "convertArgs",     (int16_t)-1, "*"},
@@ -4336,6 +4343,7 @@ void TR_ResolvedJ9Method::construct()
 
    static Y class25[] =
       {
+      { "java/lang/invoke/Invokers", InvokersMethods },
       { 0 }
       };
 
@@ -4613,6 +4621,13 @@ void TR_ResolvedJ9Method::construct()
             setRecognizedMethodInfo(TR::java_util_concurrent_ConcurrentHashMap_all);
          else if ((classNameLen == 16) && !strncmp(className, "java/util/Vector", 16))
             setRecognizedMethodInfo(TR::java_util_Vector_all);
+         else if ((classNameLen == 25) && !strncmp(className, "java/lang/invoke/Invokers", 25))
+            {
+            if (!strncmp(name, "checkCustomized", 15))
+               setRecognizedMethodInfo(TR::java_lang_invoke_Invokers_checkCustomized);
+            else if (!strncmp(name, "checkExactType", 14))
+               setRecognizedMethodInfo(TR::java_lang_invoke_Invokers_checkExactType);
+            }
          else if ((classNameLen == 28) && !strncmp(className, "java/lang/invoke/ILGenMacros", 28))
             {
             if (!strncmp(name, "invokeExact_", 12))
