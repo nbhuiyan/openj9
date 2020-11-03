@@ -116,6 +116,58 @@ void J9::RecognizedCallTransformer::process_java_lang_StrictMath_and_Math_sqrt(T
 
    TR::TransformUtil::removeTree(comp(), treetop);
    }
+
+#if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
+/*
+Transforms calls to java/lang/invoke/Invokers.checkExactType to the more performant ZEROCHK.
+
+Blocks before transformation: ==>
+
+start Block_A
+...
+treetop
+        call  java/lang/invoke/Invokers.checkExactType(Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)
+           ==>aload
+           ==>aload
+...
+end Block_A
+
+Blocks after transformation: ==>
+
+start Block_A
+...
+treetop
+        ZEROCHK
+          acmpeq
+             ==>aload <expected type>
+             aloadi <MethodHandle.type>
+               ==>aload <MethodHandle>
+...
+end Block_A
+
+*/
+void J9::RecognizedCallTransformer::process_java_lang_invoke_Invokers_checkExactType(TR::TreeTop* treetop, TR::Node* node)
+   {
+   TR::Node * methodHandleNode = node->getChild(0);
+   TR::Node * expectedTypeNode = node->getChild(1);
+   TR_J9VMBase* fej9 = static_cast<TR_J9VMBase*>(comp()->fe());
+   uint32_t typeOffset = fej9->getInstanceFieldOffsetIncludingHeader("Ljava/lang/invoke/MethodHandle;", "type", "Ljava/lang/invoke/MethodType;", comp()->getCurrentMethod());
+   TR::SymbolReference *typeSymRef = comp()->getSymRefTab()->findOrFabricateShadowSymbol(comp()->getMethodSymbol(),
+                                                                                         TR::Symbol::Java_lang_invoke_MethodHandle_type,
+                                                                                         TR::Address,
+                                                                                         typeOffset,
+                                                                                         false,
+                                                                                         false,
+                                                                                         true,
+                                                                                         "java/lang/invoke/MethodHandle.type Ljava/lang/invoke/MethodType;");
+   TR::Node *handleTypeNode = TR::Node::createWithSymRef(comp()->il.opCodeForIndirectLoad(TR::Address), 1, 1, methodHandleNode, typeSymRef);
+   TR::Node *cmpEqNode = TR::Node::create(TR::acmpeq, 2, expectedTypeNode, handleTypeNode);
+   prepareToReplaceNode(node);
+   TR::Node::recreate(node, TR::ZEROCHK);
+   node->setNumChildren(1);
+   node->setAndIncChild(0, cmpEqNode);
+   }
+#endif
 /*
 Transform an Unsafe atomic call to diamonds with equivalent semantics
 
@@ -386,6 +438,10 @@ bool J9::RecognizedCallTransformer::isInlineable(TR::TreeTop* treetop)
       case TR::java_lang_StrictMath_sqrt:
       case TR::java_lang_Math_sqrt:
          return comp()->target().cpu.getSupportsHardwareSQRT();
+#if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
+      case TR::java_lang_invoke_Invokers_checkExactType:
+         return true;
+#endif
       default:
          return false;
       }
@@ -466,6 +522,11 @@ void J9::RecognizedCallTransformer::transform(TR::TreeTop* treetop)
       case TR::java_lang_Math_sqrt:
          process_java_lang_StrictMath_and_Math_sqrt(treetop, node);
          break;
+#if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
+      case TR::java_lang_invoke_Invokers_checkExactType:
+         process_java_lang_invoke_Invokers_checkExactType(treetop, node);
+         break;
+#endif
       default:
          break;
       }

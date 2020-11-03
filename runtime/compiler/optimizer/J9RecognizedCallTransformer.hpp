@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2019 IBM Corp. and others
+* Copyright (c) 2017, 2020 IBM Corp. and others
 *
 * This program and the accompanying materials are made available under
 * the terms of the Eclipse Public License 2.0 which accompanies this
@@ -106,6 +106,19 @@ class RecognizedCallTransformer : public OMR::RecognizedCallTransformer
     *     Flag indicating if null check is needed on the first argument of the unsafe call
     */
    void processUnsafeAtomicCall(TR::TreeTop* treetop, TR::SymbolReferenceTable::CommonNonhelperSymbol helper, bool needsNullCheck = false);
+
+#if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
+   /** \brief
+    *    Transforms calls to java/lang/invoke/Invokers.checkExactType to ZEROCHK
+    *
+    *  \param treetop
+    *    The treetop of the call node
+    *
+    *  \param node
+    *    The call node representing the call to java/lang/invoke/Invokers.checkExactType
+    */
+   void process_java_lang_invoke_Invokers_checkExactType(TR::TreeTop* treetop, TR::Node* node);
+#endif
    };
 
 }
