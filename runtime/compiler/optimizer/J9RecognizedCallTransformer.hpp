@@ -118,6 +118,18 @@ class RecognizedCallTransformer : public OMR::RecognizedCallTransformer
     *    The call node representing the call to java/lang/invoke/Invokers.checkExactType
     */
    void process_java_lang_invoke_Invokers_checkExactType(TR::TreeTop* treetop, TR::Node* node);
+
+   /** \brief
+    *    Eliminates calls to java/lang/invoke/Invokers.checkCustomized when its argument
+    *    is a known object
+    *
+    *  \param treetop
+    *    The treetop of the call node
+    *
+    *  \param node
+    *    The call node representing the call to java/lang/invoke/Invokers.checkCustomized
+    */
+   void process_java_lang_invoke_Invokers_checkCustomized(TR::TreeTop* treetop, TR::Node* node);
 #endif
    };
 

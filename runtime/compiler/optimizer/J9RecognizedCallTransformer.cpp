@@ -167,6 +167,28 @@ void J9::RecognizedCallTransformer::process_java_lang_invoke_Invokers_checkExact
    node->setNumChildren(1);
    node->setAndIncChild(0, cmpEqNode);
    }
+
+/*
+java/lang/invoke/Invokers.checkCustomized is redundant if its argument is a known object. This transformation
+eliminates calls to java/lang/invoke/Invokers.checkCustomized.
+
+Blocks before transformation: ==>
+
+start Block_A
+...
+treetop
+        call  java/lang/invoke/Invokers.checkCustomized(Ljava/lang/invoke/MethodHandle;)V
+          aload  <MethodHandle>
+...
+end Block_A
+
+Blocks after transformation: ==> treetop eliminated
+
+*/
+void J9::RecognizedCallTransformer::process_java_lang_invoke_Invokers_checkCustomized(TR::TreeTop* treetop, TR::Node* node)
+   {
+   TR::TransformUtil::removeTree(comp(), treetop);
+   }
 #endif
 /*
 Transform an Unsafe atomic call to diamonds with equivalent semantics
@@ -441,6 +463,8 @@ bool J9::RecognizedCallTransformer::isInlineable(TR::TreeTop* treetop)
 #if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
       case TR::java_lang_invoke_Invokers_checkExactType:
          return true;
+      case TR::java_lang_invoke_Invokers_checkCustomized:
+         return node->getChild(0)->getSymbolReference()->hasKnownObjectIndex();
 #endif
       default:
          return false;
@@ -525,6 +549,9 @@ void J9::RecognizedCallTransformer::transform(TR::TreeTop* treetop)
 #if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
       case TR::java_lang_invoke_Invokers_checkExactType:
          process_java_lang_invoke_Invokers_checkExactType(treetop, node);
+         break;
+      case TR::java_lang_invoke_Invokers_checkCustomized:
+         process_java_lang_invoke_Invokers_checkCustomized(treetop, node);
          break;
 #endif
       default:
