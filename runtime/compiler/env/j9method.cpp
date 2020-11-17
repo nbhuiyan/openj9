@@ -6219,7 +6219,7 @@ TR_ResolvedJ9Method::callSiteTableEntryAddress(int32_t callSiteIndex)
    {
    J9Class *ramClass = constantPoolHdr();
 #if defined (J9VM_OPT_OPENJDK_METHODHANDLE)
-   return (void *)(((J9InvokeCacheEntry *)ramClass->callSites) + callSiteIndex);
+   return (void *)((j9object_t *)ramClass->callSites)[callSiteIndex];
 #else
    return ramClass->callSites + callSiteIndex;
 #endif
@@ -6274,7 +6274,7 @@ TR_ResolvedJ9Method::methodTypeTableEntryAddress(int32_t cpIndex)
    J9Class *ramClass = constantPoolHdr();
 #if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
    UDATA invokeCacheIndex = (((J9RAMMethodRef*) literals())[cpIndex]).methodIndexAndArgCount >> 8;
-   return (void *)(((J9InvokeCacheEntry *)ramClass->invokeCache) + invokeCacheIndex);
+   return (void *)(j9object_t *)&((ramClass->invokeCache)[invokeCacheIndex]);
 #else
    UDATA methodTypeIndex = (((J9RAMMethodRef*) literals())[cpIndex]).methodIndexAndArgCount;
    methodTypeIndex >>= 8;
@@ -6887,7 +6887,7 @@ TR_ResolvedJ9Method::getResolvedDynamicMethod(TR::Compilation * comp, I_32 callS
       TR_OpaqueMethodBlock * targetJ9MethodBlock = NULL;
          {
          TR::VMAccessCriticalSection getResolvedDynamicMethod(fej9());
-         targetJ9MethodBlock = fej9()->targetMethodFromMemberName((uintptr_t) *((uintptr_t *)memberNameAddressFromInvokeDynamicSideTable(callSiteIndex)));
+         targetJ9MethodBlock = fej9()->targetMethodFromMemberName((uintptr_t) memberNameElementRefFromInvokeDynamicSideTable(callSiteIndex));
          }
       result = fej9()->createResolvedMethod(comp->trMemory(), targetJ9MethodBlock, this);
       return result;
@@ -6943,7 +6943,7 @@ TR_ResolvedJ9Method::getResolvedHandleMethod(TR::Compilation * comp, I_32 cpInde
       TR_OpaqueMethodBlock * targetJ9MethodBlock = NULL;
          {
          TR::VMAccessCriticalSection getResolvedHandleMethod(fej9());
-         targetJ9MethodBlock = fej9()->targetMethodFromMemberName((uintptr_t) *((uintptr_t *)memberNameAddressFromInvokeHandleSideTable(cpIndex)));
+         targetJ9MethodBlock = fej9()->targetMethodFromMemberName((uintptr_t) memberNameElementRefFromInvokeHandleSideTable(cpIndex));
          }
       result = fej9()->createResolvedMethod(comp->trMemory(), targetJ9MethodBlock, this);
       return result;
@@ -7036,31 +7036,39 @@ TR_ResolvedJ9Method::fieldsAreSame(I_32 cpIndex1, TR_ResolvedMethod * m2, I_32 c
 
 #if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
 void *
-TR_ResolvedJ9Method::memberNameAddressFromInvokeDynamicSideTable(int32_t callSiteIndex)
+TR_ResolvedJ9Method::memberNameElementRefFromInvokeDynamicSideTable(int32_t callSiteIndex)
    {
-   J9InvokeCacheEntry *invokeCache = (J9InvokeCacheEntry *) callSiteTableEntryAddress(callSiteIndex);
-   return (void *) &invokeCache->target;
+   TR_J9VMBase *fej9 = (TR_J9VMBase *)_fe;
+   uintptr_t invokeCacheArray = (uintptr_t) callSiteTableEntryAddress(callSiteIndex);
+   TR::VMAccessCriticalSection getRefElement(fej9);
+   return (void*) fej9->getReferenceElement(*invokeCacheArray, 0);
    }
 
 void *
-TR_ResolvedJ9Method::appendixAddressFromInvokeDynamicSideTable(int32_t callSiteIndex)
+TR_ResolvedJ9Method::appendixElementRefFromInvokeDynamicSideTable(int32_t callSiteIndex)
    {
-   J9InvokeCacheEntry *invokeCache = (J9InvokeCacheEntry *) callSiteTableEntryAddress(callSiteIndex);
-   return (void *) &invokeCache->appendix;
+   TR_J9VMBase *fej9 = (TR_J9VMBase *)_fe;
+   uintptr_t invokeCacheArray = (uintptr_t) callSiteTableEntryAddress(callSiteIndex);
+   TR::VMAccessCriticalSection getRefElement(fej9);
+   return (void*) fej9->getReferenceElement(*invokeCacheArray, 1);
    }
 
 void *
-TR_ResolvedJ9Method::memberNameAddressFromInvokeHandleSideTable(int32_t cpIndex)
+TR_ResolvedJ9Method::memberNameElementRefFromInvokeHandleSideTable(int32_t cpIndex)
    {
-   J9InvokeCacheEntry *invokeCache = (J9InvokeCacheEntry *) methodTypeTableEntryAddress(cpIndex);
-   return (void *) &invokeCache->target;
+   TR_J9VMBase *fej9 = (TR_J9VMBase *)_fe;
+   uintptr_t * invokeCacheArray = (uintptr_t *) methodTypeTableEntryAddress(cpIndex);
+   TR::VMAccessCriticalSection getRefElement(fej9);
+   return (void*) fej9->getReferenceElement(*invokeCacheArray, 0);
    }
 
 void *
-TR_ResolvedJ9Method::appendixAddressFromInvokeHandleSideTable(int32_t cpIndex)
+TR_ResolvedJ9Method::appendixElementRefFromInvokeHandleSideTable(int32_t cpIndex)
    {
-   J9InvokeCacheEntry *invokeCache = (J9InvokeCacheEntry *) methodTypeTableEntryAddress(cpIndex);
-   return (void *) &invokeCache->appendix;
+   TR_J9VMBase *fej9 = (TR_J9VMBase *)_fe;
+   uintptr_t * invokeCacheArray = (uintptr_t *) methodTypeTableEntryAddress(cpIndex);
+   TR::VMAccessCriticalSection getRefElement(fej9);
+   return (void*) fej9->getReferenceElement(*invokeCacheArray, 1);
    }
 #endif
 

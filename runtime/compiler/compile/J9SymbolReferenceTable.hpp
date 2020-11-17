@@ -110,6 +110,7 @@ class SymbolReferenceTable : public OMR::SymbolReferenceTableConnector
 #if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
    TR::SymbolReference * findOrCreateCallSiteTableEntrySymbol(TR::ResolvedMethodSymbol * owningMethodSymbol, int32_t callSiteIndex, bool isMemberNameObject = false);
    TR::SymbolReference * findOrCreateMethodTypeTableEntrySymbol(TR::ResolvedMethodSymbol * owningMethodSymbol, int32_t cpIndex, bool isMemberNameObject = false);
+   TR::SymbolReference * findOrCreateImmutableArrayShadowSymbolRefWithKnot(TR::DataType type, TR::KnownObjectTable::Index knownObjectIndex);
 #else
    TR::SymbolReference * findOrCreateCallSiteTableEntrySymbol(TR::ResolvedMethodSymbol * owningMethodSymbol, int32_t callSiteIndex);
    TR::SymbolReference * findOrCreateMethodTypeTableEntrySymbol(TR::ResolvedMethodSymbol * owningMethodSymbol, int32_t cpIndex);

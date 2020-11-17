@@ -466,25 +466,83 @@ J9::SymbolReferenceTable::findOrCreateHandleMethodSymbol(TR::ResolvedMethodSymbo
    }
 
 
-TR::SymbolReference *
 #if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
+TR::SymbolReference *
 J9::SymbolReferenceTable::findOrCreateCallSiteTableEntrySymbol(TR::ResolvedMethodSymbol * owningMethodSymbol, int32_t callSiteIndex, bool isMemberNameObject)
-#else
-J9::SymbolReferenceTable::findOrCreateCallSiteTableEntrySymbol(TR::ResolvedMethodSymbol * owningMethodSymbol, int32_t callSiteIndex)
-#endif
    {
    TR::SymbolReference *symRef;
    TR_SymRefIterator i(aliasBuilder.callSiteTableEntrySymRefs(), self());
    TR_ResolvedJ9Method *owningMethod = static_cast<TR_ResolvedJ9Method*>(owningMethodSymbol->getResolvedMethod());
-#if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
-   void * entryLocation = NULL;
-   if (!isMemberNameObject)
-      entryLocation = owningMethod->appendixAddressFromInvokeDynamicSideTable(callSiteIndex);
-   else
-      entryLocation = owningMethod->memberNameAddressFromInvokeDynamicSideTable(callSiteIndex);
-#else
+   TR::KnownObjectTable::Index callSiteTableEntryKnotIndex = TR::KnownObjectTable::UNKNOWN;
+   TR::KnownObjectTable::Index arrayElementKnotIndex = TR::KnownObjectTable::UNKNOWN;
+   bool isCallSiteTableEntrySymbolCreated = false;
    void *entryLocation = owningMethod->callSiteTableEntryAddress(callSiteIndex);
-#endif
+
+   for (symRef = i.getNext(); symRef; symRef = i.getNext())
+      if (  owningMethodSymbol->getResolvedMethodIndex() == symRef->getOwningMethodIndex()
+         && symRef->getSymbol()->castToStaticSymbol()->getStaticAddress() == entryLocation)
+         {
+         isCallSiteTableEntrySymbolCreated = true;
+         break;
+         }
+
+   TR::StaticSymbol *callSiteTableEntrySym = NULL;
+   if (!isMethodTypeTableEntrySymbolCreated)
+      {
+      callSiteTableEntrySym = TR::StaticSymbol::create(trHeapMemory(),TR::Address);
+      callSiteTableEntrySym->makeCallSiteTableEntry(callSiteIndex);
+      callSiteTableEntrySym->setStaticAddress(entryLocation);
+      }
+   else
+      callSiteTableEntrySym = symRef->getSymbol()->castToStaticSymbol();
+
+   bool isUnresolved = owningMethod->isUnresolvedCallSiteTableEntry(callSiteIndex);
+
+   if (!isUnresolved)
+      {
+      TR_J9VMBase *fej9 = (TR_J9VMBase *)(fe());
+      TR::VMAccessCriticalSection createKnotIndex(comp());
+      TR::KnownObjectTable *knot = comp()->getOrCreateKnownObjectTable();
+      if (knot)
+         {
+         callSiteTableEntryKnotIndex = knot->getOrCreateIndexAt((uintptr_t*)entryLocation, true);
+         if (!isMemberNameObject)
+            arrayElementKnotIndex = knot->getOrCreateIndex((uintptr_t) owningMethod->appendixElementRefFromInvokeDynamicSideTable(cpIndex), true);
+         else
+            arrayElementKnotIndex = knot->getOrCreateIndex((uintptr_t) owningMethod->memberNameElementRefFromInvokeDynamicSideTable(cpIndex), true);
+         }
+      }
+
+   if (!isCallSiteTableEntrySymbolCreated)
+      {
+      symRef = new (trHeapMemory()) TR::SymbolReference( self(),
+                                                         callSiteTableEntrySym,
+                                                         comp()->getMethodSymbol()->getResolvedMethodIndex(),
+                                                         -1,
+                                                         isUnresolved ? _numUnresolvedSymbols++ : 0,
+                                                         callSiteTableEntryKnotIndex);
+      if (isUnresolved)
+         {
+         // Resolving method type table entries causes java code to run
+         symRef->setUnresolved();
+         symRef->setCanGCandReturn();
+         symRef->setCanGCandExcept();
+         }
+      }
+   TR::SymbolReference* arrayShadowSymRef = findOrCreateImmutableArrayShadowSymbolRefWithKnot(TR::Address, arrayElementKnotIndex);
+   aliasBuilder.callSiteTableEntrySymRefs().set(symRef->getReferenceNumber());
+   aliasBuilder.callSiteTableEntrySymRefs().set(arrayShadowSymRef->getReferenceNumber());
+   return symRef;
+   }
+
+#else
+TR::SymbolReference *
+J9::SymbolReferenceTable::findOrCreateCallSiteTableEntrySymbol(TR::ResolvedMethodSymbol * owningMethodSymbol, int32_t callSiteIndex)
+   {
+   TR::SymbolReference *symRef;
+   TR_SymRefIterator i(aliasBuilder.callSiteTableEntrySymRefs(), self());
+   TR_ResolvedMethod *owningMethod = owningMethodSymbol->getResolvedMethod();
+   void *entryLocation = owningMethod->callSiteTableEntryAddress(callSiteIndex);
    for (symRef = i.getNext(); symRef; symRef = i.getNext())
       if (  owningMethodSymbol->getResolvedMethodIndex() == symRef->getOwningMethodIndex()
          && symRef->getSymbol()->castToStaticSymbol()->getStaticAddress() == entryLocation)
@@ -519,27 +577,86 @@ J9::SymbolReferenceTable::findOrCreateCallSiteTableEntrySymbol(TR::ResolvedMetho
    aliasBuilder.callSiteTableEntrySymRefs().set(symRef->getReferenceNumber());
    return symRef;
    }
-
-
-TR::SymbolReference *
-#if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
-J9::SymbolReferenceTable::findOrCreateMethodTypeTableEntrySymbol(TR::ResolvedMethodSymbol * owningMethodSymbol, int32_t cpIndex, bool isMemberNameObject)
-#else
-J9::SymbolReferenceTable::findOrCreateMethodTypeTableEntrySymbol(TR::ResolvedMethodSymbol * owningMethodSymbol, int32_t cpIndex)
 #endif
+
+#if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
+TR::SymbolReference *
+J9::SymbolReferenceTable::findOrCreateMethodTypeTableEntrySymbol(TR::ResolvedMethodSymbol * owningMethodSymbol, int32_t cpIndex, bool isMemberNameObject)
    {
    TR::SymbolReference *symRef;
    TR_SymRefIterator i(aliasBuilder.methodTypeTableEntrySymRefs(), self());
    TR_ResolvedJ9Method *owningMethod = static_cast<TR_ResolvedJ9Method*>(owningMethodSymbol->getResolvedMethod());
-#if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
-   void * entryLocation = NULL;
-   if (!isMemberNameObject)
-      entryLocation = owningMethod->appendixAddressFromInvokeHandleSideTable(cpIndex);
-   else
-      entryLocation = owningMethod->memberNameAddressFromInvokeHandleSideTable(cpIndex);
-#else
    void *entryLocation = owningMethod->methodTypeTableEntryAddress(cpIndex);
-#endif
+   TR::KnownObjectTable::Index methodTypeTableEntryKnotIndex = TR::KnownObjectTable::UNKNOWN;
+   TR::KnownObjectTable::Index arrayElementKnotIndex = TR::KnownObjectTable::UNKNOWN;
+   bool isMethodTypeTableEntrySymbolCreated = false;
+
+   for (symRef = i.getNext(); symRef; symRef = i.getNext())
+      if (  owningMethodSymbol->getResolvedMethodIndex() == symRef->getOwningMethodIndex()
+         && symRef->getSymbol()->castToStaticSymbol()->getStaticAddress() == entryLocation)
+         {
+         isMethodTypeTableEntrySymbolCreated = true;
+         break;
+         }
+
+   TR::StaticSymbol * methodTypeTableEntrySym = NULL;
+   if (!isMethodTypeTableEntrySymbolCreated)
+      {
+      methodTypeTableEntrySym = TR::StaticSymbol::createMethodTypeTableEntry(trHeapMemory(),cpIndex);
+      methodTypeTableEntrySym->setStaticAddress(entryLocation);
+      }
+   else
+      methodTypeTableEntrySym = symRef->getSymbol()->castToStaticSymbol();
+
+   bool isUnresolved = owningMethod->isUnresolvedMethodTypeTableEntry(cpIndex);
+
+   if (!isUnresolved)
+      {
+      TR_J9VMBase *fej9 = (TR_J9VMBase *)(fe());
+      TR::VMAccessCriticalSection createKnotIndex(comp());
+      TR::KnownObjectTable *knot = comp()->getOrCreateKnownObjectTable();
+      if (knot)
+         {
+         methodTypeTableEntryKnotIndex = knot->getOrCreateIndexAt((uintptr_t*)entryLocation, true);
+         if (!isMemberNameObject)
+            arrayElementKnotIndex = knot->getOrCreateIndex((uintptr_t) owningMethod->appendixElementRefFromInvokeHandleSideTable(cpIndex), true);
+         else
+            arrayElementKnotIndex = knot->getOrCreateIndex((uintptr_t) owningMethod->memberNameElementRefFromInvokeHandleSideTable(cpIndex), true);
+         }
+      }
+
+   if (!isMethodTypeTableEntrySymbolCreated)
+      {
+      symRef = new (trHeapMemory()) TR::SymbolReference( self(),
+                                                         methodTypeTableEntrySym,
+                                                         comp()->getMethodSymbol()->getResolvedMethodIndex(),
+                                                         -1,
+                                                         isUnresolved ? _numUnresolvedSymbols++ : 0,
+                                                         methodTypeTableEntryKnotIndex);
+      if (isUnresolved)
+         {
+         // Resolving method type table entries causes java code to run
+         symRef->setUnresolved();
+         symRef->setCanGCandReturn();
+         symRef->setCanGCandExcept();
+         }
+      }
+
+   TR::SymbolReference* arrayShadowSymRef = findOrCreateImmutableArrayShadowSymbolRefWithKnot(TR::Address, arrayElementKnotIndex);
+   aliasBuilder.methodTypeTableEntrySymRefs().set(symRef->getReferenceNumber());
+   aliasBuilder.methodTypeTableEntrySymRefs().set(arrayShadowSymRef->getReferenceNumber());
+   return arrayShadowSymRef;
+   }
+
+#else //J9VM_OPT_OPENJDK_METHODHANDLE
+
+TR::SymbolReference *
+J9::SymbolReferenceTable::findOrCreateMethodTypeTableEntrySymbol(TR::ResolvedMethodSymbol * owningMethodSymbol, int32_t cpIndex)
+   {
+   TR::SymbolReference *symRef;
+   TR_SymRefIterator i(aliasBuilder.methodTypeTableEntrySymRefs(), self());
+   TR_ResolvedMethod *owningMethod = owningMethodSymbol->getResolvedMethod();
+   void *entryLocation = owningMethod->methodTypeTableEntryAddress(cpIndex);
    for (symRef = i.getNext(); symRef; symRef = i.getNext())
       if (  owningMethodSymbol->getResolvedMethodIndex() == symRef->getOwningMethodIndex()
          && symRef->getSymbol()->castToStaticSymbol()->getStaticAddress() == entryLocation)
@@ -550,15 +667,6 @@ J9::SymbolReferenceTable::findOrCreateMethodTypeTableEntrySymbol(TR::ResolvedMet
    TR::StaticSymbol *sym = TR::StaticSymbol::createMethodTypeTableEntry(trHeapMemory(),cpIndex);
    sym->setStaticAddress(entryLocation);
    bool isUnresolved = owningMethod->isUnresolvedMethodTypeTableEntry(cpIndex);
-
-   TR::KnownObjectTable::Index knownObjectIndex = TR::KnownObjectTable::UNKNOWN;
-   if (!isUnresolved)
-      {
-      TR::KnownObjectTable *knot = comp()->getOrCreateKnownObjectTable();
-      if (knot)
-         knownObjectIndex = knot->getOrCreateIndexAt((uintptr_t*)entryLocation);
-      }
-
    symRef = new (trHeapMemory()) TR::SymbolReference(self(), sym, owningMethodSymbol->getResolvedMethodIndex(), -1,
                                                     isUnresolved ? _numUnresolvedSymbols++ : 0);
 
@@ -573,6 +681,38 @@ J9::SymbolReferenceTable::findOrCreateMethodTypeTableEntrySymbol(TR::ResolvedMet
    aliasBuilder.methodTypeTableEntrySymRefs().set(symRef->getReferenceNumber());
    return symRef;
    }
+
+#endif // J9VM_OPT_OPENJDK_METHODHANDLE
+
+#if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
+TR::SymbolReference *
+J9::SymbolReferenceTable::findOrCreateImmutableArrayShadowSymbolRefWithKnot(TR::DataType type, TR::KnownObjectTable::Index knownObjectIndex)
+   {
+   TR_BitVectorIterator bvi(aliasBuilder.immutableArrayElementSymRefs());
+   while (bvi.hasMoreElements())
+      {
+      TR::SymbolReference *symRef = getSymRef(bvi.getNextElement());
+      // A immutable array shadow with known object index is for array shadow from a known array,
+      // and thus cannot be shared with other array shadows
+      if (symRef->getSymbol()->getDataType() == type && !symRef->hasKnownObjectIndex())
+         return symRef;
+      }
+
+   TR::SymbolReference * symRef = findOrCreateArrayShadowSymbolRef(type);
+
+   symRef->setReallySharesSymbol();
+
+   TR::SymbolReference *newRef = findOrCreateSymRefWithKnownObject(symRef, knownObjectIndex);
+   newRef->setReallySharesSymbol();
+   newRef->setCPIndex(-1);
+
+   int32_t index = newRef->getReferenceNumber();
+   aliasBuilder.arrayElementSymRefs().set(index);
+   aliasBuilder.immutableArrayElementSymRefs().set(index);
+
+   return newRef;
+   }
+#endif
 
 TR::SymbolReference *
 J9::SymbolReferenceTable::findOrCreateVarHandleMethodTypeTableEntrySymbol(TR::ResolvedMethodSymbol * owningMethodSymbol, int32_t cpIndex)
