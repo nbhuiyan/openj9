@@ -487,7 +487,7 @@ J9::SymbolReferenceTable::findOrCreateCallSiteTableEntrySymbol(TR::ResolvedMetho
          }
 
    TR::StaticSymbol *callSiteTableEntrySym = NULL;
-   if (!isMethodTypeTableEntrySymbolCreated)
+   if (!isCallSiteTableEntrySymbolCreated)
       {
       callSiteTableEntrySym = TR::StaticSymbol::create(trHeapMemory(),TR::Address);
       callSiteTableEntrySym->makeCallSiteTableEntry(callSiteIndex);
@@ -507,9 +507,9 @@ J9::SymbolReferenceTable::findOrCreateCallSiteTableEntrySymbol(TR::ResolvedMetho
          {
          callSiteTableEntryKnotIndex = knot->getOrCreateIndexAt((uintptr_t*)entryLocation, true);
          if (!isMemberNameObject)
-            arrayElementKnotIndex = knot->getOrCreateIndex((uintptr_t) owningMethod->appendixElementRefFromInvokeDynamicSideTable(cpIndex), true);
+            arrayElementKnotIndex = knot->getOrCreateIndex((uintptr_t) owningMethod->appendixElementRefFromInvokeDynamicSideTable(callSiteIndex), true);
          else
-            arrayElementKnotIndex = knot->getOrCreateIndex((uintptr_t) owningMethod->memberNameElementRefFromInvokeDynamicSideTable(cpIndex), true);
+            arrayElementKnotIndex = knot->getOrCreateIndex((uintptr_t) owningMethod->memberNameElementRefFromInvokeDynamicSideTable(callSiteIndex), true);
          }
       }
 

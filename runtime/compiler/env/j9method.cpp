@@ -7039,7 +7039,7 @@ void *
 TR_ResolvedJ9Method::memberNameElementRefFromInvokeDynamicSideTable(int32_t callSiteIndex)
    {
    TR_J9VMBase *fej9 = (TR_J9VMBase *)_fe;
-   uintptr_t invokeCacheArray = (uintptr_t) callSiteTableEntryAddress(callSiteIndex);
+   uintptr_t * invokeCacheArray = (uintptr_t *) callSiteTableEntryAddress(callSiteIndex);
    TR::VMAccessCriticalSection getRefElement(fej9);
    return (void*) fej9->getReferenceElement(*invokeCacheArray, 0);
    }
@@ -7048,7 +7048,7 @@ void *
 TR_ResolvedJ9Method::appendixElementRefFromInvokeDynamicSideTable(int32_t callSiteIndex)
    {
    TR_J9VMBase *fej9 = (TR_J9VMBase *)_fe;
-   uintptr_t invokeCacheArray = (uintptr_t) callSiteTableEntryAddress(callSiteIndex);
+   uintptr_t * invokeCacheArray = (uintptr_t *) callSiteTableEntryAddress(callSiteIndex);
    TR::VMAccessCriticalSection getRefElement(fej9);
    return (void*) fej9->getReferenceElement(*invokeCacheArray, 1);
    }

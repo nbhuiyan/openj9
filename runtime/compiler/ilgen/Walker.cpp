@@ -3381,7 +3381,7 @@ TR_J9ByteCodeIlGenerator::genInvokeHandle(TR::SymbolReference *invokeExactSymRef
 void
 TR_J9ByteCodeIlGenerator::loadFromSideTableForInvokeDynamic(int32_t callSiteIndex)
    {
-   TR::SymbolReference *callSiteTableEntrySymRef = symRefTab()->findOrCreateCallSiteTableEntrySymbol(_methodSymbol, cpIndex);
+   TR::SymbolReference *callSiteTableEntrySymRef = symRefTab()->findOrCreateCallSiteTableEntrySymbol(_methodSymbol, callSiteIndex);
    loadSymbol(TR::aload, callSiteTableEntrySymRef);
    loadConstant(TR::iconst, 1); // appendix object
    loadArrayElement(TR::Address, comp()->il.opCodeForIndirectLoad(TR::Address), false);
@@ -3391,7 +3391,7 @@ TR_J9ByteCodeIlGenerator::loadFromSideTableForInvokeDynamic(int32_t callSiteInde
       // Instead of creating a call to the adapter method, we construct
       // a call to linkToStatic and provide appendix and target as
       // additional parameters.
-      TR::SymbolReference *callSiteTableEntrySymRef = symRefTab()->findOrCreateCallSiteTableEntrySymbol(_methodSymbol, cpIndex, true);
+      TR::SymbolReference *callSiteTableEntrySymRef = symRefTab()->findOrCreateCallSiteTableEntrySymbol(_methodSymbol, callSiteIndex, true);
       loadSymbol(TR::aload, callSiteTableEntrySymRef);
       loadConstant(TR::iconst, 0); // membername object
       loadArrayElement(TR::Address, comp()->il.opCodeForIndirectLoad(TR::Address), false);
@@ -3415,7 +3415,6 @@ TR_J9ByteCodeIlGenerator::loadFromSideTableForInvokeHandle(int32_t cpIndex)
       loadSymbol(TR::aload, methodTypeTableEntrySymRef);
       loadConstant(TR::iconst, 0); // membername object
       loadArrayElement(TR::Address, comp()->il.opCodeForIndirectLoad(TR::Address), false);
-      TR::Node * memberNameNode = loadSymbol(TR::aload, memberNameSymRef);
       }
    }
 #endif
