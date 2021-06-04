@@ -817,42 +817,7 @@ J9::CodeGenerator::lowerTreeIfNeeded(
             {
             int32_t numArgs;
             if (node->getSymbolReference()->getSymbol()->isDummyResolvedMethod())
-               {
-               // The last child of the call node is the iload for the memberName object, from which we can obtain the callSite index or cpIndex.
-               TR::Node * invokeCacheArrayShadowNode = node->getLastChild();
-
-               // In compressed pointers mode, the compressed refs anchors are transformed right before codegen, for which we
-               // may need to go a few levels down to reach the invoke cache array shadow node
-               //
-               // n28n      compressedRefs
-               // n26n        l2a
-               // n49n          lshl (compressionSequence )
-               // n48n            iu2l
-               // n47n              iloadi  <array-shadow>[#229  Shadow] [flags 0x80000607 0x0 ]
-               // n25n                aladd (X>=0 internalPtr sharedMemory )
-               // n5n                   ==>aload
-               // n24n                  lconst 16 (highWordZero X!=0 X>=0 )
-               // n46n            iconst 3
-               // n15n        ==>lconst 0
-               //
-               if (self()->comp()->useCompressedPointers())
-                  {
-                  TR::Node * currentNode = invokeCacheArrayShadowNode;
-                  while (currentNode){
-                     if (currentNode->getOpCode().isLoad()) break;
-                     currentNode = currentNode->getFirstChild();
-                  }
-                  invokeCacheArrayShadowNode = currentNode;
-                  }
-
-               TR::Node * sideTableEntryNode = invokeCacheArrayShadowNode->getFirstChild()->getFirstChild();
-               TR::StaticSymbol * sideTableEntrySymbol = sideTableEntryNode->getSymbolReference()->getSymbol()->castToStaticSymbol();
-
-               if(sideTableEntrySymbol->isCallSiteTableEntry()) // invokedynamic uses the CallSiteTable
-                  numArgs = node->getNumChildren() - 2; // for invokedynamic, linkToStatic gets 2 args added to the ROM method signature
-               else
-                  numArgs = node->getNumChildren() - 3; // for invokehandle, linkToStatic gets 3 args added to the ROM method signature
-               }
+               numArgs = node->getNumChildren();
             else
                numArgs = -1;
 
