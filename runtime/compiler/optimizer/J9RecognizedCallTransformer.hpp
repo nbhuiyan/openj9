@@ -166,6 +166,14 @@ class RecognizedCallTransformer : public OMR::RecognizedCallTransformer
     *     the call node representing the linkToStatic call
     */
    void process_java_lang_invoke_MethodHandle_linkToStaticSpecial(TR::TreeTop * treetop, TR::Node* node);
+
+   /**
+    * @brief todo
+    * 
+    * @param treetop 
+    * @param node 
+    */
+   void process_java_lang_invoke_MethodHandle_linkToVirtual(TR::TreeTop * treetop, TR::Node * node);
 #endif
 
    private:
