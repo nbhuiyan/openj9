@@ -196,6 +196,7 @@ class SymbolReferenceTable : public OMR::SymbolReferenceTableConnector
    TR::SymbolReference * findOrCreatePerCodeCacheHelperSymbolRef(TR_CCPreLoadedCode helper, uintptr_t helperAddr);
    TR::SymbolReference * findOrCreateANewArraySymbolRef(TR::ResolvedMethodSymbol * owningMethodSymbol);
    TR::SymbolReference * findOrCreateStringSymbol(TR::ResolvedMethodSymbol * owningMethodSymbol, int32_t cpIndex);
+   TR::SymbolReference * findOrCreateJ9JNIMethodIDvTableIndexFieldSymbol(intptr_t offset);
    /** \brief
     *     Finds or creates a constant dynamic static symbol reference.
     *
