@@ -5576,7 +5576,8 @@ TR_PrexArgInfo* TR_PrexArgInfo::buildPrexArgInfoForMethodSymbol(TR::ResolvedMeth
 
       if (*sig == 'L')
          {
-         TR_OpaqueClassBlock *clazz = comp->fe()->getClassFromSignature(sig, len, feMethod);
+         // PR #13169
+         TR_OpaqueClassBlock *clazz = (index == 0 && !methodSymbol->isStatic()) ? feMethod->containingClass() :  comp->fe()->getClassFromSignature(sig, len, feMethod);
          if (clazz)
             {
             argInfo->set(index, new (comp->trHeapMemory()) TR_PrexArgument(TR_PrexArgument::ClassIsPreexistent, clazz));
