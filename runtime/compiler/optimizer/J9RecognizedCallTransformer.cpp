@@ -386,6 +386,7 @@ void J9::RecognizedCallTransformer::process_java_lang_invoke_MethodHandle_invoke
                                                                                                 "java/lang/invoke/MethodHandle.form Ljava/lang/invoke/LambdaForm;");
    TR::Node * lambdaFormNode = TR::Node::createWithSymRef(node, comp()->il.opCodeForIndirectLoad(TR::Address), 1 , mhNode, lambdaFormSymRef);
    lambdaFormNode->setIsNonNull(true);
+   //lambdaFormSymRef->getSymbol()->setNotCollected();
    // load from lambdaForm.vmEntry, which is the MemberName object
    offset = fej9->getInstanceFieldOffsetIncludingHeader("Ljava/lang/invoke/LambdaForm;", "vmentry", "Ljava/lang/invoke/MemberName;", comp()->getCurrentMethod());
    TR::SymbolReference * memberNameSymRef = comp()->getSymRefTab()->findOrFabricateShadowSymbol(comp()->getMethodSymbol(),
@@ -408,6 +409,7 @@ void J9::RecognizedCallTransformer::process_java_lang_invoke_MethodHandle_invoke
                                                                                                 "java/lang/invoke/MemberName.vmtarget J");
    vmTargetSymRef->getSymbol()->setNotCollected();
    TR::Node * vmTargetNode = TR::Node::createWithSymRef(node, TR::aloadi, 1, memberNameNode, vmTargetSymRef);
+   //vmTargetNode->setIsNonNull(true);
    processVMInternalNativeFunction(treetop, node, vmTargetNode, argsList, inlCallNode, /* hasMethodHandleReceiver*/ true);
    }
 
@@ -439,6 +441,7 @@ void J9::RecognizedCallTransformer::process_java_lang_invoke_MethodHandle_linkTo
                                                                                                 "java/lang/invoke/MemberName.vmtarget J");
    vmTargetSymRef->getSymbol()->setNotCollected();
    TR::Node * vmTargetNode = TR::Node::createWithSymRef(node, TR::aloadi, 1, mnNode, vmTargetSymRef);
+   vmTargetNode->setIsNonNull(true);
    argsList->pop_back(); // MemberName is not required when dispatching directly to the jitted method address
    processVMInternalNativeFunction(treetop, node, vmTargetNode, argsList, inlCallNode, /* hasMethodHandleReceiver*/ false);
    }
@@ -565,17 +568,24 @@ void J9::RecognizedCallTransformer::process_java_lang_invoke_MethodHandle_linkTo
    TR::Node * inlCallNode = node->duplicateTree(false);
    TR::Node* newInlCall = node->duplicateTree(false);
    TR::list<TR::SymbolReference *>* argsList = new (comp()->trStackMemory()) TR::list<TR::SymbolReference*>(getTypedAllocator<TR::SymbolReference*>(comp()->allocator()));
+   traceMsg(comp(), "creating temps for args and the inl call nodes\n");
    for (int i = 0; i < node->getNumChildren(); i++)
       {
       TR::Node * currentChild = node->getChild(i);
       TR::SymbolReference *newSymbolReference = comp()->getSymRefTab()->createTemporary(comp()->getMethodSymbol(), currentChild->getDataType());
+      newSymbolReference->getSymbol()->setNotCollected();
       argsList->push_back(newSymbolReference);
       TR::Node * storeNode = TR::Node::createStore(node, newSymbolReference, currentChild);
       treetop->insertBefore(TR::TreeTop::create(comp(),storeNode));
       inlCallNode->setAndIncChild(i, TR::Node::createLoad(node, newSymbolReference));
       newInlCall->setAndIncChild(i, TR::Node::createLoad(node, newSymbolReference));
       currentChild->recursivelyDecReferenceCount();
+      currentChild->recursivelyDecReferenceCount();
       }
+   
+   //TR::Block * block = treetop->getEnclosingBlock()->split(treetop, comp()->getMethodSymbol()->getFlowGraph());
+
+   traceMsg(comp(), "created temps for args in the inl call nodes\n");
    TR::SymbolReference *mhSymRef = argsList->front();
    TR::SymbolReference *mnSymRef = argsList->back();
 
@@ -590,15 +600,19 @@ void J9::RecognizedCallTransformer::process_java_lang_invoke_MethodHandle_linkTo
                                                                               true,
                                                                               "java/lang/invoke/MemberName.vmindex J");
    vmindexSymRef->getSymbol()->setNotCollected();
-
+   traceMsg(comp(), "vmindex symref created\n");
    // check if vtable index is zero (NOT MemberName.vmindex, but MN.vmindex.vtableindex). if zero, then treat this like invokeBasic.
 
    
    TR::Node * j9JNIMethodIdNode = TR::Node::createWithSymRef(node, TR::aloadi, 1, TR::Node::createLoad(node, mnSymRef), vmindexSymRef);
    TR::SymbolReference* vtableIndexSymRef = comp()->getSymRefTab()->findOrCreateJ9JNIMethodIDvTableIndexFieldSymbol(offsetof(struct J9JNIMethodID, vTableIndex));
    vtableIndexSymRef->getSymbol()->setNotCollected();
+   traceMsg(comp(), "vtableindex SymRef created\n");
    TR::Node* vtableIndexNode = TR::Node::createWithSymRef(node, comp()->il.opCodeForIndirectLoad(vtableIndexSymRef->getSymbol()->getDataType()), 1, j9JNIMethodIdNode , vtableIndexSymRef);
+   vtableIndexNode->getSymbolReference()->getSymbol()->setNotCollected();
    TR::SymbolReference* vtableOffsetTempSlotSymRef = comp()->getSymRefTab()->createTemporary(comp()->getMethodSymbol(),vtableIndexNode->getSymbol()->getDataType());
+   vtableOffsetTempSlotSymRef->getSymbol()->setNotCollected();
+   traceMsg(comp(), "vtableoffset symref created\n");
    treetop->insertBefore(TR::TreeTop::create(comp(), TR::Node::createStore(node, vtableOffsetTempSlotSymRef, vtableIndexNode)));
    
    TR::ILOpCodes xcmpne = comp()->target().is64Bit()? TR::iflcmpne : TR::ificmpne;
@@ -638,6 +652,7 @@ void J9::RecognizedCallTransformer::process_java_lang_invoke_MethodHandle_linkTo
 
    // get vft address
    TR::SymbolReference * vftSymRef = comp()->getSymRefTab()->findOrCreateVftSymbolRef();
+   traceMsg(comp(), "vft symref created\n");
    TR::Node * vftNode = TR::Node::createWithSymRef(node, TR::aloadi, 1, TR::Node::createLoad(node, mhSymRef), vftSymRef);
    //TR::Node * javaLangClassFromClassNode = TR::Node::createWithSymRef(node, TR::aloadi, 1, vftNode, javaLangClassFromClassSymRef);
    //TR::Node* j9ClassFromClassNode = TR::Node::createWithSymRef(node, comp()->il.opCodeForIndirectLoad(j9ClassFromClassAsPrimitiveSymRef->getSymbol()->getDataType()), 1, javaLangClassFromClassNode, j9ClassFromClassAsPrimitiveSymRef);
@@ -646,6 +661,7 @@ void J9::RecognizedCallTransformer::process_java_lang_invoke_MethodHandle_linkTo
    //TR::Node * jittedMethodAddressNode = TR::Node::create(x2a, 1, TR::Node::create(subOp, 2, j9ClassFromClassNode, vtableOffset));
    TR::Node * jittedMethodAddressNode = TR::Node::create(x2a, 1, TR::Node::create(subOp, 2, vftNode, vtableOffset));
    TR::SymbolReference *tSymRef = comp()->getSymRefTab()->findOrCreateGenericIntShadowSymbolReference(0);
+   traceMsg(comp(), "jitted method address temp slot symref created\n");
    tSymRef->getSymbol()->setNotCollected();
    TR::ILOpCodes loadOp = comp()->target().is64Bit() ? TR::lloadi : TR::iloadi;
    TR::Node * jittedMethodAddressLoadNode = TR::Node::createWithSymRef(loadOp, 1, 1, jittedMethodAddressNode,tSymRef);
@@ -672,6 +688,9 @@ void J9::RecognizedCallTransformer::process_java_lang_invoke_MethodHandle_linkTo
    TR::TreeTop * dispatchVirtualTreeTop = TR::TreeTop::create(comp(), TR::Node::create(node, TR::treetop, 1, dispatchVirtualCallNode));
    TR::TreeTop * inlCallTreeTop = TR::TreeTop::create(comp(), TR::Node::create(node, TR::treetop, 1, inlCallNode));
 
+   traceMsg(comp(), "about to create first diamond for call\n");
+   node->removeAllChildren();
+
    TR::TransformUtil::createDiamondForCall(this, treetop, vtableOffsetIsNotZeroTreeTop, dispatchVirtualTreeTop, inlCallTreeTop, false, false);
 
    //traceMsg(comp(), "trees after creating the first diamond for call\n");
@@ -692,6 +711,8 @@ void J9::RecognizedCallTransformer::process_java_lang_invoke_MethodHandle_linkTo
                                                                                                 true,
                                                                                                 "java/lang/invoke/MemberName.vmtarget J");
    vmtargetSymRef->getSymbol()->setNotCollected();
+
+   traceMsg(comp(), "vmTargetSymRef created for the computed static call\n");
    TR::Node * vmTargetNode = TR::Node::createWithSymRef(node, TR::aloadi, 1, /* memberName */ TR::Node::createLoad(node, mnSymRef), vmtargetSymRef);
    //argsList->pop_back(); // remove memberName for computed call
    processVMInternalNativeFunction(treetop, node, vmTargetNode, argsList, newInlCall, /* hasMethodHandleReceiver*/ false);
@@ -704,170 +725,196 @@ void J9::RecognizedCallTransformer::process_java_lang_invoke_MethodHandle_linkTo
 bool J9::RecognizedCallTransformer::isInlineable(TR::TreeTop* treetop)
    {
    auto node = treetop->getNode()->getFirstChild();
-   switch(node->getSymbol()->castToMethodSymbol()->getMandatoryRecognizedMethod())
+   bool lastRun = getLastRun();
+   if (!lastRun)
       {
-      case TR::sun_misc_Unsafe_getAndAddInt:
-         return !comp()->getOption(TR_DisableUnsafe) && !comp()->compileRelocatableCode() && !TR::Compiler->om.canGenerateArraylets() &&
-            cg()->supportsNonHelper(TR::SymbolReferenceTable::atomicFetchAndAddSymbol);
-      case TR::sun_misc_Unsafe_getAndSetInt:
-         return !comp()->getOption(TR_DisableUnsafe) && !comp()->compileRelocatableCode() && !TR::Compiler->om.canGenerateArraylets() &&
-            cg()->supportsNonHelper(TR::SymbolReferenceTable::atomicSwapSymbol);
-      case TR::sun_misc_Unsafe_getAndAddLong:
-         return !comp()->getOption(TR_DisableUnsafe) && !comp()->compileRelocatableCode() && !TR::Compiler->om.canGenerateArraylets() && comp()->target().is64Bit() &&
-            cg()->supportsNonHelper(TR::SymbolReferenceTable::atomicFetchAndAddSymbol);
-      case TR::sun_misc_Unsafe_getAndSetLong:
-         return !comp()->getOption(TR_DisableUnsafe) && !comp()->compileRelocatableCode() && !TR::Compiler->om.canGenerateArraylets() && comp()->target().is64Bit() &&
-            cg()->supportsNonHelper(TR::SymbolReferenceTable::atomicSwapSymbol);
-      case TR::java_lang_Class_isAssignableFrom:
-         return cg()->supportsInliningOfIsAssignableFrom();
-      case TR::java_lang_Integer_rotateLeft:
-      case TR::java_lang_Integer_rotateRight:
-         return comp()->target().cpu.getSupportsHardware32bitRotate();
-      case TR::java_lang_Long_rotateLeft:
-      case TR::java_lang_Long_rotateRight:
-         return comp()->target().cpu.getSupportsHardware64bitRotate();
-      case TR::java_lang_Math_abs_I:
-      case TR::java_lang_Math_abs_L:
-         return cg()->supportsIntAbs();
-      case TR::java_lang_Math_abs_F:
-      case TR::java_lang_Math_abs_D:
-         return cg()->supportsFPAbs();
-      case TR::java_lang_Math_max_I:
-      case TR::java_lang_Math_min_I:
-      case TR::java_lang_Math_max_L:
-      case TR::java_lang_Math_min_L:
-         return !comp()->getOption(TR_DisableMaxMinOptimization);
-      case TR::java_lang_StringUTF16_toBytes:
-         return !comp()->compileRelocatableCode();
-      case TR::java_lang_StrictMath_sqrt:
-      case TR::java_lang_Math_sqrt:
-         return comp()->target().cpu.getSupportsHardwareSQRT();
-      case TR::java_lang_Short_reverseBytes:
-      case TR::java_lang_Integer_reverseBytes:
-      case TR::java_lang_Long_reverseBytes:
-         return comp()->cg()->supportsByteswap();
-#if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
-      case TR::java_lang_invoke_MethodHandle_invokeBasic:
-         if (_processedINLCalls->get(node->getGlobalIndex()))
+      switch(node->getSymbol()->castToMethodSymbol()->getMandatoryRecognizedMethod())
+         {
+         case TR::sun_misc_Unsafe_getAndAddInt:
+            return !comp()->getOption(TR_DisableUnsafe) && !comp()->compileRelocatableCode() && !TR::Compiler->om.canGenerateArraylets() &&
+               cg()->supportsNonHelper(TR::SymbolReferenceTable::atomicFetchAndAddSymbol);
+         case TR::sun_misc_Unsafe_getAndSetInt:
+            return !comp()->getOption(TR_DisableUnsafe) && !comp()->compileRelocatableCode() && !TR::Compiler->om.canGenerateArraylets() &&
+               cg()->supportsNonHelper(TR::SymbolReferenceTable::atomicSwapSymbol);
+         case TR::sun_misc_Unsafe_getAndAddLong:
+            return !comp()->getOption(TR_DisableUnsafe) && !comp()->compileRelocatableCode() && !TR::Compiler->om.canGenerateArraylets() && comp()->target().is64Bit() &&
+               cg()->supportsNonHelper(TR::SymbolReferenceTable::atomicFetchAndAddSymbol);
+         case TR::sun_misc_Unsafe_getAndSetLong:
+            return !comp()->getOption(TR_DisableUnsafe) && !comp()->compileRelocatableCode() && !TR::Compiler->om.canGenerateArraylets() && comp()->target().is64Bit() &&
+               cg()->supportsNonHelper(TR::SymbolReferenceTable::atomicSwapSymbol);
+         case TR::java_lang_Class_isAssignableFrom:
+            return cg()->supportsInliningOfIsAssignableFrom();
+         case TR::java_lang_Integer_rotateLeft:
+         case TR::java_lang_Integer_rotateRight:
+            return comp()->target().cpu.getSupportsHardware32bitRotate();
+         case TR::java_lang_Long_rotateLeft:
+         case TR::java_lang_Long_rotateRight:
+            return comp()->target().cpu.getSupportsHardware64bitRotate();
+         case TR::java_lang_Math_abs_I:
+         case TR::java_lang_Math_abs_L:
+            return cg()->supportsIntAbs();
+         case TR::java_lang_Math_abs_F:
+         case TR::java_lang_Math_abs_D:
+            return cg()->supportsFPAbs();
+         case TR::java_lang_Math_max_I:
+         case TR::java_lang_Math_min_I:
+         case TR::java_lang_Math_max_L:
+         case TR::java_lang_Math_min_L:
+            return !comp()->getOption(TR_DisableMaxMinOptimization);
+         case TR::java_lang_StringUTF16_toBytes:
+            return !comp()->compileRelocatableCode();
+         case TR::java_lang_StrictMath_sqrt:
+         case TR::java_lang_Math_sqrt:
+            return comp()->target().cpu.getSupportsHardwareSQRT();
+         case TR::java_lang_Short_reverseBytes:
+         case TR::java_lang_Integer_reverseBytes:
+         case TR::java_lang_Long_reverseBytes:
+            return comp()->cg()->supportsByteswap();
+         default:
             return false;
-         else
-            return true;
-      case TR::java_lang_invoke_MethodHandle_linkToStatic:
-      case TR::java_lang_invoke_MethodHandle_linkToSpecial:
-         // linkToStatic calls are also used for unresolved invokedynamic/invokehandle, which we can not
-         // bypass as we may push null appendix object that we can not check at compile time
-         if (_processedINLCalls->get(node->getGlobalIndex()) || node->getSymbolReference()->getSymbol()->isDummyResolvedMethod())
-            return false;
-         else
-            return true;
-      case TR::java_lang_invoke_MethodHandle_linkToVirtual:
-          if (_processedINLCalls->get(node->getGlobalIndex()))
-            return false;
-         else
-            return true;
-#endif
-      default:
-         return false;
+         }
       }
+#if 0 // defined(J9VM_OPT_OPENJDK_METHODHANDLE)
+   else
+      {
+      switch(node->getSymbol()->castToMethodSymbol()->getMandatoryRecognizedMethod())
+         {
+         /*case TR::java_lang_invoke_MethodHandle_invokeBasic:
+            if (_processedINLCalls->get(node->getGlobalIndex()))
+               return false;
+            else
+               return true;
+         //case TR::java_lang_invoke_MethodHandle_linkToStatic:
+         //case TR::java_lang_invoke_MethodHandle_linkToSpecial:
+            // linkToStatic calls are also used for unresolved invokedynamic/invokehandle, which we can not
+            // bypass as we may push null appendix object that we can not check at compile time
+         //   if (_processedINLCalls->get(node->getGlobalIndex()) || node->getSymbolReference()->getSymbol()->isDummyResolvedMethod())
+         //      return false;
+         //   else
+         //      return true;
+         case TR::java_lang_invoke_MethodHandle_linkToVirtual:
+             if (_processedINLCalls->get(node->getGlobalIndex()))
+               return false;
+            else
+               return true; */
+         default:
+            return false;
+         }
+      }
+#endif
+   return false;
    }
 
 void J9::RecognizedCallTransformer::transform(TR::TreeTop* treetop)
    {
+   bool lastRun = getLastRun();
    auto node = treetop->getNode()->getFirstChild();
-   switch(node->getSymbol()->castToMethodSymbol()->getMandatoryRecognizedMethod())
+   if (!lastRun)
       {
-      case TR::sun_misc_Unsafe_getAndAddInt:
-      case TR::sun_misc_Unsafe_getAndAddLong:
-         processUnsafeAtomicCall(treetop, TR::SymbolReferenceTable::atomicFetchAndAddSymbol);
-         break;
-      case TR::sun_misc_Unsafe_getAndSetInt:
-      case TR::sun_misc_Unsafe_getAndSetLong:
-         processUnsafeAtomicCall(treetop, TR::SymbolReferenceTable::atomicSwapSymbol);
-         break;
-      case TR::java_lang_Class_isAssignableFrom:
-         process_java_lang_Class_IsAssignableFrom(treetop, node);
-         break;
-      case TR::java_lang_Integer_rotateLeft:
-         processIntrinsicFunction(treetop, node, TR::irol);
-         break;
-      case TR::java_lang_Integer_rotateRight:
+      switch(node->getSymbol()->castToMethodSymbol()->getMandatoryRecognizedMethod())
          {
-         // rotateRight(x, distance) = rotateLeft(x, -distance)
-         TR::Node *distance = TR::Node::create(node, TR::ineg, 1);
-         distance->setChild(0, node->getSecondChild());
-         node->setAndIncChild(1, distance);
+         case TR::sun_misc_Unsafe_getAndAddInt:
+         case TR::sun_misc_Unsafe_getAndAddLong:
+            processUnsafeAtomicCall(treetop, TR::SymbolReferenceTable::atomicFetchAndAddSymbol);
+            break;
+         case TR::sun_misc_Unsafe_getAndSetInt:
+         case TR::sun_misc_Unsafe_getAndSetLong:
+            processUnsafeAtomicCall(treetop, TR::SymbolReferenceTable::atomicSwapSymbol);
+            break;
+         case TR::java_lang_Class_isAssignableFrom:
+            process_java_lang_Class_IsAssignableFrom(treetop, node);
+            break;
+         case TR::java_lang_Integer_rotateLeft:
+            processIntrinsicFunction(treetop, node, TR::irol);
+            break;
+         case TR::java_lang_Integer_rotateRight:
+            {
+            // rotateRight(x, distance) = rotateLeft(x, -distance)
+            TR::Node *distance = TR::Node::create(node, TR::ineg, 1);
+            distance->setChild(0, node->getSecondChild());
+            node->setAndIncChild(1, distance);
 
-         processIntrinsicFunction(treetop, node, TR::irol);
+            processIntrinsicFunction(treetop, node, TR::irol);
 
-         break;
+            break;
+            }
+         case TR::java_lang_Long_rotateLeft:
+            processIntrinsicFunction(treetop, node, TR::lrol);
+            break;
+         case TR::java_lang_Long_rotateRight:
+            {
+            // rotateRight(x, distance) = rotateLeft(x, -distance)
+            TR::Node *distance = TR::Node::create(node, TR::ineg, 1);
+            distance->setChild(0, node->getSecondChild());
+            node->setAndIncChild(1, distance);
+
+            processIntrinsicFunction(treetop, node, TR::lrol);
+
+            break;
+            }
+         case TR::java_lang_Math_abs_I:
+            processIntrinsicFunction(treetop, node, TR::iabs);
+            break;
+         case TR::java_lang_Math_abs_L:
+            processIntrinsicFunction(treetop, node, TR::labs);
+            break;
+         case TR::java_lang_Math_abs_D:
+            processIntrinsicFunction(treetop, node, TR::dabs);
+            break;
+         case TR::java_lang_Math_abs_F:
+            processIntrinsicFunction(treetop, node, TR::fabs);
+            break;
+         case TR::java_lang_Math_max_I:
+            processIntrinsicFunction(treetop, node, TR::imax);
+            break;
+         case TR::java_lang_Math_min_I:
+            processIntrinsicFunction(treetop, node, TR::imin);
+            break;
+         case TR::java_lang_Math_max_L:
+            processIntrinsicFunction(treetop, node, TR::lmax);
+            break;
+         case TR::java_lang_Math_min_L:
+            processIntrinsicFunction(treetop, node, TR::lmin);
+            break;
+         case TR::java_lang_StringUTF16_toBytes:
+            process_java_lang_StringUTF16_toBytes(treetop, node);
+            break;
+         case TR::java_lang_StrictMath_sqrt:
+         case TR::java_lang_Math_sqrt:
+            process_java_lang_StrictMath_and_Math_sqrt(treetop, node);
+            break;
+         case TR::java_lang_Short_reverseBytes:
+            processConvertingUnaryIntrinsicFunction(treetop, node, TR::i2s, TR::sbyteswap, TR::s2i);
+            break;
+         case TR::java_lang_Integer_reverseBytes:
+            processIntrinsicFunction(treetop, node, TR::ibyteswap);
+            break;
+         case TR::java_lang_Long_reverseBytes:
+            processIntrinsicFunction(treetop, node, TR::lbyteswap);
+            break;
+         default:
+            break;
          }
-      case TR::java_lang_Long_rotateLeft:
-         processIntrinsicFunction(treetop, node, TR::lrol);
-         break;
-      case TR::java_lang_Long_rotateRight:
-         {
-         // rotateRight(x, distance) = rotateLeft(x, -distance)
-         TR::Node *distance = TR::Node::create(node, TR::ineg, 1);
-         distance->setChild(0, node->getSecondChild());
-         node->setAndIncChild(1, distance);
-
-         processIntrinsicFunction(treetop, node, TR::lrol);
-
-         break;
-         }
-      case TR::java_lang_Math_abs_I:
-         processIntrinsicFunction(treetop, node, TR::iabs);
-         break;
-      case TR::java_lang_Math_abs_L:
-         processIntrinsicFunction(treetop, node, TR::labs);
-         break;
-      case TR::java_lang_Math_abs_D:
-         processIntrinsicFunction(treetop, node, TR::dabs);
-         break;
-      case TR::java_lang_Math_abs_F:
-         processIntrinsicFunction(treetop, node, TR::fabs);
-         break;
-      case TR::java_lang_Math_max_I:
-         processIntrinsicFunction(treetop, node, TR::imax);
-         break;
-      case TR::java_lang_Math_min_I:
-         processIntrinsicFunction(treetop, node, TR::imin);
-         break;
-      case TR::java_lang_Math_max_L:
-         processIntrinsicFunction(treetop, node, TR::lmax);
-         break;
-      case TR::java_lang_Math_min_L:
-         processIntrinsicFunction(treetop, node, TR::lmin);
-         break;
-      case TR::java_lang_StringUTF16_toBytes:
-         process_java_lang_StringUTF16_toBytes(treetop, node);
-         break;
-      case TR::java_lang_StrictMath_sqrt:
-      case TR::java_lang_Math_sqrt:
-         process_java_lang_StrictMath_and_Math_sqrt(treetop, node);
-         break;
-      case TR::java_lang_Short_reverseBytes:
-         processConvertingUnaryIntrinsicFunction(treetop, node, TR::i2s, TR::sbyteswap, TR::s2i);
-         break;
-      case TR::java_lang_Integer_reverseBytes:
-         processIntrinsicFunction(treetop, node, TR::ibyteswap);
-         break;
-      case TR::java_lang_Long_reverseBytes:
-         processIntrinsicFunction(treetop, node, TR::lbyteswap);
-         break;
-#if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
-      case TR::java_lang_invoke_MethodHandle_invokeBasic:
-         process_java_lang_invoke_MethodHandle_invokeBasic(treetop, node);
-         break;
-      case TR::java_lang_invoke_MethodHandle_linkToStatic:
-      case TR::java_lang_invoke_MethodHandle_linkToSpecial:
-         process_java_lang_invoke_MethodHandle_linkToStaticSpecial(treetop, node);
-         break;
-      case TR::java_lang_invoke_MethodHandle_linkToVirtual:
-         process_java_lang_invoke_MethodHandle_linkToVirtual(treetop, node);
-         break;
-#endif
-      default:
-         break;
       }
+#if 0// defined(J9VM_OPT_OPENJDK_METHODHANDLE)
+   else
+      {
+      switch(node->getSymbol()->castToMethodSymbol()->getMandatoryRecognizedMethod())
+         {
+         /*
+         case TR::java_lang_invoke_MethodHandle_invokeBasic:
+            process_java_lang_invoke_MethodHandle_invokeBasic(treetop, node);
+            break;
+         //case TR::java_lang_invoke_MethodHandle_linkToStatic:
+         //case TR::java_lang_invoke_MethodHandle_linkToSpecial:
+         //   process_java_lang_invoke_MethodHandle_linkToStaticSpecial(treetop, node);
+         //   break;
+         case TR::java_lang_invoke_MethodHandle_linkToVirtual:
+            process_java_lang_invoke_MethodHandle_linkToVirtual(treetop, node);
+            break;*/
+         default:
+            break;
+         }
+      }
+#endif
    }
