@@ -7925,7 +7925,7 @@ void J9::Power::TreeEvaluator::genArrayCopyWithArrayStoreCHK(TR::Node* node, TR:
       cg->addSnippet(new (cg->trHeapMemory()) TR::PPCHelperCallSnippet(cg, node, exceptionSnippetLabel, throwSymRef));
       }
 
-   gcPoint = generateDepConditionalBranchInstruction(cg, TR::InstOpCode::bnel, node, exceptionSnippetLabel, cr0Reg, conditions->cloneAndFix(cg));
+   gcPoint = generateConditionalBranchInstruction(cg, TR::InstOpCode::bnel, node, exceptionSnippetLabel, cr0Reg);
    // somewhere to hang the dependencies
    TR::LabelSymbol *depLabel = generateLabelSymbol(cg);
    generateDepLabelInstruction(cg, TR::InstOpCode::label, node, depLabel, conditions);
