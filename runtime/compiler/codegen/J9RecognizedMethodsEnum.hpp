@@ -448,6 +448,8 @@
    jdk_internal_misc_Unsafe_copyMemory0,
    jdk_internal_loader_NativeLibraries_load,
 
+   jdk_internal_reflect_DirectMethodHandleAccessor_invokeImpl,
+
    FirstVectorMethod,
    jdk_internal_vm_vector_VectorSupport_load = FirstVectorMethod,
    jdk_internal_vm_vector_VectorSupport_store,

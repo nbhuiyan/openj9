@@ -3622,6 +3622,13 @@ void TR_ResolvedJ9Method::construct()
       {  TR::unknownMethod}
       };
 
+
+   static X ReflectionDirectMethodHandleAccessorMethods[] =
+      {
+      { TR::jdk_internal_reflect_DirectMethodHandleAccessor_invokeImpl, 10, "invokeImpl", (int16_t)-1 , "*"},
+      { TR::unknownMethod}
+      };
+
    static X PrimitiveHandleMethods[] =
       {
       {x(TR::java_lang_invoke_PrimitiveHandle_initializeClassIfRequired,  "initializeClassIfRequired",       "()V")},
@@ -4258,6 +4265,12 @@ void TR_ResolvedJ9Method::construct()
       { 0 }
       };
 
+   static Y class47[] =
+      {
+      { "jdk/internal/reflect/DirectMethodHandleAccessor", ReflectionDirectMethodHandleAccessorMethods },
+      { 0 }
+      };
+
    static Y class48[] =
       {
       { "java/util/concurrent/atomic/AtomicReferenceArray", JavaUtilConcurrentAtomicReferenceArrayMethods },
@@ -4294,7 +4307,7 @@ void TR_ResolvedJ9Method::construct()
       0, 0, 0, class13, class14, class15, class16, class17, class18, class19,
       class20, class21, class22, class23, class24, class25, 0, class27, class28, class29,
       class30, class31, class32, class33, class34, class35, class36, 0, class38, class39,
-      class40, class41, class42, class43, class44, class45, class46, 0, class48, class49,
+      class40, class41, class42, class43, class44, class45, class46, class47, class48, class49,
       class50, 0, 0, class53, 0, class55
       };
 

@@ -424,6 +424,12 @@ TR_J9InlinerPolicy::alwaysWorthInlining(TR_ResolvedMethod * calleeMethod, TR::No
    if (!comp()->getOption(TR_DisableForceInlineAnnotations) &&
        comp()->fej9()->isForceInline(calleeMethod))
       {
+      if (calleeMethod->getRecognizedMethod() == TR::jdk_internal_reflect_DirectMethodHandleAccessor_invokeImpl)
+         {
+         if (comp()->trace(OMR::inlining))
+               traceMsg(comp(), "@ForceInline annotation was ignored in alwaysWorthInlining for callee method %s\n", calleeMethod->signature(comp()->trMemory()));
+         return false;
+         }
       if (comp()->trace(OMR::inlining))
          traceMsg(comp(), "@ForceInline was specified for %s, in alwaysWorthInlining\n", calleeMethod->signature(comp()->trMemory()));
       return true;
@@ -2171,6 +2177,12 @@ TR_J9InlinerPolicy::tryToInline(TR_CallTarget * calltarget, TR_CallStack * callS
       if (!comp()->getOption(TR_DisableForceInlineAnnotations) &&
           comp()->fej9()->isForceInline(method))
          {
+         if (method->getRecognizedMethod() == TR::jdk_internal_reflect_DirectMethodHandleAccessor_invokeImpl) 
+            {
+            if (comp()->trace(OMR::inlining))
+               traceMsg(comp(), "@ForceInline annotation was ignored in tryToInline for callee method %s\n",method->signature(comp()->trMemory()));
+            return false;
+            }
          if (comp()->trace(OMR::inlining))
             traceMsg(comp(), "@ForceInline was specified for %s, in tryToInline\n", method->signature(comp()->trMemory()));
          return true;
