@@ -1278,6 +1278,12 @@ resolveSpecialMethodRefInto(J9VMThread *vmStruct, J9ConstantPool *ramCP, UDATA c
 
 	checkForDecompile(vmStruct, romMethodRef, jitCompileTimeResolve);
 
+#if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
+	/* Stack allocate a J9NameAndSignature structure for polymorphic signature methods */
+	J9NameAndSignature onStackNAS = {NULL, NULL};
+	J9UTF8 nullSignature = {0};
+#endif /* defined(J9VM_OPT_OPENJDK_METHODHANDLE) */
+
 	/* Resolve the class. */
 	resolvedClass = resolveClassRef(vmStruct, ramCP, romMethodRef->classRefCPIndex, resolveFlags);
 	
@@ -1340,6 +1346,30 @@ incompat:
 			}
 		}
 	}
+
+#if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
+	if (resolvedClass == J9VMJAVALANGINVOKEMETHODHANDLE(vmStruct->javaVM)) {
+		J9UTF8 *nameUTF = J9ROMNAMEANDSIGNATURE_NAME(nameAndSig);
+		/**
+		 * Check for MH intrinsic methods
+		 *
+		 * Modify the signature to avoid signature mismatch due to varargs
+		 * These methods have special INL send targets
+		 */
+		U_8* methodName = J9UTF8_DATA(nameUTF);
+		U_16 methodNameLength = J9UTF8_LENGTH(nameUTF);
+
+		if (isMethodHandleINL(methodName, methodNameLength)) {
+			/* Create new J9NameAndSignature */
+			onStackNAS.name = nameUTF;
+			onStackNAS.signature = &nullSignature;
+			nameAndSig = (J9ROMNameAndSignature *)(&onStackNAS);
+
+			/* Set flag for partial signature lookup. Signature length is already initialized to 0. */
+			lookupOptions |= (J9_LOOK_DIRECT_NAS | J9_LOOK_PARTIAL_SIGNATURE);
+		}
+	}
+#endif /* defined(J9VM_OPT_OPENJDK_METHODHANDLE) */
 
 	method = (J9Method *)javaLookupMethod(vmStruct, resolvedClass, nameAndSig, currentClass, lookupOptions);
 	
