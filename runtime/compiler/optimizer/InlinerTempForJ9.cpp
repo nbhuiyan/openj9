@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corp. and others
+ * Copyright (c) 2000, 2023 IBM Corp. and others
  *
  * This program and the accompanying materials are made available under
  * the terms of the Eclipse Public License 2.0 which accompanies this
@@ -4780,7 +4780,15 @@ TR_J9InlinerPolicy::supressInliningRecognizedInitialCallee(TR_CallSite* callsite
          return true;
       case TR::java_lang_Class_cast:
          return true; // Call will be transformed into checkcast
+      case TR::java_lang_Class_isHidden:
+      case TR::java_lang_Class_isAnonymousClass:
+      case TR::java_lang_Class_isEnum:
+      case TR::java_lang_Class_isSynthetic:
+      case TR::java_lang_Class_isArray:
+      case TR::java_lang_Class_isPrimitive:
       case TR::java_lang_Object_hashCode:
+      case TR::java_lang_Class_isInstance:
+      case TR::java_lang_Class_isAnnotation:
          if (callNode &&
              callNode->getFirstChild() &&
              callNode->getFirstChild()->getOpCode().hasSymbolReference())
@@ -4789,7 +4797,7 @@ TR_J9InlinerPolicy::supressInliningRecognizedInitialCallee(TR_CallSite* callsite
             if (classChildSymRef->hasKnownObjectIndex() &&
                 classChildSymRef->getSymbol()->isClassObject() &&
                 classChildSymRef->getSymbol()->isConstObjectRef())
-               return true; // VP may be able to determine the hash code and fold away the call
+               return true; // VP may be able to determine the result of the call and fold it
             }
          return false; // VP will not be able to fold away the call
       case TR::java_lang_String_hashCodeImplDecompressed:

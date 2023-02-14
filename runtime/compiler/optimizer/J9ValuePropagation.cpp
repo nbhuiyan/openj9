@@ -1381,6 +1381,100 @@ J9::ValuePropagation::constrainRecognizedMethod(TR::Node *node)
             break;
             }
          }
+      case TR::java_lang_Class_isHidden:
+      case TR::java_lang_Class_isAnonymousClass:
+      case TR::java_lang_Class_isEnum:
+      case TR::java_lang_Class_isSynthetic:
+      case TR::java_lang_Class_isArray:
+      case TR::java_lang_Class_isPrimitive:
+      case TR::java_lang_Class_isAnnotation:
+         {
+         // Only constrain the call in the last run of vp to avoid adding the candidate twice if the call is inside a loop
+         if (!lastTimeThrough())
+            return;
+         TR::Node *jlClassChild = node->getFirstChild();
+         bool jlClassChildGlobal;
+         TR::VPConstraint *jlClassChildConstraint = getConstraint(jlClassChild, jlClassChildGlobal);
+         int32_t result = -1;
+         if (  jlClassChildConstraint
+            && jlClassChildConstraint->isFixedClass()
+            && jlClassChildConstraint->getKnownObject())
+            {
+            if (rm == TR::java_lang_Class_isHidden)
+               result = comp()->fej9()->isHiddenClass(jlClassChildConstraint->getClass());
+            else if (rm == TR::java_lang_Class_isAnonymousClass)
+               result = comp()->fej9()->isAnonymousClass(jlClassChildConstraint->getClass());
+            else if (rm == TR::java_lang_Class_isEnum)
+               result = comp()->fej9()->isEnumClass(jlClassChildConstraint->getClass(), calledMethod);
+            else if (rm == TR::java_lang_Class_isSynthetic)
+               result = comp()->fej9()->isSyntheticClass(jlClassChildConstraint->getClass());
+            else if (rm == TR::java_lang_Class_isArray)
+               {
+               if (comp()->fej9()->isPrimitiveArray(jlClassChildConstraint->getClass())
+                   || comp()fej9()->isReferenceArray(jlClassChildConstraint->getClass()))
+                  result = true;
+               else result = false;
+               }
+            else if (rm == TR::java_lang_Class_isPrimitive)
+               result = comp()->fej9()->isPrimitiveClass(jlClassChildConstraint->getClass());
+            else if (rm == TR::java_lang_Class_isAnnotation)
+               result = comp()->fej9()->isAnnotationClass(jlClassChildConstraint->getClass());
+
+            if (result >= 0)
+               {
+               transformCallToIconstInPlaceOrInDelayedTransformations(_curTree, result, jlClassChildGlobal, transformNonnativeMethodInPlace, !transformNonnativeMethodInPlace);
+               if (trace()) traceMsg(comp(), "Transformed %s into its result\n", signature);
+               TR::DebugCounter::incStaticDebugCounter(comp(), TR::DebugCounter::debugCounterName(comp(), "constrainCall/(%s)", signature));
+               return;
+               }
+            else
+               {
+               if (trace()) traceMsg(comp(), "Failed to evaluate call to %s\n", signature);
+               break;
+               }
+            }
+         else
+            {
+            if (trace()) traceMsg(comp(), "Unable to transform %s into its result\n", signature);
+            break;
+            }
+         }
+      case TR::java_lang_Class_isInstance:
+         {
+         // Only constrain the call in the last run of vp to avoid adding the candidate twice if the call is inside a loop
+         if (!lastTimeThrough())
+            return;
+         TR::Node *jlClassChild = node->getFirstChild();
+         TR::Node *jlClassChild2 = node->getLastChild();
+         bool jlClassChildGlobal, jlClassChildGlobal2;
+         TR::VPConstraint *jlClassChildConstraint = getConstraint(jlClassChild, jlClassChildGlobal);
+         TR::VPConstraint *jlClassChildConstraint2 = getConstraint(jlClassChild2, jlClassChildGlobal2);
+         if (  jlClassChildConstraint
+            && jlClassChildConstraint->isFixedClass()
+            && jlClassChildConstraint->getKnownObject())
+            {
+            TR_YesNoMaybe result = comp()->fej9()->isInstanceOf(jlClassChildConstraint->getClass(),jlClassChildConstraint2->getClass(), true);
+            if (result == TR_yes)
+               transformCallToIconstInPlaceOrInDelayedTransformations(_curTree, 1, jlClassChildGlobal, transformNonnativeMethodInPlace, !transformNonnativeMethodInPlace);
+            else if (result == TR_no)
+               {
+               transformCallToIconstInPlaceOrInDelayedTransformations(_curTree, 0, jlClassChildGlobal, transformNonnativeMethodInPlace, !transformNonnativeMethodInPlace);
+               }
+            else
+               {
+               if (trace()) traceMsg(comp(), "Failed to transform Class.isInstance() into the result\n");
+               break;
+               }
+            if (trace()) traceMsg(comp(), "Transformed Class.isInstance() into its result\n");
+            TR::DebugCounter::incStaticDebugCounter(comp(), TR::DebugCounter::debugCounterName(comp(), "constrainCall/(%s)", signature));
+            return;
+            }
+         else
+            {
+            if (trace()) traceMsg(comp(), "Failed to transform Class.isInstance() into the result\n");
+            break;
+            }
+         }
       case TR::java_lang_String_equals:
          {
          // Only constrain the call in the last run of vp to avoid adding the candidate twice if the call is inside a loop

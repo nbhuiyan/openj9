@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corp. and others
+ * Copyright (c) 2000, 2023 IBM Corp. and others
  *
  * This program and the accompanying materials are made available under
  * the terms of the Eclipse Public License 2.0 which accompanies this
@@ -6782,6 +6782,23 @@ TR_J9VMBase::isEnumClass(TR_OpaqueClassBlock * clazzPointer, TR_ResolvedMethod *
    return (isModFlagSet && (enumClass == superClass));
    }
 
+bool
+TR_J9VMBase::isHiddenClass(TR_OpaqueClassBlock * clazzPointer)
+   {
+   return (TR::Compiler->cls.romClassOf(clazzPointer)->modifiers & J9AccClassHidden) ? true : false;
+   }
+
+bool
+TR_J9VMBase::isSyntheticClass(TR_OpaqueClassBlock * clazzPointer)
+   {
+   return (TR::Compiler->cls.romClassOf(clazzPointer)->modifiers & J9AccSynthetic) ? true : false;
+   }
+
+bool
+TR_J9VMBase::isAnnotationClass(TR_OpaqueClassBlock * clazzPointer)
+   {
+   return (TR::Compiler->cls.romClassOf(clazzPointer)->modifiers & J9AccAnnotation) ? true : false;
+   }
 
 bool
 TR_J9VMBase::isAbstractClass(TR_OpaqueClassBlock * clazzPointer)
