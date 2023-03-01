@@ -1381,6 +1381,7 @@ J9::ValuePropagation::constrainRecognizedMethod(TR::Node *node)
             break;
             }
          }
+      /*
       case TR::java_lang_Class_isHidden:
       case TR::java_lang_Class_isAnonymousClass:
       case TR::java_lang_Class_isEnum:
@@ -1437,6 +1438,7 @@ J9::ValuePropagation::constrainRecognizedMethod(TR::Node *node)
             break;
             }
          }
+         */
       case TR::java_lang_String_equals:
          {
          // Only constrain the call in the last run of vp to avoid adding the candidate twice if the call is inside a loop

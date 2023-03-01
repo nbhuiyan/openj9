@@ -4780,13 +4780,13 @@ TR_J9InlinerPolicy::supressInliningRecognizedInitialCallee(TR_CallSite* callsite
          return true;
       case TR::java_lang_Class_cast:
          return true; // Call will be transformed into checkcast
-      case TR::java_lang_Class_isHidden:
+      /*case TR::java_lang_Class_isHidden:
       case TR::java_lang_Class_isAnonymousClass:
       case TR::java_lang_Class_isEnum:
       case TR::java_lang_Class_isSynthetic:
       case TR::java_lang_Class_isArray:
       case TR::java_lang_Class_isPrimitive:
-      case TR::java_lang_Class_isAnnotation:
+      case TR::java_lang_Class_isAnnotation:*/
       case TR::java_lang_Object_hashCode:
          if (callNode
              && callNode->getNumChildren() > 0
