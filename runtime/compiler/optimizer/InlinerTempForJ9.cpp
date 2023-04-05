@@ -3850,7 +3850,11 @@ bool TR_MultipleCallTargetInliner::inlineSubCallGraph(TR_CallTarget* calltarget)
    TR::Node *callNode = NULL; // no call node has been generated yet
    if (j9inlinerPolicy->isJSR292Method(calltarget->_calleeMethod)
        || forceInline(calltarget)
-       || j9inlinerPolicy->alwaysWorthInlining(calltarget->_calleeMethod, callNode))
+       || j9inlinerPolicy->alwaysWorthInlining(calltarget->_calleeMethod, callNode)
+       || calltarget->_fullSize <= 50
+       || (calltarget->_myCallees.getFirst()
+           && calltarget->_myCallees.getFirst()->_callerResolvedMethod
+           && j9inlinerPolicy->isJSR292Method(calltarget->_myCallees.getFirst()->_callerResolvedMethod)))
       {
       for (TR_CallSite* callsite = calltarget->_myCallees.getFirst(); callsite ; callsite = callsite->getNext())
          {
