@@ -3762,6 +3762,38 @@ void TR_ResolvedJ9Method::construct()
       {  TR::unknownMethod}
       };
 
+   static X MethodHandleImplArrayAccessorMethods[] =
+      {
+      {x(TR::java_lang_invoke_MethodHandleImpl_ArrayAccessor_getElementI, "getElementI", "([II)I")},
+      {x(TR::java_lang_invoke_MethodHandleImpl_ArrayAccessor_getElementJ, "getElementJ", "([JI)J")},
+      {x(TR::java_lang_invoke_MethodHandleImpl_ArrayAccessor_getElementF, "getElementF", "([FI)F")},
+      {x(TR::java_lang_invoke_MethodHandleImpl_ArrayAccessor_getElementD, "getElementD", "([DI)D")},
+      {x(TR::java_lang_invoke_MethodHandleImpl_ArrayAccessor_getElementZ, "getElementZ", "([ZI)Z")},
+      {x(TR::java_lang_invoke_MethodHandleImpl_ArrayAccessor_getElementB, "getElementB", "([BI)B")},
+      {x(TR::java_lang_invoke_MethodHandleImpl_ArrayAccessor_getElementS, "getElementS", "([SI)S")},
+      {x(TR::java_lang_invoke_MethodHandleImpl_ArrayAccessor_getElementC, "getElementC", "([CI)C")},
+      {x(TR::java_lang_invoke_MethodHandleImpl_ArrayAccessor_getElementL, "getElementL", "([Ljava/lang/Object;I)Ljava/lang/Object;")},
+      {x(TR::java_lang_invoke_MethodHandleImpl_ArrayAccessor_setElementI, "setElementI", "([III)V")},
+      {x(TR::java_lang_invoke_MethodHandleImpl_ArrayAccessor_setElementJ, "setElementJ", "([JIJ)V")},
+      {x(TR::java_lang_invoke_MethodHandleImpl_ArrayAccessor_setElementF, "setElementF", "([FIF)V")},
+      {x(TR::java_lang_invoke_MethodHandleImpl_ArrayAccessor_setElementD, "setElementD", "([DID)V")},
+      {x(TR::java_lang_invoke_MethodHandleImpl_ArrayAccessor_setElementZ, "setElementZ", "([ZIZ)V")},
+      {x(TR::java_lang_invoke_MethodHandleImpl_ArrayAccessor_setElementB, "setElementB", "([BIB)V")},
+      {x(TR::java_lang_invoke_MethodHandleImpl_ArrayAccessor_setElementS, "setElementS", "([SIS)V")},
+      {x(TR::java_lang_invoke_MethodHandleImpl_ArrayAccessor_setElementC, "setElementC", "([CIC)V")},
+      {x(TR::java_lang_invoke_MethodHandleImpl_ArrayAccessor_setElementL, "setElementL", "([Ljava/lang/Object;ILjava/lang/Object;)V")},
+      {x(TR::java_lang_invoke_MethodHandleImpl_ArrayAccessor_lengthI, "lengthI", "([I)I")},
+      {x(TR::java_lang_invoke_MethodHandleImpl_ArrayAccessor_lengthJ, "lengthJ", "([J)I")},
+      {x(TR::java_lang_invoke_MethodHandleImpl_ArrayAccessor_lengthF, "lengthF", "([F)I")},
+      {x(TR::java_lang_invoke_MethodHandleImpl_ArrayAccessor_lengthD, "lengthD", "([D)I")},
+      {x(TR::java_lang_invoke_MethodHandleImpl_ArrayAccessor_lengthZ, "lengthZ", "([Z)I")},
+      {x(TR::java_lang_invoke_MethodHandleImpl_ArrayAccessor_lengthB, "lengthB", "([B)I")},
+      {x(TR::java_lang_invoke_MethodHandleImpl_ArrayAccessor_lengthS, "lengthS", "([S)I")},
+      {x(TR::java_lang_invoke_MethodHandleImpl_ArrayAccessor_lengthC, "lengthC", "([C)I")},
+      {x(TR::java_lang_invoke_MethodHandleImpl_ArrayAccessor_lengthL, "lengthL", "([Ljava/lang/Object;)I")},
+      { TR::unknownMethod}
+      };
+
    static X MethodHandleImplCountingWrapperMethods[] =
       {
       {x(TR::java_lang_invoke_MethodHandleImpl_CountingWrapper_getTarget,   "getTarget",  "()Ljava/lang/invoke/MethodHandle;")},
@@ -4235,6 +4267,12 @@ void TR_ResolvedJ9Method::construct()
       { "java/util/concurrent/atomic/AtomicIntegerArray", JavaUtilConcurrentAtomicIntegerArrayMethods },
       { "java/util/concurrent/ConcurrentHashMap$TreeBin", JavaUtilConcurrentConcurrentHashMapTreeBinMethods },
       { "java/io/ObjectInputStream$BlockDataInputStream", ObjectInputStream_BlockDataInputStreamMethods },
+      { 0 }
+      };
+
+   static Y class47[] =
+      {
+      {"java/lang/invoke/MethodHandleImpl$ArrayAccessor", MethodHandleImplArrayAccessorMethods },
       { 0 }
       };
 
