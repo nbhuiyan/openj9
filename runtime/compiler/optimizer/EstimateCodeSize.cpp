@@ -100,7 +100,11 @@ TR_EstimateCodeSize::calculateCodeSize(TR_CallTarget *calltarget, TR_CallStack *
       }
 
    if (!retval && _inliner->forceInline(calltarget))
+      {
+      heuristicTrace(tracer(),"Recognized method that must be inlined.  Assuming zero size for %s\n", tracer()->traceSignature(calltarget->_calleeSymbol));
+      _realSize = 0;
       retval = true;
+      }
 
    return retval;
    }

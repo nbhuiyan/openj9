@@ -2412,7 +2412,7 @@ TR_J9InlinerPolicy::callMustBeInlined(TR_CallTarget *calltarget)
    if (method->convertToMethod()->isArchetypeSpecimen())
       return true;
 
-   if (comp()->fej9()->isLambdaFormGeneratedMethod(method))
+   if (alwaysWorthInlining(calltarget->_calleeMethod, NULL))
       return true;
 
    if (insideIntPipelineForEach(method, comp()))
@@ -3692,7 +3692,11 @@ void TR_MultipleCallTargetInliner::weighCallSite( TR_CallStack * callStack , TR_
          static int32_t methodHandleThunkWeightFactor = methodHandleThunkWeightFactorStr? atoi(methodHandleThunkWeightFactorStr) : 10;
          // MethodHandle thunks benefit a great deal from inlining so let's encourage them.
          weight /= methodHandleThunkWeightFactor;
+#if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
+         heuristicTrace(tracer(),"Setting weight to %d because callee is LamdaForm generated method.",weight);
+#else
          heuristicTrace(tracer(),"Setting weight to %d because callee is MethodHandle thunk.",weight);
+#endif
          }
 
 
@@ -3774,6 +3778,11 @@ void TR_MultipleCallTargetInliner::weighCallSite( TR_CallStack * callStack , TR_
          heuristicTrace(tracer(),"Setting weight to %d because weight is less than originalWeight/8", weight);
          }
 
+      if (forceInline(calltarget) && weight > 0)
+         {
+         weight = 0;
+         heuristicTrace(tracer(), "Reduced weight to 0 because method must always be inlined\n");
+         }
 
       float callGraphAdjustedWeight = 0.0f;
       int32_t callGraphWeight       = -1;
