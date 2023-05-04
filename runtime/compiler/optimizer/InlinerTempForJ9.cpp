@@ -3840,6 +3840,33 @@ void TR_MultipleCallTargetInliner::weighCallSite( TR_CallStack * callStack , TR_
 bool TR_MultipleCallTargetInliner::inlineSubCallGraph(TR_CallTarget* calltarget)
    {
    TR_J9InlinerPolicy *j9inlinerPolicy = (TR_J9InlinerPolicy *) getPolicy();
+
+#if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
+   /*
+    * We got to this stage because we have too many callees to inline, and now have to go through
+    * the list of chopped off callees that will be inlined beyond inlining budget because they
+    * are always worth inlining. However, when it comes to MethodHandle-heavy methods, the inlining
+    * of MH chain methods can result in the exponential growth in nodes resulting in too much
+    * time spent compiling or even failing compilation due to too many nodes or exceeding memory.
+    * We can somewhat mitigate this problem by avoiding forced inlining of JSR292-related methods
+    * whose caller block frequency is below a certain threshold.
+    *
+    * TR_mhForcedInliningThreshold env variable can be used to try out other cut-off values, or set
+    * to 0 to disable this check entirely.
+    *
+    */
+   static char *mhForcedInliningThresholdStr = feGetEnv("TR_mhForcedInliningThreshold");
+   static int32_t mhForcedInliningThreshold = mhForcedInliningThresholdStr? atoi(mhForcedInliningThresholdStr) : 50;
+   if (j9inlinerPolicy->isJSR292Method(calltarget->_calleeMethod)
+      && mhForcedInliningThreshold > 0
+      && calltarget->_myCallSite->_callNodeTreeTop
+      && calltarget->_myCallSite->_callNodeTreeTop->getEnclosingBlock()->getFrequency() < mhForcedInliningThreshold)
+      {
+      calltarget->_myCallSite->removecalltarget(calltarget, tracer(), Trimmed_List_of_Callees);
+      return false;
+      }
+#endif
+
    /*
     * keep the target if it meets either of the following condition:
     * 1. It's a JSR292 related method. This condition allows inlining method handle thunk chain without inlining the leaf java method.
