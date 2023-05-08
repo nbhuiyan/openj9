@@ -9213,6 +9213,11 @@ foundITable:
 		J9Method *method = NULL;
 		UDATA vTableOffset = 0;
 
+		if (fromJIT) {
+			PORT_ACCESS_FROM_JAVAVM(_vm);
+			j9tty_printf(PORTLIB, "<%p> : Arrived in linkToInterface from compiled code.\n", _currentThread);
+		}
+
 		/* Pop memberNameObject from the stack. */
 		j9object_t memberNameObject = *(j9object_t *)_sp++;
 		if (J9_UNEXPECTED(NULL == memberNameObject)) {
