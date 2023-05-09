@@ -904,7 +904,9 @@ void J9::RecognizedCallTransformer::processVMInternalNativeFunction(TR::TreeTop*
    TR::TreeTop * computedCallTreeTop = TR::TreeTop::create(comp(), TR::Node::create(node, TR::treetop, 1, computedCallNode));
    TR::RecognizedMethod rm = node->getSymbol()->castToMethodSymbol()->getMandatoryRecognizedMethod();
    TR::Node *nullChkNode = NULL;
-   if (rm == TR::java_lang_invoke_MethodHandle_linkToSpecial || rm == TR::java_lang_invoke_MethodHandle_linkToVirtual)
+   if (rm == TR::java_lang_invoke_MethodHandle_linkToSpecial
+       || rm == TR::java_lang_invoke_MethodHandle_linkToVirtual
+       || rm == TR::java_lang_invoke_MethodHandle_linkToInterface)
       {
       TR::Node *passthroughNode = TR::Node::create(node, TR::PassThrough, 1);
       passthroughNode->setAndIncChild(0, TR::Node::createLoad(node, argsList->front()));
@@ -918,8 +920,13 @@ void J9::RecognizedCallTransformer::processVMInternalNativeFunction(TR::TreeTop*
    _processedINLCalls->set(inlCallNode->getGlobalIndex());
    }
 
-void J9::RecognizedCallTransformer::process_java_lang_invoke_MethodHandle_linkToVirtual(TR::TreeTop * treetop, TR::Node * node)
+void J9::RecognizedCallTransformer::process_java_lang_invoke_MethodHandle_linkToVirtualInterface(TR::TreeTop * treetop, TR::Node * node)
    {
+   TR::RecognizedMethod rm =
+      node->getSymbol()->castToMethodSymbol()->getMandatoryRecognizedMethod();
+
+   bool isLinkToInterface = rm == TR::java_lang_invoke_MethodHandle_linkToInterface;
+
    TR_J9VMBase* fej9 = static_cast<TR_J9VMBase*>(comp()->fe());
    TR::Node * placeholderINLCallNode = node->duplicateTree(false); // this will be eventually removed once the second diamond is created
    TR::Node* duplicatedINLCallNode = node->duplicateTree(false);
@@ -1061,14 +1068,24 @@ void J9::RecognizedCallTransformer::process_java_lang_invoke_MethodHandle_linkTo
    virtualNullCheckBlock->append(TR::TreeTop::create(comp(), ifIsVFTOffset));
    cfg->addEdge(virtualNullCheckBlock, virtualDispatchBlock);
 
-   // TODO: For linkToInterface() we should instead use
-   // findOrCreateLookupDynamicPublicInterfaceMethodSymbolRef(), which will
-   // throw IllegalAccessError when the dispatched method is non-public.
+   TR::SymbolReference *lookupDynamicInterfaceMethodSymRef = NULL;
+   if (isLinkToInterface)
+      {
+      // throws IllegalAccessError when the dispatched method is non-public
+      lookupDynamicInterfaceMethodSymRef =
+         comp()->getSymRefTab()->findOrCreateLookupDynamicPublicInterfaceMethodSymbolRef();
+      }
+   else
+      {
+      lookupDynamicInterfaceMethodSymRef =
+         comp()->getSymRefTab()->findOrCreateLookupDynamicInterfaceMethodSymbolRef();
+      }
+
    TR::Node *vftOffsetFromITable = TR::Node::createWithSymRef(
       node,
       comp()->target().is64Bit() ? TR::lcall : TR::icall,
       3,
-      comp()->getSymRefTab()->findOrCreateLookupDynamicInterfaceMethodSymbolRef());
+      lookupDynamicInterfaceMethodSymRef);
 
    // The first argument to the itable lookup helper is the receiver class.
    // It's safe to duplicate vftNode here because it is just a load of
@@ -1266,6 +1283,7 @@ bool J9::RecognizedCallTransformer::isInlineable(TR::TreeTop* treetop)
             else
                return true;
          case TR::java_lang_invoke_MethodHandle_linkToVirtual:
+         case TR::java_lang_invoke_MethodHandle_linkToInterface:
              if (_processedINLCalls->get(node->getGlobalIndex()))
                return false;
             else
@@ -1394,7 +1412,8 @@ void J9::RecognizedCallTransformer::transform(TR::TreeTop* treetop)
             process_java_lang_invoke_MethodHandle_linkToStaticSpecial(treetop, node);
             break;
          case TR::java_lang_invoke_MethodHandle_linkToVirtual:
-            process_java_lang_invoke_MethodHandle_linkToVirtual(treetop, node);
+         case TR::java_lang_invoke_MethodHandle_linkToInterface:
+            process_java_lang_invoke_MethodHandle_linkToVirtualInterface(treetop, node);
             break;
          default:
             break;
