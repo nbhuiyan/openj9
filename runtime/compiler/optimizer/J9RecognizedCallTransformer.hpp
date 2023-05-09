@@ -201,22 +201,23 @@ class RecognizedCallTransformer : public OMR::RecognizedCallTransformer
    void process_java_lang_invoke_MethodHandle_linkToStaticSpecial(TR::TreeTop * treetop, TR::Node* node);
 
    /** \brief
-    *     Transforms java/lang/MethodHandle.linkToVirtual when the MemberName object (last arg) is not a known object.
-    *     linkToVirtual is a VM INL call that would construct the call frame for the target virtual method invocation.
+    *     Transforms java/lang/MethodHandle.linkToVirtual or linkToInterface when the MemberName object (last arg) is not a known object.
+    *
+    *     linkToVirtual and linkToInterface are VM INL calls that would construct the call frame for the target method invocation.
     *     This would be the case even if the method to be invoked is compiled, resulting in j2i and i2j transitions.
     *     This transformation creates an alternate conditional paths for such invocations to avoid j2i transitions. In most
     *     cases, the JITHelper method dispatchVirtual will be used to dispatch to the vtable entry for the method directly.
-    *     For private virtual methods (vtable index 0), dispatchVirtual cannot be used as there are no vtable entries for those
-    *     methods, so instead the call will be treated as a linkToStatic call, as the target method can be obtained from the
+    *     For directly-dispatched methods (vtable index 0), dispatchVirtual cannot be used as there are no vtable entries for those
+    *     methods, so instead the call will be treated as a linkToSpecial call, as the target method can be obtained from the
     *     MemberName object.
     *
     *  \param treetop
     *     the TreeTop anchoring the call node
     *
     *  \param node
-    *     the call node representing the linkToVirtual call
+    *     the call node representing the linkToVirtual or linkToInterface call
     */
-   void process_java_lang_invoke_MethodHandle_linkToVirtual(TR::TreeTop * treetop, TR::Node * node);
+   void process_java_lang_invoke_MethodHandle_linkToVirtualInterface(TR::TreeTop * treetop, TR::Node * node);
 #endif
 
    private:
