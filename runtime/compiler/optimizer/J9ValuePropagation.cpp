@@ -1390,6 +1390,8 @@ J9::ValuePropagation::constrainRecognizedMethod(TR::Node *node)
          }
       case TR::java_lang_Object_hashCode:
          {
+         static char *encourageInliningConstArgs = feGetEnv("TR_encourageInliningConstArgs");
+         if (!encourageInliningConstArgs) break;
          // Only constrain the call in the last run of vp to avoid adding the candidate twice if the call is inside a loop
          if (!lastTimeThrough())
             return;
@@ -1425,6 +1427,8 @@ J9::ValuePropagation::constrainRecognizedMethod(TR::Node *node)
       case TR::java_lang_Class_isPrimitive:
       case TR::java_lang_Class_isAnnotation:
          {
+         static char *encourageInliningConstArgs = feGetEnv("TR_encourageInliningConstArgs");
+         if (!encourageInliningConstArgs) break;
          // Only constrain the call in the last run of vp to avoid adding the candidate twice if the call is inside a loop
          if (!lastTimeThrough())
             return;
