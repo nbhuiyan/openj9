@@ -3540,6 +3540,44 @@ void TR_MultipleCallTargetInliner::weighCallSite( TR_CallStack * callStack , TR_
                if (comp()->trace(OMR::inlining))
                   heuristicTrace(tracer(),"WeighCallSite: Considering shrinking call %p with frequency %d\n", callsite->_callNode, frequency2);
 
+               static char *encourageInliningConstArgs = feGetEnv("TR_encourageInliningConstArgs");
+               TR_LinkHead<TR_ParameterMapping> argMap;
+               if (encourageInliningConstArgs && ((TR_J9InlinerPolicy *)getPolicy())->validateArguments(calltarget,argMap))
+                  {
+                  int32_t originalSize = size;
+                  for (TR_ParameterMapping* parm = argMap.getFirst(); parm; parm = parm->getNext())
+                     {
+                     int32_t preIterationSize = size;
+                     TR::Node * parmNode = parm->_parameterNode;
+                     if (parmNode->getSymbolReference()
+                         && parmNode->getSymbolReference()->getSymbol()->isStatic()
+                         && parmNode->getSymbolReference()->getSymbol()->castToStaticSymbol()->isConstString())
+                        {
+                        size = (int)((float)size * 0.75f);
+                        heuristicTrace(tracer(),"Setting size from %d to %d because arg is constant string.", preIterationSize, size);
+                        }
+                     else if (parmNode->getOpCode().isLoadConst())
+                        {
+                        size = (int)((float)size * 0.75f);
+                        heuristicTrace(tracer(),"Setting size from %d to %d because arg is load const.", preIterationSize, size);
+                        }
+                     else if (parmNode->getOpCodeValue() == TR::aload
+                              && parmNode->getSymbolReference()->getSymbol()->isConstObjectRef())
+                        {
+                        size = (int)((float)size * 0.75f);
+                        heuristicTrace(tracer(),"Setting size from %d to %d because arg is const object ref.", preIterationSize, size);
+                        }
+                     else if (parmNode->getOpCodeValue() == TR::aloadi
+                              && parmNode->getSymbolReference() == comp()->getSymRefTab()->findJavaLangClassFromClassSymbolRef())
+                        {
+                        size = (int)((float)size * 0.75f);
+                        heuristicTrace(tracer(),"Setting size from %d to %d because arg is const class ref.", preIterationSize, size);
+                        }
+                     }
+                  if (size < originalSize)
+                     heuristicTrace(tracer(), "Reducd size from %d to %d due to constant args in callee.", originalSize, size);
+                  }
+
                bool largeCompiledCallee = !comp()->getOption(TR_InlineVeryLargeCompiledMethods) &&
                                           isLargeCompiledMethod(calltarget->_calleeMethod, size, frequency2);
                if (largeCompiledCallee)
