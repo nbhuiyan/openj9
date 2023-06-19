@@ -279,6 +279,14 @@ public:
    virtual bool jitStaticsAreSame(TR_ResolvedMethod *, int32_t, TR_ResolvedMethod *, int32_t);
    virtual bool jitFieldsAreSame(TR_ResolvedMethod *, int32_t, TR_ResolvedMethod *, int32_t, int32_t);
 
+   /**
+    * \brief Check if object is an array class instance
+    *
+    * \param object the object address
+    * \return true if object is an array class instance, false otherwise
+    */
+   virtual bool isArrayObject(TR_OpaqueClassBlock *object);
+
    virtual uintptr_t getPersistentClassPointerFromClassPointer(TR_OpaqueClassBlock * clazz);//d169771 [2177]
 
    virtual bool needRelocationsForHelpers() { return false; }
