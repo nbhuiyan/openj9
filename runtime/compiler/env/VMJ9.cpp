@@ -6680,6 +6680,12 @@ TR_J9VM::isUnloadAssumptionRequired(TR_OpaqueClassBlock * clazzPointer, TR_Resol
    }
 
 bool
+TR_J9VMBase::isArrayObject(TR_OpaqueClassBlock *object)
+   {
+   return VM_VMHelpers::objectIsArray(getCurrentVMThread(), (j9object_t) object);
+   }
+
+bool
 TR_J9VM::classHasBeenExtended(TR_OpaqueClassBlock * clazzPointer)
    {
    return (J9CLASS_FLAGS(TR::Compiler->cls.convertClassOffsetToClassPtr(clazzPointer)) & J9AccClassHasBeenOverridden) != 0;

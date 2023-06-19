@@ -6605,6 +6605,11 @@ TR_ResolvedJ9Method::getResolvedDynamicMethod(TR::Compilation * comp, I_32 callS
       {
       TR_OpaqueMethodBlock * targetJ9MethodBlock = NULL;
       uintptr_t * invokeCacheArray = (uintptr_t *) callSiteTableEntryAddress(callSiteIndex);
+      // CallSite table entry is expected to be an array, but this is not the case when an exception
+      // occurs during the invokedynamic resolution
+      if (!fej9()->isArrayObject((TR_OpaqueClassBlock*) *invokeCacheArray))
+         comp->failCompilation<TR::CompilationException>("Invalid CallSite table entry for invokedynamic");
+
          {
          TR::VMAccessCriticalSection getResolvedDynamicMethod(fej9());
          targetJ9MethodBlock = fej9()->targetMethodFromMemberName((uintptr_t) fej9()->getReferenceElement(*invokeCacheArray, JSR292_invokeCacheArrayMemberNameIndex)); // this will not work in AOT or JITServer

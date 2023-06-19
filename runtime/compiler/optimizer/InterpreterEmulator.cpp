@@ -1256,6 +1256,11 @@ InterpreterEmulator::visitInvokedynamic()
          || comp()->compileRelocatableCode()
       ) return; // do nothing if unresolved, is AOT compilation
    uintptr_t * invokeCacheArray = (uintptr_t *) owningMethod->callSiteTableEntryAddress(callSiteIndex);
+   // CallSite table entry is expected to be an array, but this is not the case when an exception
+   // occurs during the invokedynamic resolution
+   if (!comp()->fej9()->isArrayObject((TR_OpaqueClassBlock*) *invokeCacheArray))
+      return;
+
    updateKnotAndCreateCallSiteUsingInvokeCacheArray(owningMethod, invokeCacheArray, -1);
 #else
    bool isInterface = false;
