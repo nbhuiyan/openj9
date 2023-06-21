@@ -1191,6 +1191,12 @@ handleServerMessage(JITServer::ClientStream *client, TR_J9VM *fe, JITServer::Mes
          client->write(response, fe->inSnapshotMode());
          }
          break;
+      case MessageType::VM_isArrayObject:
+         {
+         auto object = std::get<0>(client->getRecvData<TR_OpaqueClassBlock*>());
+         client->write(response, fe->isArrayObject(object));
+         }
+         break;
 
       case MessageType::mirrorResolvedJ9Method:
          {
