@@ -187,6 +187,7 @@ public:
    virtual bool needsInvokeExactJ2IThunk(TR::Node *node,  TR::Compilation *comp) override;
    virtual TR_ResolvedMethod *createMethodHandleArchetypeSpecimen(TR_Memory *trMemory, uintptr_t *methodHandleLocation, TR_ResolvedMethod *owningMethod = 0) override;
    virtual TR_ResolvedMethod *createMethodHandleArchetypeSpecimen(TR_Memory *trMemory, TR_OpaqueMethodBlock *archetype, uintptr_t *methodHandleLocation, TR_ResolvedMethod *owningMethod = 0) override;
+   virtual bool isArrayObject(TR_OpaqueClassBlock* object) override;
 
    // Is method generated for LambdaForm
    virtual bool isLambdaFormGeneratedMethod(TR_OpaqueMethodBlock *method) override;

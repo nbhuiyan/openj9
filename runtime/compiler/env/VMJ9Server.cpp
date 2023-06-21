@@ -2425,6 +2425,14 @@ TR_J9ServerVM::isDontInline(TR_ResolvedMethod *method)
    }
 
 bool
+TR_J9ServerVM::isArrayObject(TR_OpaqueClassBlock* object)
+   {
+   JITServer::ServerStream *stream = _compInfoPT->getMethodBeingCompiled()->_stream;
+   stream->write(JITServer::MessageType::VM_isArrayObject, object);
+   return std::get<0>(stream->read<bool>());
+   }
+
+bool
 TR_J9ServerVM::isPortableSCCEnabled()
    {
    JITServer::ServerStream *stream = _compInfoPT->getMethodBeingCompiled()->_stream;
