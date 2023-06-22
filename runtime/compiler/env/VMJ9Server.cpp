@@ -2425,7 +2425,7 @@ TR_J9ServerVM::isDontInline(TR_ResolvedMethod *method)
    }
 
 bool
-TR_J9ServerVM::isArrayObject(TR_OpaqueClassBlock* object)
+TR_J9ServerVM::isArrayObject(uintptr_t object)
    {
    JITServer::ServerStream *stream = _compInfoPT->getMethodBeingCompiled()->_stream;
    stream->write(JITServer::MessageType::VM_isArrayObject, object);

@@ -1193,7 +1193,7 @@ handleServerMessage(JITServer::ClientStream *client, TR_J9VM *fe, JITServer::Mes
          break;
       case MessageType::VM_isArrayObject:
          {
-         auto object = std::get<0>(client->getRecvData<TR_OpaqueClassBlock*>());
+         auto object = std::get<0>(client->getRecvData<uintptr_t>());
          client->write(response, fe->isArrayObject(object));
          }
          break;
