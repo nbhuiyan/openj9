@@ -6605,9 +6605,12 @@ TR_ResolvedJ9Method::getResolvedDynamicMethod(TR::Compilation * comp, I_32 callS
       {
       TR_OpaqueMethodBlock * targetJ9MethodBlock = NULL;
       uintptr_t * invokeCacheArray = (uintptr_t *) callSiteTableEntryAddress(callSiteIndex);
-      // CallSite table entry is expected to be an array, but this is not the case when an exception
-      // occurs during the invokedynamic resolution
-      if (!fej9()->isArrayObject((TR_OpaqueClassBlock*) *invokeCacheArray))
+      // invokedynamic resolution can either result in a valid entry in the corresponding CallSite table slot if successful,
+      // or an exception object otherwise. The CallSite table entry is a two-element array containing the MemberName
+      // and appendix objects necessary for constructing a resolved invokedynamic adapter method call.
+      // The exception object would not be an array type object, and therefore it is sufficient to check if
+      // the entry obtained from the CallSite table is an array instance to determine if the resolution was successful.
+      if (!fej9()->isArrayObject(*invokeCacheArray))
          comp->failCompilation<TR::CompilationException>("Invalid CallSite table entry for invokedynamic");
 
          {

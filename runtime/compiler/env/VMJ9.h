@@ -285,7 +285,7 @@ public:
     * \param object the object address
     * \return true if object is an array class instance, false otherwise
     */
-   virtual bool isArrayObject(TR_OpaqueClassBlock *object);
+   virtual bool isArrayObject(uintptr_t object);
 
    virtual uintptr_t getPersistentClassPointerFromClassPointer(TR_OpaqueClassBlock * clazz);//d169771 [2177]
 
