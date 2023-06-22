@@ -6680,7 +6680,7 @@ TR_J9VM::isUnloadAssumptionRequired(TR_OpaqueClassBlock * clazzPointer, TR_Resol
    }
 
 bool
-TR_J9VMBase::isArrayObject(TR_OpaqueClassBlock *object)
+TR_J9VMBase::isArrayObject(uintptr_t object)
    {
    return VM_VMHelpers::objectIsArray(getCurrentVMThread(), (j9object_t) object);
    }
