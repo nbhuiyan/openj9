@@ -279,14 +279,6 @@ public:
    virtual bool jitStaticsAreSame(TR_ResolvedMethod *, int32_t, TR_ResolvedMethod *, int32_t);
    virtual bool jitFieldsAreSame(TR_ResolvedMethod *, int32_t, TR_ResolvedMethod *, int32_t, int32_t);
 
-   /**
-    * \brief Check if object is an array class instance
-    *
-    * \param object the object address
-    * \return true if object is an array class instance, false otherwise
-    */
-   virtual bool isArrayObject(uintptr_t object);
-
    virtual uintptr_t getPersistentClassPointerFromClassPointer(TR_OpaqueClassBlock * clazz);//d169771 [2177]
 
    virtual bool needRelocationsForHelpers() { return false; }
@@ -907,6 +899,17 @@ public:
     *    VM access is not required
     */
    virtual uintptr_t vTableOrITableIndexFromMemberName(TR::Compilation* comp, TR::KnownObjectTable::Index objIndex);
+
+   /**
+    * \brief
+    *    invokedynamic resolution can either result in a valid entry in the corresponding CallSite table slot if successful,
+    *    or an exception object otherwise. The entry is considered valid when the object in the slot is an array type.
+    *    This helper must be used before trying to access elements of an invokeCacheArray corresponding to an invokedynamic bytecode
+    * \param invokeCacheArray the invokeCacheArray address
+    * \return true if entry is an array type; false otherwise
+    */
+   virtual bool isInvokeCacheEntryAnArray(uintptr_t *invokeCacheArray);
+
    /*
     * \brief
     *    Create and return a resolved method from member name index of an invoke cache array.
