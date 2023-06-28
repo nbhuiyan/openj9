@@ -187,7 +187,7 @@ const char *messageNames[] =
    "VM_getVMTargetOffset",
    "VM_getVMIndexOffset",
    "VM_inSnapshotMode",
-   "VM_isArrayObject",
+   "VM_isInvokeCacheEntryAnArray",
    "CompInfo_isCompiled",
    "CompInfo_getPCIfCompiled",
    "CompInfo_getInvocationCount",

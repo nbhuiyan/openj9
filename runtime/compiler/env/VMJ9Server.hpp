@@ -187,7 +187,6 @@ public:
    virtual bool needsInvokeExactJ2IThunk(TR::Node *node,  TR::Compilation *comp) override;
    virtual TR_ResolvedMethod *createMethodHandleArchetypeSpecimen(TR_Memory *trMemory, uintptr_t *methodHandleLocation, TR_ResolvedMethod *owningMethod = 0) override;
    virtual TR_ResolvedMethod *createMethodHandleArchetypeSpecimen(TR_Memory *trMemory, TR_OpaqueMethodBlock *archetype, uintptr_t *methodHandleLocation, TR_ResolvedMethod *owningMethod = 0) override;
-   virtual bool isArrayObject(uintptr_t object) override;
 
    // Is method generated for LambdaForm
    virtual bool isLambdaFormGeneratedMethod(TR_OpaqueMethodBlock *method) override;
@@ -236,6 +235,7 @@ public:
    virtual TR_ResolvedMethod *targetMethodFromInvokeCacheArrayMemberNameObj(TR::Compilation *comp, TR_ResolvedMethod *owningMethod, uintptr_t *invokeCacheArray) override;
    virtual TR::KnownObjectTable::Index getKnotIndexOfInvokeCacheArrayAppendixElement(TR::Compilation *comp, uintptr_t *invokeCacheArray) override;
    virtual TR::SymbolReference* refineInvokeCacheElementSymRefWithKnownObjectIndex(TR::Compilation *comp, TR::SymbolReference *originalSymRef, uintptr_t *invokeCacheArray) override;
+   virtual bool isInvokeCacheEntryAnArray(uintptr_t *invokeCacheArray) override;
 
    virtual J9JNIMethodID* jniMethodIdFromMemberName(uintptr_t memberName) override;
    virtual J9JNIMethodID* jniMethodIdFromMemberName(TR::Compilation* comp, TR::KnownObjectTable::Index objIndex) override;

@@ -2228,6 +2228,17 @@ TR_J9ServerVM::targetMethodFromMethodHandle(TR::Compilation* comp, TR::KnownObje
    return NULL;
    }
 
+bool
+TR_J9ServerVM::isInvokeCacheEntryAnArray(uintptr_t *invokeCacheArray)
+   {
+   JITServer::ServerStream *stream = _compInfoPT->getMethodBeingCompiled()->_stream;
+   stream->write(
+      JITServer::MessageType::VM_getKnotIndexOfInvokeCacheArrayAppendixElement,
+      invokeCacheArray
+      );
+   return std::get<0>(stream->read<bool>());
+   }
+
 TR::KnownObjectTable::Index
 TR_J9ServerVM::getKnotIndexOfInvokeCacheArrayAppendixElement(TR::Compilation *comp, uintptr_t *invokeCacheArray)
    {
@@ -2424,13 +2435,6 @@ TR_J9ServerVM::isDontInline(TR_ResolvedMethod *method)
    return static_cast<TR_ResolvedJ9JITServerMethod *>(method)->isDontInline();
    }
 
-bool
-TR_J9ServerVM::isArrayObject(uintptr_t object)
-   {
-   JITServer::ServerStream *stream = _compInfoPT->getMethodBeingCompiled()->_stream;
-   stream->write(JITServer::MessageType::VM_isArrayObject, object);
-   return std::get<0>(stream->read<bool>());
-   }
 
 bool
 TR_J9ServerVM::isPortableSCCEnabled()

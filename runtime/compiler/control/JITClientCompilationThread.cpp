@@ -1098,6 +1098,11 @@ handleServerMessage(JITServer::ClientStream *client, TR_J9VM *fe, JITServer::Mes
          client->write(response, fe->targetMethodFromMethodHandle(comp, std::get<0>(recv)));
          }
          break;
+      case MessageType::VM_isInvokeCacheEntryAnArray:
+         {
+         auto recv = client->getRecvData<uintptr_t *>();
+         client->write(response, fe->isInvokeCacheEntryAnArray(std::get<0>(recv)));
+         }
       case MessageType::VM_getKnotIndexOfInvokeCacheArrayAppendixElement:
          {
          auto recv = client->getRecvData<uintptr_t *>();
@@ -1189,12 +1194,6 @@ handleServerMessage(JITServer::ClientStream *client, TR_J9VM *fe, JITServer::Mes
          {
          client->getRecvData<JITServer::Void>();
          client->write(response, fe->inSnapshotMode());
-         }
-         break;
-      case MessageType::VM_isArrayObject:
-         {
-         auto object = std::get<0>(client->getRecvData<uintptr_t>());
-         client->write(response, fe->isArrayObject(object));
          }
          break;
 
