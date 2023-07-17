@@ -419,6 +419,12 @@ bool
 TR_J9EstimateCodeSize::adjustEstimateForConstArgs(TR_CallTarget * target, int32_t& value, float factor)
    {
    static const char * disableConstArgWeightReduction = feGetEnv("TR_disableConstArgWeightReduction");
+   static const char * disableConstArgWeightReduction1 = feGetEnv("TR_disableConstArgWeightReduction1");
+   static const char * disableConstArgWeightReduction2 = feGetEnv("TR_disableConstArgWeightReduction2");
+   static const char * disableConstArgWeightReduction3 = feGetEnv("TR_disableConstArgWeightReduction3");
+   static const char * disableConstArgWeightReduction4 = feGetEnv("TR_disableConstArgWeightReduction4");
+   static const char * disableConstArgWeightReduction5 = feGetEnv("TR_disableConstArgWeightReduction5");
+   static const char * disableConstArgWeightReduction6 = feGetEnv("TR_disableConstArgWeightReduction6");
    if (disableConstArgWeightReduction || !target->_calleeSymbol)
       return false;
 
@@ -458,7 +464,8 @@ TR_J9EstimateCodeSize::adjustEstimateForConstArgs(TR_CallTarget * target, int32_
 
          if (parmNode->getOpCode().hasSymbolReference()
             && parmNode->getSymbolReference()->getSymbol()->isStatic()
-            && parmNode->getSymbolReference()->getSymbol()->castToStaticSymbol()->isConstString())
+            && parmNode->getSymbolReference()->getSymbol()->castToStaticSymbol()->isConstString()
+            && !disableConstArgWeightReduction1)
             {
             value *= factor;
             heuristicTrace(tracer(),"Setting size from %d to %d because arg is constant string.", interimWeight, value);
@@ -466,14 +473,16 @@ TR_J9EstimateCodeSize::adjustEstimateForConstArgs(TR_CallTarget * target, int32_
          else if (argClassName
                  && parmClassName
                  && strncmp(argClassName, parmClassName, parmClassNameLen) != 0 // arg type needs to be more specific than declared type to benefit from weight adjustment
-                 && strcmp(argClassName, "Ljava/lang/String;") == 0)
+                 && strcmp(argClassName, "Ljava/lang/String;") == 0
+                 && !disableConstArgWeightReduction1)
             {
             value *= lessAggressiveAdjustmentFactor;
             heuristicTrace(tracer(),"Setting size from %d to %d because arg is a string.", interimWeight, value);
             }
          else if (parmNode->getOpCodeValue() == TR::aload
                  && parmNode->getSymbolReference()
-                 && parmNode->getSymbolReference()->getSymbol()->isConstObjectRef())
+                 && parmNode->getSymbolReference()->getSymbol()->isConstObjectRef()
+                 && !disableConstArgWeightReduction2)
             {
             value *= factor;
             heuristicTrace(tracer(),"Setting size from %d to %d because arg is const object ref.", interimWeight, value);
@@ -485,7 +494,8 @@ TR_J9EstimateCodeSize::adjustEstimateForConstArgs(TR_CallTarget * target, int32_
                && parmNode->getFirstChild()->getOpCodeValue() == TR::loadaddr
                && parmNode->getFirstChild()->getSymbol()->isStatic()
                && !parmNode->getFirstChild()->getSymbolReference()->isUnresolved()
-               && parmNode->getFirstChild()->getSymbol()->isClassObject())
+               && parmNode->getFirstChild()->getSymbol()->isClassObject()
+               && !disableConstArgWeightReduction3)
             {
             value *= factor;
             heuristicTrace(tracer(),"Setting size from %d to %d because arg is const class ref.", interimWeight, value);
@@ -493,12 +503,14 @@ TR_J9EstimateCodeSize::adjustEstimateForConstArgs(TR_CallTarget * target, int32_
          else if (argClassName
                && parmClassName
                && strncmp(argClassName, parmClassName, parmClassNameLen) != 0
-               && strcmp(argClassName, "Ljava/lang/Class;") == 0)
+               && strcmp(argClassName, "Ljava/lang/Class;") == 0
+               && !disableConstArgWeightReduction3)
             {
             value *= lessAggressiveAdjustmentFactor;
             heuristicTrace(tracer(),"Setting size from %d to %d because arg is a class ref.", interimWeight, value);
             }
-         else if (parmNode->getOpCode().isLoadConst())
+         else if (parmNode->getOpCode().isLoadConst()
+         && !disableConstArgWeightReduction4)
             {
             value *= factor;
             heuristicTrace(tracer(),"Setting size from %d to %d because arg is load const.", interimWeight, value);
@@ -513,20 +525,24 @@ TR_J9EstimateCodeSize::adjustEstimateForConstArgs(TR_CallTarget * target, int32_
                   || strcmp(argClassName, "Ljava/lang/Float;") == 0
                   || strcmp(argClassName, "Ljava/lang/Short;") == 0
                   || strcmp(argClassName, "Ljava/lang/Boolean;") == 0
-                  || strcmp(argClassName, "Ljava/lang/Character;") == 0))
+                  || strcmp(argClassName, "Ljava/lang/Character;") == 0)
+                  && !disableConstArgWeightReduction4)
             {
             value *= lessAggressiveAdjustmentFactor;
             heuristicTrace(tracer(),"Setting size from %d to %d because arg is boxed primitive type.", interimWeight, value);
             }
-         if (prexArg && prexArg->hasKnownObjectIndex())
+         if (prexArg && prexArg->hasKnownObjectIndex() && !disableConstArgWeightReduction5)
             {
             value = knownObjWeight;
             heuristicTrace(tracer(),"Setting size from %d to %d because arg is known object.", interimWeight, value);
             break;
             }
          }
-      value -= (argMap.getSize() * 4);
-      heuristicTrace(tracer(),"Reduced size estimate to %d (subtract num args * 4)", value);
+      if (!disableConstArgWeightReduction6)
+         {
+         value -= (argMap.getSize() * 4);
+         heuristicTrace(tracer(),"Reduced size estimate to %d (subtract num args * 4)", value);
+         }
       }
       if (value < originalWeight)
          return true;
