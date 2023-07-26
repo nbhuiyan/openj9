@@ -190,9 +190,10 @@ J9::Compilation::Compilation(int32_t id, J9VMThread *j9vmThread, TR_FrontEnd *fe
     ,
 #endif /* !defined(PERSISTENT_COLLECTIONS_UNSUPPORTED) */
     _permanentLoaders(self()->region())
-    , _constProvenanceGraph(new(heapMemoryRegion) J9::ConstProvenanceGraph(self()))
+    , _constProvenanceGraph(new (heapMemoryRegion) J9::ConstProvenanceGraph(self()))
     , _osrProhibitedOverRangeOfTrees(false)
     , _wasFearPointAnalysisDone(false)
+    , _isFearPointPlacementUnrestricted(false)
     , _permanentLoadersInitialized(false)
     , _crashedDueToOrphanedConstRefs(false)
 {
@@ -224,6 +225,19 @@ J9::Compilation::Compilation(int32_t id, J9VMThread *j9vmThread, TR_FrontEnd *fe
     // memory. Const refs for known objects reachable from a custom thunk would
     // be attributed to the handle class in java/lang/invoke, which is permanent.
     self()->getOptions()->setOption(TR_EnableConstRefs, false);
+#endif
+
+    // Determine whether fear point placement is to remain unrestricted. This
+    // can allow transformations that would otherwise be impractical due to the
+    // difficulty of avoiding OSR prohibitions. However, it also prevents any
+    // transformation that requires OSR prohibition.
+#if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
+    _isFearPointPlacementUnrestricted
+        = self()->canAddOSRAssumptions() && TR::TransformUtil::enableEarlyGuardedStaticFinalFieldFolding();
+#else
+    // J9 method handles necessarily prohibit OSR and therefore it's not always
+    // possible to avoid restricting fear point placement.
+    _isFearPointPlacementUnrestricted = false;
 #endif
 
     // Const provenance is only needed for const refs.
@@ -367,7 +381,7 @@ TR::Node *J9::Compilation::findNullChkInfo(TR::Node *node)
     TR_ASSERT((node->getOpCodeValue() == TR::checkcastAndNULLCHK), "should call this only for checkcastAndNullChk\n");
     TR::Node *newNode = NULL;
     for (auto pair = self()->getCheckcastNullChkInfo().begin(); pair != self()->getCheckcastNullChkInfo().end();
-         ++pair) {
+        ++pair) {
         if ((*pair)->getKey()->getByteCodeIndex() == node->getByteCodeIndex()
             && (*pair)->getKey()->getCallerIndex() == node->getInlinedSiteIndex()) {
             newNode = (*pair)->getValue();
