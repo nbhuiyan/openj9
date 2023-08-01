@@ -418,6 +418,7 @@ TR_J9EstimateCodeSize::adjustEstimateForMethodInvoke(TR_ResolvedMethod* method, 
 bool
 TR_J9EstimateCodeSize::adjustEstimateForConstArgs(TR_CallTarget * target, int32_t& value, float factor)
    {
+   return false;
    static const char * disableConstArgWeightReduction = feGetEnv("TR_disableConstArgWeightReduction");
    if (disableConstArgWeightReduction || !target->_calleeSymbol)
       return false;
