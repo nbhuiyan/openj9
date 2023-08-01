@@ -498,26 +498,6 @@ TR_J9EstimateCodeSize::adjustEstimateForConstArgs(TR_CallTarget * target, int32_
             value *= lessAggressiveAdjustmentFactor;
             heuristicTrace(tracer(),"Setting size from %d to %d because arg is a class ref.", interimWeight, value);
             }
-         else if (parmNode->getOpCode().isLoadConst())
-            {
-            value *= factor;
-            heuristicTrace(tracer(),"Setting size from %d to %d because arg is load const.", interimWeight, value);
-            }
-         else if (argClassName
-               && parmClassName
-               && strncmp(argClassName, parmClassName, parmClassNameLen) != 0
-               && (strcmp(argClassName, "Ljava/lang/Integer;") == 0
-                  || strcmp(argClassName, "Ljava/lang/Long;") == 0
-                  || strcmp(argClassName, "Ljava/lang/Byte;") == 0
-                  || strcmp(argClassName, "Ljava/lang/Double;") == 0
-                  || strcmp(argClassName, "Ljava/lang/Float;") == 0
-                  || strcmp(argClassName, "Ljava/lang/Short;") == 0
-                  || strcmp(argClassName, "Ljava/lang/Boolean;") == 0
-                  || strcmp(argClassName, "Ljava/lang/Character;") == 0))
-            {
-            value *= lessAggressiveAdjustmentFactor;
-            heuristicTrace(tracer(),"Setting size from %d to %d because arg is boxed primitive type.", interimWeight, value);
-            }
          if (prexArg && prexArg->hasKnownObjectIndex())
             {
             value = knownObjWeight;
@@ -525,8 +505,6 @@ TR_J9EstimateCodeSize::adjustEstimateForConstArgs(TR_CallTarget * target, int32_
             break;
             }
          }
-      value -= (argMap.getSize() * 4);
-      heuristicTrace(tracer(),"Reduced size estimate to %d (subtract num args * 4)", value);
       }
       if (value < originalWeight)
          return true;
