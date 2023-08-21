@@ -2181,14 +2181,6 @@ TR_J9InlinerPolicy::tryToInline(TR_CallTarget * calltarget, TR_CallStack * callS
 
    if (toInline)
       {
-      if (!comp()->getOption(TR_DisableForceInlineAnnotations) &&
-          comp()->fej9()->isForceInline(method))
-         {
-         if (comp()->trace(OMR::inlining))
-            traceMsg(comp(), "@ForceInline was specified for %s, in tryToInline\n", method->signature(comp()->trMemory()));
-         return true;
-         }
-
       if (method->getRecognizedMethod() == TR::unknownMethod &&
           comp()->fej9()->isIntrinsicCandidate(method) &&
           !comp()->getOption(TR_DisableInliningUnrecognizedIntrinsics))
