@@ -3722,7 +3722,7 @@ void TR_MultipleCallTargetInliner::weighCallSite( TR_CallStack * callStack , TR_
 
       int32_t weightBeforeLookingForBenefits = weight;
 
-      bool isLambdaFormGeneratedMethod = comp()->fej9()->isLambdaFormGeneratedMethod(calltarget->_calleeMethod);
+      bool isLambdaFormGeneratedMethod = false; //comp()->fej9()->isLambdaFormGeneratedMethod(calltarget->_calleeMethod);
       if ((calltarget->_calleeMethod->convertToMethod()->isArchetypeSpecimen() && calltarget->_calleeMethod->getMethodHandleLocation()) || isLambdaFormGeneratedMethod)
          {
          static char *methodHandleThunkWeightFactorStr = feGetEnv("TR_methodHandleThunkWeightFactor");
@@ -4115,7 +4115,7 @@ TR_MultipleCallTargetInliner::exceedsSizeThreshold(TR_CallSite *callSite, int by
 
      bool isLambdaFormGeneratedMethod = comp()->fej9()->isLambdaFormGeneratedMethod(callerResolvedMethod);
      // TODO: we should ignore frequency for thunk archetype, however, this require performance evaluation
-     bool frequencyIsInaccurate = isLambdaFormGeneratedMethod;
+     bool frequencyIsInaccurate = false; //isLambdaFormGeneratedMethod;
 
      frequency1 = comp()->convertNonDeterministicInput(comp()->fej9()->getIProfilerCallCount(bcInfo, comp()), MAX_BLOCK_COUNT + MAX_COLD_BLOCK_COUNT, randomGenerator(), 0);
      frequency2 = comp()->convertNonDeterministicInput(block->getFrequency(), MAX_BLOCK_COUNT + MAX_COLD_BLOCK_COUNT, randomGenerator(), 0);
@@ -5205,8 +5205,8 @@ bool TR_J9InlinerPolicy::isJSR292AlwaysWorthInlining(TR_ResolvedMethod *resolved
    if (resolvedMethod->convertToMethod()->isArchetypeSpecimen())
       return true;
 
-   if (TR::comp()->fej9()->isLambdaFormGeneratedMethod(resolvedMethod))
-      return true;
+   //if (TR::comp()->fej9()->isLambdaFormGeneratedMethod(resolvedMethod))
+   //   return true;
 
    return false;
    }
