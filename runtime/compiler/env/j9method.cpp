@@ -2842,6 +2842,7 @@ void TR_ResolvedJ9Method::construct()
    static X ThreadMethods[] =
       {
       {x(TR::java_lang_Thread_currentThread,     "currentThread",   "()Ljava/lang/Thread;")},
+      {x(TR::java_lang_Thread_ensureMaterializedForStackWalk, "ensureMaterializedForStackWalk", "(Ljava/lang/Object;)V")},
       {  TR::unknownMethod}
       };
 

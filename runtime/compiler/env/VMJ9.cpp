@@ -7619,6 +7619,11 @@ TR_J9VM::inlineNativeCall(TR::Compilation * comp, TR::TreeTop * callNodeTreeTop,
             }
          return 0;
          }
+      case TR::java_lang_Thread_ensureMaterializedForStackWalk:
+         {
+         TR::Node::recreate(callNode, TR::PassThrough);
+         return callNode;
+         }
       case TR::java_lang_Float_intBitsToFloat:
          if (comp->cg()->getSupportsInliningOfTypeCoersionMethods())
             TR::Node::recreate(callNode, TR::ibits2f);
