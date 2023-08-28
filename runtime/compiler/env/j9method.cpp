@@ -742,11 +742,12 @@ static const char * const excludeArray[] = {
    "java/security/AccessController.doPrivileged(Ljava/security/PrivilegedAction;Ljava/security/AccessControlContext;[Ljava/security/Permission;)Ljava/lang/Object;",
    "java/security/AccessController.doPrivileged(Ljava/security/PrivilegedExceptionAction;Ljava/security/AccessControlContext;[Ljava/security/Permission;)Ljava/lang/Object;",
    "java/lang/NullPointerException.fillInStackTrace()Ljava/lang/Throwable;",
+   "java/lang/ScopedValue$Carrier.runWith(Ljava/lang/ScopedValue$Snapshot;Ljava/util/concurrent/Callable;)Ljava/lang/Object;",
+   "java/lang/ScopedValue$Carrier.runWith(Ljava/lang/ScopedValue$Snapshot;Ljava/lang/Runnable;)V",
 #if (17 <= JAVA_SPEC_VERSION) && (JAVA_SPEC_VERSION <= 18)
    "jdk/internal/loader/NativeLibraries.load(Ljdk/internal/loader/NativeLibraries$NativeLibraryImpl;Ljava/lang/String;ZZZ)Z",
 #elif JAVA_SPEC_VERSION >= 15 /* (17 <= JAVA_SPEC_VERSION) && (JAVA_SPEC_VERSION <= 18) */
    "jdk/internal/loader/NativeLibraries.load(Ljdk/internal/loader/NativeLibraries$NativeLibraryImpl;Ljava/lang/String;ZZ)Z",
-   "java/lang/ScopedValue$Carrier.runWith(Ljava/lang/ScopedValue$Snapshot;Ljava/util/concurrent/Callable;)Ljava/lang/Object;"
 #endif /* (17 <= JAVA_SPEC_VERSION) && (JAVA_SPEC_VERSION <= 18) */
 };
 
