@@ -119,7 +119,7 @@ public:
 
     IconstOperand(int x)
         : intValue(x)
-    {}
+    { }
 
     virtual IconstOperand *asIconst() { return this; }
 
@@ -143,7 +143,7 @@ public:
     ObjectOperand(TR_OpaqueClassBlock *clazz = NULL)
         : _signature(NULL)
         , _clazz(clazz)
-    {}
+    { }
 
     virtual char *getSignature(TR::Compilation *comp, TR_Memory *trMemory);
 
@@ -173,7 +173,7 @@ public:
 
     PreexistentObjectOperand(TR_OpaqueClassBlock *clazz)
         : ObjectOperand(clazz)
-    {}
+    { }
 
     virtual PreexistentObjectOperand *asPreexistentObjectOperand() { return this; }
 
@@ -193,7 +193,7 @@ public:
 
     FixedClassOperand(TR_OpaqueClassBlock *clazz)
         : ObjectOperand(clazz)
-    {}
+    { }
 
     virtual FixedClassOperand *asFixedClassOperand() { return this; }
 
@@ -249,7 +249,7 @@ public:
         TR::KnownObjectTable::Index mutableCallsiteIndex)
         : methodHandleIndex(methodHandleIndex)
         , mutableCallsiteIndex(mutableCallsiteIndex)
-    {}
+    { }
 
     virtual MutableCallsiteTargetOperand *asMutableCallsiteTargetOperand() { return this; }
 
@@ -365,6 +365,9 @@ private:
      * Initialize the data structures needed for iterator with state
      */
     void initializeIteratorWithState();
+
+    void assertHasState();
+
     /*
      * push and pop operands on stack according to given bytecode
      *
@@ -410,7 +413,7 @@ private:
     void pushUnknownOperand() { Base::push(_unknownOperand); }
 
     // doesn't need to handle execeptions yet as they don't exist in method handle thunk archetypes
-    virtual void findAndMarkExceptionRanges() {}
+    virtual void findAndMarkExceptionRanges() { }
 
     /*
      * \brief Propagte state state and local variable state to next target
