@@ -480,7 +480,7 @@ static bool checkForRemainingInlineableJSR292(TR::Compilation *comp, TR::Resolve
 void
 TR_J9InlinerUtil::requestAdditionalOptimizations(TR_CallTarget *calltarget)
    {
-#if !defined(J9VM_OPT_OPENJDK_METHODHANDLE)
+//#if !defined(J9VM_OPT_OPENJDK_METHODHANDLE)
    if (calltarget->_myCallSite->getDepth() == -1 // only do this for top level callee to prevent exponential walk of inlined trees
       && checkForRemainingInlineableJSR292(comp(), calltarget->_calleeSymbol))
       {
@@ -488,7 +488,7 @@ TR_J9InlinerUtil::requestAdditionalOptimizations(TR_CallTarget *calltarget)
       if (comp()->trace(OMR::inlining))
          heuristicTrace(tracer(),"Requesting one more pass of targeted inlining due to method handle invoke in %s\n", tracer()->traceSignature(calltarget->_calleeSymbol));
       }
-#endif
+//#endif
    }
 
 void
@@ -5686,11 +5686,11 @@ bool TR_J9InlinerUtil::needTargetedInlining(TR::ResolvedMethodSymbol *callee)
    // Tactically, we also inline again based on hasMethodHandleInvokes because EstimateCodeSize
    // doesn't yet cope with invokeHandle, invokeHandleGeneric, and invokeDynamic (but it should).
    //
-#if !defined(J9VM_OPT_OPENJDK_METHODHANDLE)
+//#if !defined(J9VM_OPT_OPENJDK_METHODHANDLE)
    if (callee->getMethod()->isArchetypeSpecimen() ||
        callee->hasMethodHandleInvokes())
       return true;
-#endif
+//#endif
    return false;
    }
 

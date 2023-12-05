@@ -1023,6 +1023,33 @@ InterpreterEmulator::getReturnValue(TR_ResolvedMethod *callee)
             }
          break;
          }
+      case TR::java_lang_invoke_VarHandle_asDirect:
+      case TR::java_lang_invoke_Invokers_directVarHandleTarget:
+         {
+         Operand* vh = top();
+         TR::KnownObjectTable::Index vhIndex = vh->getKnownObjectIndex();
+         TR::KnownObjectTable *knot = comp()->getKnownObjectTable();
+         if (knot && vhIndex != TR::KnownObjectTable::UNKNOWN && !knot->isNull(vhIndex))
+            {
+            result = new (trStackMemory()) KnownObjOperand(vhIndex);
+            }
+         break;
+         }
+      case TR::java_lang_invoke_Invokers_checkVarHandleGenericType:
+         {
+         Operand* vh = topn(1);
+         Operand* ad = topn(0);
+         TR::KnownObjectTable::Index vhIndex = vh->getKnownObjectIndex();
+         TR::KnownObjectTable::Index adIndex = ad->getKnownObjectIndex();
+         TR::KnownObjectTable *knot = comp()->getKnownObjectTable();
+         if (knot && vhIndex != TR::KnownObjectTable::UNKNOWN && adIndex != TR::KnownObjectTable::UNKNOWN && !knot->isNull(vhIndex) && !knot->isNull(adIndex))
+            {
+            TR::KnownObjectTable::Index mhIndex = comp()->fej9()->getMHTable(comp(), vhIndex, adIndex);
+            if (mhIndex != TR::KnownObjectTable::UNKNOWN)
+               result = new (trStackMemory()) KnownObjOperand(mhIndex);
+            }
+         break;
+         }
 
       default:
          break;

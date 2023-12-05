@@ -404,6 +404,39 @@ TR_MethodHandleTransformer::getObjectInfoOfNode(TR::Node* node)
                comp(), dmhIndex, trace());
             }
 #endif
+         case TR::java_lang_invoke_Invokers_directVarHandleTarget:
+            {
+            auto vhIndex = getObjectInfoOfNode(node->getFirstArgument());
+            if (knot && isKnownObject(vhIndex) && !knot->isNull(vhIndex))
+               {
+               if (trace())
+                 traceMsg(comp(), "Invokers_directVarHandleTarget known object %d, update node n%dn known object\n", vhIndex, node->getGlobalIndex());
+               node->setKnownObjectIndex(vhIndex);
+               return vhIndex;
+               }
+            }
+         case TR::java_lang_invoke_VarHandle_asDirect:
+            {
+            auto vhIndex = getObjectInfoOfNode(node->getLastChild());
+            if (knot && isKnownObject(vhIndex) && !knot->isNull(vhIndex))
+               {
+               if (trace())
+                 traceMsg(comp(), "VarHandle_asDirect known object %d, update node n%dn known object\n", vhIndex, node->getGlobalIndex());
+               node->setKnownObjectIndex(vhIndex);
+               return vhIndex;
+               }
+            }
+         case TR::java_lang_invoke_Invokers_checkVarHandleGenericType:
+            {
+            auto vhIndex = getObjectInfoOfNode(node->getFirstArgument());
+            auto adIndex = getObjectInfoOfNode(node->getLastChild());
+            if (knot && isKnownObject(vhIndex) && isKnownObject(adIndex) && isKnownObject(vhIndex) && !knot->isNull(vhIndex) && !knot->isNull(adIndex))
+               {
+               if (trace())
+                 traceMsg(comp(), "Invokers_checkVarHandleGenericType vh is known object %d, updating node n%dn with known MH from mhtable\n", vhIndex, node->getGlobalIndex());
+               return comp()->fej9()->getMHTable(comp(), vhIndex, adIndex);
+               }
+            }
 
          default:
             break;

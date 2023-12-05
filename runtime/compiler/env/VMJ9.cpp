@@ -5043,6 +5043,53 @@ TR_J9VMBase::getMemberNameFieldKnotIndexFromMethodHandleKnotIndex(TR::Compilatio
    return knot->getOrCreateIndex(mnObject);
    }
 
+TR::KnownObjectTable::Index
+TR_J9VMBase::getMHTable(TR::Compilation *comp, TR::KnownObjectTable::Index vhIndex, TR::KnownObjectTable::Index adIndex)
+   {
+   TR::VMAccessCriticalSection getMHTable(this);
+   TR::KnownObjectTable::Index result = TR::KnownObjectTable::UNKNOWN;
+   TR::KnownObjectTable *knot = comp->getKnownObjectTable();
+   if (!knot) return result;
+
+#if JAVA_SPEC_VERSION == 17
+
+   uintptr_t typesAndInvokersObj = getReferenceField(knot->getPointer(vhIndex), "typesAndInvokers", "Ljava/lang/invoke/VarHandle$TypesAndInvokers;");
+   if (!typesAndInvokersObj) return result;
+
+   uintptr_t mhTable = getReferenceField(typesAndInvokersObj, "methodHandle_table", "[Ljava/lang/invoke/MethodHandle;");
+   if (!mhTable) return result;
+
+#elif JAVA_SPEC_VERSION >= 21
+   uintptr_t mhTable = getReferenceField(knot->getPointer(vhIndex), "methodHandleTable", "[Ljava/lang/invoke/MethodHandle;");
+   if (!mhTable) return result;
+#else
+   return result;
+#endif
+   int32_t mhEntryIndex = getInt32FieldAt(knot->getPointer(adIndex), getInstanceFieldOffset(getObjectClass(knot->getPointer(adIndex)),"mode", "I"));
+   // todo: check mh entry index is within range
+   uintptr_t methodHandleObj = getReferenceElement(mhTable, mhEntryIndex);
+
+   result = knot->getOrCreateIndex(methodHandleObj);
+
+   /* todo: handle cases when mt does not match ad.symbolicMTInvoker (unusual)
+   uintptr_t methodTypeObj = getReferenceField(methodHandleObj, "type", "Ljava/lang/invoke/MethodType;");
+   uintptr_t methodTypeObjDesc = getReferenceField(methodTypeObj, "methodDescriptor", "Ljava/lang/String;");
+   uintptr_t symbolicMTInvokerObj = getReferenceField(knot->getPointer(adIndex), "symbolicMethodTypeInvoker", "Ljava/lang/invoke/MethodType;");
+   uintptr_t invokerObjDesc = getReferenceField(symbolicMTInvokerObj, "methodDescriptor", "Ljava/lang/String;");
+
+   int32_t isSameDesc;
+   if (!stringEquals(comp, methodTypeObjDesc, invokerObjDesc, isSameDesc))
+      {
+      traceMsg(comp, "Failed to do strcmp\n");
+      }
+   
+   if (isSameDesc) return result;
+   else return TR::KnownObjectTable::UNKNOWN;
+   */
+  return result;
+
+   }
+
 bool
 TR_J9VMBase::isMethodHandleExpectedType(
    TR::Compilation *comp,
