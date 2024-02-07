@@ -526,7 +526,7 @@ public:
      *
      * \return true if fear points may be placed (almost) anywhere
      */
-    bool isFearPointPlacementUnrestricted() { return false; }
+    bool isFearPointPlacementUnrestricted() { return _isFearPointPlacementUnrestricted; }
 
     // Flag to record whether fear-point analysis has already been done.
     void setFearPointAnalysisDone() { _wasFearPointAnalysisDone = true; }
@@ -541,7 +541,7 @@ public:
 #if defined(PERSISTENT_COLLECTIONS_UNSUPPORTED)
     void addAOTMethodDependency(TR_OpaqueClassBlock *ramClass,
         uintptr_t chainOffset = TR_SharedCache::INVALID_CLASS_CHAIN_OFFSET)
-    {}
+    { }
 #else
     /**
      * \brief Add the provided class as an AOT Method Dependency
@@ -805,6 +805,7 @@ private:
     ConstProvenanceGraph *_constProvenanceGraph;
     bool _osrProhibitedOverRangeOfTrees;
     bool _wasFearPointAnalysisDone;
+    bool _isFearPointPlacementUnrestricted;
     bool _permanentLoadersInitialized;
     bool _crashedDueToOrphanedConstRefs;
 };
