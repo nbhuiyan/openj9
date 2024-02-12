@@ -5049,7 +5049,7 @@ TR_J9VMBase::getMethodHandleTableEntryIndex(TR::Compilation *comp, TR::KnownObje
    TR::VMAccessCriticalSection getMethodHandleTableEntryIndex(this);
    TR::KnownObjectTable::Index result = TR::KnownObjectTable::UNKNOWN;
    TR::KnownObjectTable *knot = comp->getKnownObjectTable();
-   if (!knot) return result;
+   if (!knot || comp->compileRelocatableCode()) return result;
 
    uintptr_t varHandleObj = knot->getPointer(vhIndex);
    uintptr_t accessDescriptorObj = knot->getPointer(adIndex);
