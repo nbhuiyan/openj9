@@ -80,7 +80,8 @@ int32_t TR_MethodHandleTransformer::perform()
    {
    // Only do the opt for MethodHandle methods
    TR_ResolvedMethod* currentMethod = comp()->getCurrentMethod();
-   if (!comp()->fej9()->isLambdaFormGeneratedMethod(currentMethod))
+   if (comp()->compileRelocatableCode()
+       || !comp()->fej9()->isLambdaFormGeneratedMethod(currentMethod))
       return 0;
 
    TR::StackMemoryRegion stackMemoryRegion(*trMemory());
