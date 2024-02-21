@@ -408,7 +408,7 @@ TR_MethodHandleTransformer::getObjectInfoOfNode(TR::Node* node)
 #endif
          case TR::java_lang_invoke_Invokers_directVarHandleTarget:
          case TR::java_lang_invoke_VarHandle_asDirect:
-            {
+            /*{
             auto vhIndex = getObjectInfoOfNode(node->getLastChild());
             if (knot && isKnownObject(vhIndex) && !knot->isNull(vhIndex))
                {
@@ -425,9 +425,9 @@ TR_MethodHandleTransformer::getObjectInfoOfNode(TR::Node* node)
                return directVHIndex;
                }
             break;
-            }
+            }*/
          case TR::java_lang_invoke_Invokers_checkVarHandleGenericType:
-            {
+            /*{
             auto vhIndex = getObjectInfoOfNode(node->getFirstArgument());
             auto adIndex = getObjectInfoOfNode(node->getLastChild());
             if (knot
@@ -443,7 +443,7 @@ TR_MethodHandleTransformer::getObjectInfoOfNode(TR::Node* node)
                return mhIndex;
                }
             break;
-            }
+            }*/
 
          default:
             break;

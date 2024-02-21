@@ -1025,7 +1025,7 @@ InterpreterEmulator::getReturnValue(TR_ResolvedMethod *callee)
          }
       case TR::java_lang_invoke_VarHandle_asDirect:
       case TR::java_lang_invoke_Invokers_directVarHandleTarget:
-         {
+         /*{
          Operand* varHandleOperand = top();
          TR::KnownObjectTable::Index vhIndex = varHandleOperand->getKnownObjectIndex();
          TR::KnownObjectTable *knot = comp()->getKnownObjectTable();
@@ -1038,9 +1038,9 @@ InterpreterEmulator::getReturnValue(TR_ResolvedMethod *callee)
                result = new (trStackMemory()) KnownObjOperand(directVHIndex);
             }
          break;
-         }
+         }*/
       case TR::java_lang_invoke_Invokers_checkVarHandleGenericType:
-         {
+         /*{
          Operand* varHandleOperand = topn(1);
          Operand* accessDescriptorOperand = topn(0);
          TR::KnownObjectTable::Index vhIndex = varHandleOperand->getKnownObjectIndex();
@@ -1057,7 +1057,7 @@ InterpreterEmulator::getReturnValue(TR_ResolvedMethod *callee)
                result = new (trStackMemory()) KnownObjOperand(mhIndex);
             }
          break;
-         }
+         }*/
 
       default:
          break;
