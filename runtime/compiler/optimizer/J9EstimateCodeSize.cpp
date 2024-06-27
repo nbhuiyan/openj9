@@ -1467,6 +1467,13 @@ TR_J9EstimateCodeSize::realEstimateCodeSize(TR_CallTarget *calltarget, TR_CallSt
       bci.prepareToFindAndCreateCallsites(blocks, flags, callSites, &cfg, &newBCInfo, _recursionDepth, &callStack);
       bool iteratorWithState = (inlineArchetypeSpecimen && !mhInlineWithPeeking) || inlineLambdaFormGeneratedMethod;
 
+      if (callerName && strlen(callerName) > 69 && (!strncmp(callerName, "java/lang/foreign/MemorySegment.get(Ljava/lang/foreign/ValueLayout$Of", 69)
+            || !strncmp(callerName, "java/lang/foreign/MemorySegment.set(Ljava/lang/foreign/ValueLayout$Of", 69)))
+         {
+         traceMsg(comp(), "about to try iterate get with state\n");
+         iteratorWithState = true;
+         }
+
       if (!bci.findAndCreateCallsitesFromBytecodes(wasPeekingSuccessfull, iteratorWithState))
          {
          heuristicTrace(tracer(), "*** Depth %d: ECS end for target %p signature %s. bci.findAndCreateCallsitesFromBytecode failed", _recursionDepth, calltarget, callerName);
