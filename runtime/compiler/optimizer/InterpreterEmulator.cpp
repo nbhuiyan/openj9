@@ -956,10 +956,10 @@ InterpreterEmulator::getReturnValue(TR_ResolvedMethod *callee)
       }
    
    const char * methodName = callee->signature(comp()->trMemory());
-   traceMsg(comp(), "in getReturnValue trying to handle %s", methodName);
+   //traceMsg(comp(), "in getReturnValue trying to handle %s", methodName);
    if (strlen(methodName) > 100 && !strncmp(methodName, "jdk/internal/foreign/layout/ValueLayouts$AbstractValueLayout.accessHandle()Ljava/lang/invoke/VarHandle;", 100))
       {
-      traceMsg(comp(), "Dealing with evaluating the result of accessHandle()\n");
+      //traceMsg(comp(), "Dealing with evaluating the result of accessHandle()\n");
       Operand* layoutOperand = top();
       TR::KnownObjectTable::Index layoutIndex = layoutOperand->getKnownObjectIndex();
       TR::KnownObjectTable *knot = comp()->getKnownObjectTable();

@@ -1034,6 +1034,9 @@ J9::TransformUtil::canFoldStaticFinalField(
          if (!strncmp("Ljava/lang/foreign/ValueLayout", sig, 30))
             return TR_yes;
 
+         if (!strncmp("Ljdk/internal/foreign/layout/ValueLayouts", sig, 41))
+            return TR_yes;
+
          if (!strncmp("Ljava/lang/foreign/MemorySegment", sig, 32))
             return TR_yes;
          }
