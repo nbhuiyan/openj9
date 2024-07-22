@@ -159,7 +159,7 @@ class NeedsPeekingHeuristic
          {
             if (_bci.bcIndex() - _loadIndices[i] <= _distance)
             {
-               _needsPeeking = true;
+               //_needsPeeking = true;
                heuristicTraceIfTracerIsNotNull(_tracer, "there is a parm load at %d which is within %d of a call at %d", _loadIndices[i], _distance, _bci.bcIndex());
             }
          }
@@ -630,7 +630,7 @@ TR_J9EstimateCodeSize::processBytecodeAndGenerateCFG(TR_CallTarget *calltarget, 
       nph.processByteCode();
       TR_ResolvedMethod * resolvedMethod;
       int32_t cpIndex;
-      bool isVolatile, isFinal, isPrivate, isUnresolvedInCP, resolved;
+      bool isVolatile, isPrivate, isUnresolvedInCP, resolved;
       TR::DataType type = TR::NoType;
       void * staticAddress;
       uint32_t fieldOffset;
@@ -842,6 +842,19 @@ TR_J9EstimateCodeSize::processBytecodeAndGenerateCFG(TR_CallTarget *calltarget, 
             break;
          case J9BCinvokeinterface:
             cpIndex = bci.next2Bytes();
+            {
+            TR::Method *meth = comp()->fej9()->createMethod(comp()->trMemory(), calltarget->_calleeMethod->containingClass(), cpIndex);
+            const char * sig;
+            if (meth)
+               sig = meth->signature(comp()->trMemory());
+
+            if (sig && (!strncmp(sig, "java/lang/foreign/MemorySegment", 31)
+               || !strncmp(sig, "jdk/internal/foreign/MemorySegment", 34)))
+               {
+               nph.setNeedsPeekingDueToSaticFinalLoad();
+               heuristicTrace(tracer(), "Depth %d: invokeinterface call at bc index %d has Signature %s, enabled peeking for caller.",_recursionDepth,i,tracer()->traceSignature(meth));
+               }
+            }
             flags[i].set(InterpreterEmulator::BytecodePropertyFlag::isUnsanitizeable);
             break;
          case J9BCgetfield:
@@ -868,7 +881,7 @@ TR_J9EstimateCodeSize::processBytecodeAndGenerateCFG(TR_CallTarget *calltarget, 
             flags[i].set(InterpreterEmulator::BytecodePropertyFlag::isUnsanitizeable);
             break;
          case J9BCgetstatic:
-            resolved = calltarget->_calleeMethod->staticAttributes(comp(), bci.next2Bytes(), &staticAddress, &type, &isVolatile, &isFinal, &isPrivate, false, &isUnresolvedInCP, false);
+            resolved = calltarget->_calleeMethod->staticAttributes(comp(), bci.next2Bytes(), &staticAddress, &type, &isVolatile, 0, &isPrivate, false, &isUnresolvedInCP, false);
             if (!resolved || isUnresolvedInCP)
                {
                if (unresolvedSymbolsAreCold)
@@ -878,11 +891,9 @@ TR_J9EstimateCodeSize::processBytecodeAndGenerateCFG(TR_CallTarget *calltarget, 
                }
             if (isInExceptionRange(calltarget->_calleeMethod, i))
                flags[i].set(InterpreterEmulator::BytecodePropertyFlag::isUnsanitizeable);
-            if (isFinal)
-                  nph.setNeedsPeekingDueToSaticFinalLoad();
             break;
          case J9BCputstatic:
-            resolved = calltarget->_calleeMethod->staticAttributes(comp(), bci.next2Bytes(), &staticAddress, &type, &isVolatile, &isFinal, &isPrivate, true, &isUnresolvedInCP, false);
+            resolved = calltarget->_calleeMethod->staticAttributes(comp(), bci.next2Bytes(), &staticAddress, &type, &isVolatile, 0, &isPrivate, true, &isUnresolvedInCP, false);
             if (!resolved || isUnresolvedInCP)
                {
                if (unresolvedSymbolsAreCold)
@@ -890,8 +901,6 @@ TR_J9EstimateCodeSize::processBytecodeAndGenerateCFG(TR_CallTarget *calltarget, 
                if (!resolved)
                   _isLeaf = false;
                }
-            if (isFinal)
-                  nph.setNeedsPeekingDueToSaticFinalLoad();
             flags[i].set(InterpreterEmulator::BytecodePropertyFlag::isUnsanitizeable);
             break;
          case J9BCaload0:
@@ -1477,10 +1486,9 @@ TR_J9EstimateCodeSize::realEstimateCodeSize(TR_CallTarget *calltarget, TR_CallSt
       bci.prepareToFindAndCreateCallsites(blocks, flags, callSites, &cfg, &newBCInfo, _recursionDepth, &callStack);
       bool iteratorWithState = (inlineArchetypeSpecimen && !mhInlineWithPeeking) || inlineLambdaFormGeneratedMethod;
 
-      if (callerName && (!strncmp(callerName, "java/lang/foreign/", 18)
-            || !strncmp(callerName, "jdk/internal/foreign/", 21)))
+      if (callerName && (!strncmp(callerName, "java/lang/foreign/MemorySegment", 31)
+            || !strncmp(callerName, "jdk/internal/foreign/MemorySegment", 34)))
          {
-         traceMsg(comp(), "about to try iterate get with state\n");
          iteratorWithState = true;
          }
 
