@@ -954,9 +954,9 @@ InterpreterEmulator::getReturnValue(TR_ResolvedMethod *callee)
       if (!thunkDetails.isCustom())
          recognizedMethod = TR::unknownMethod;
       }
-   
+
    const char * methodName = callee->signature(comp()->trMemory());
-   //traceMsg(comp(), "in getReturnValue trying to handle %s", methodName);
+   // traceMsg(comp(), "in getReturnValue trying to handle %s\n", methodName);
    if (strlen(methodName) > 100 && !strncmp(methodName, "jdk/internal/foreign/layout/ValueLayouts$AbstractValueLayout.accessHandle()Ljava/lang/invoke/VarHandle;", 100))
       {
       //traceMsg(comp(), "Dealing with evaluating the result of accessHandle()\n");

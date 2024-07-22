@@ -165,6 +165,11 @@ class NeedsPeekingHeuristic
          }
       };
 
+      void setNeedsPeekingDueToSaticFinalLoad()
+      {
+      _needsPeeking = true;
+      }
+
       void processByteCode()
          {
             if (!_hasArgumentsInfo)
@@ -625,7 +630,7 @@ TR_J9EstimateCodeSize::processBytecodeAndGenerateCFG(TR_CallTarget *calltarget, 
       nph.processByteCode();
       TR_ResolvedMethod * resolvedMethod;
       int32_t cpIndex;
-      bool isVolatile, isPrivate, isUnresolvedInCP, resolved;
+      bool isVolatile, isFinal, isPrivate, isUnresolvedInCP, resolved;
       TR::DataType type = TR::NoType;
       void * staticAddress;
       uint32_t fieldOffset;
@@ -863,7 +868,7 @@ TR_J9EstimateCodeSize::processBytecodeAndGenerateCFG(TR_CallTarget *calltarget, 
             flags[i].set(InterpreterEmulator::BytecodePropertyFlag::isUnsanitizeable);
             break;
          case J9BCgetstatic:
-            resolved = calltarget->_calleeMethod->staticAttributes(comp(), bci.next2Bytes(), &staticAddress, &type, &isVolatile, 0, &isPrivate, false, &isUnresolvedInCP, false);
+            resolved = calltarget->_calleeMethod->staticAttributes(comp(), bci.next2Bytes(), &staticAddress, &type, &isVolatile, &isFinal, &isPrivate, false, &isUnresolvedInCP, false);
             if (!resolved || isUnresolvedInCP)
                {
                if (unresolvedSymbolsAreCold)
@@ -873,9 +878,11 @@ TR_J9EstimateCodeSize::processBytecodeAndGenerateCFG(TR_CallTarget *calltarget, 
                }
             if (isInExceptionRange(calltarget->_calleeMethod, i))
                flags[i].set(InterpreterEmulator::BytecodePropertyFlag::isUnsanitizeable);
+            if (isFinal)
+                  nph.setNeedsPeekingDueToSaticFinalLoad();
             break;
          case J9BCputstatic:
-            resolved = calltarget->_calleeMethod->staticAttributes(comp(), bci.next2Bytes(), &staticAddress, &type, &isVolatile, 0, &isPrivate, true, &isUnresolvedInCP, false);
+            resolved = calltarget->_calleeMethod->staticAttributes(comp(), bci.next2Bytes(), &staticAddress, &type, &isVolatile, &isFinal, &isPrivate, true, &isUnresolvedInCP, false);
             if (!resolved || isUnresolvedInCP)
                {
                if (unresolvedSymbolsAreCold)
@@ -883,6 +890,8 @@ TR_J9EstimateCodeSize::processBytecodeAndGenerateCFG(TR_CallTarget *calltarget, 
                if (!resolved)
                   _isLeaf = false;
                }
+            if (isFinal)
+                  nph.setNeedsPeekingDueToSaticFinalLoad();
             flags[i].set(InterpreterEmulator::BytecodePropertyFlag::isUnsanitizeable);
             break;
          case J9BCaload0:
@@ -1325,6 +1334,13 @@ TR_J9EstimateCodeSize::realEstimateCodeSize(TR_CallTarget *calltarget, TR_CallSt
                                    (!disableMethodHandleInliningAfterFirstPass || _inliner->firstPass());
    bool inlineLambdaFormGeneratedMethod = comp()->fej9()->isLambdaFormGeneratedMethod(calltarget->_calleeMethod) &&
                                    (!disableMethodHandleInliningAfterFirstPass || _inliner->firstPass());
+   
+   TR::Block * * blocks =
+         (TR::Block * *) comp()->trMemory()->allocateStackMemory(maxIndex
+               * sizeof(TR::Block *));
+   memset(blocks, 0, maxIndex * sizeof(TR::Block *));
+
+   TR::CFG &cfg = processBytecodeAndGenerateCFG(calltarget, cfgRegion, bci, nph, blocks, flags);
 
    // No need to peek LF methods, as we'll always interprete the method with state in order to propagate object info
    // through bytecodes to find call targets
@@ -1350,12 +1366,6 @@ TR_J9EstimateCodeSize::realEstimateCodeSize(TR_CallTarget *calltarget, TR_CallSt
       methodSymbol->getResolvedMethod()->genMethodILForPeekingEvenUnderMethodRedefinition(methodSymbol, comp(), false, NULL);
       }
 
-   TR::Block * * blocks =
-         (TR::Block * *) comp()->trMemory()->allocateStackMemory(maxIndex
-               * sizeof(TR::Block *));
-   memset(blocks, 0, maxIndex * sizeof(TR::Block *));
-
-   TR::CFG &cfg = processBytecodeAndGenerateCFG(calltarget, cfgRegion, bci, nph, blocks, flags);
    int size = calltarget->_fullSize;
 
    // Adjust call frequency for unknown or direct calls, for which we don't get profiling information
@@ -1468,8 +1478,7 @@ TR_J9EstimateCodeSize::realEstimateCodeSize(TR_CallTarget *calltarget, TR_CallSt
       bool iteratorWithState = (inlineArchetypeSpecimen && !mhInlineWithPeeking) || inlineLambdaFormGeneratedMethod;
 
       if (callerName && (!strncmp(callerName, "java/lang/foreign/", 18)
-            || !strncmp(callerName, "jdk/internal/foreign/", 21)
-            || !strncmp(callerName, "org/apache/lucene/", 18)))
+            || !strncmp(callerName, "jdk/internal/foreign/", 21)))
          {
          traceMsg(comp(), "about to try iterate get with state\n");
          iteratorWithState = true;
