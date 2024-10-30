@@ -2759,6 +2759,12 @@ TR_J9InlinerPolicy::isInlineableJNI(TR_ResolvedMethod *method,TR::Node *callNode
    {
    TR::Compilation *comp = this->comp();
    TR::RecognizedMethod recognizedMethod = method->getRecognizedMethod();
+
+   if (recognizedMethod == TR::jdk_internal_misc_Unsafe_getIntUnaligned
+      || recognizedMethod == TR::jdk_internal_misc_Unsafe_getLongUnaligned
+      || recognizedMethod == TR::jdk_internal_misc_Unsafe_getShortUnaligned)
+
+      return true;
    // Reflection's JNI
    //
    if (!comp->getOption(TR_DisableInliningOfNatives) &&
@@ -2836,6 +2842,16 @@ TR_J9InlinerPolicy::isInlineableJNI(TR_ResolvedMethod *method,TR::Node *callNode
       case TR::sun_misc_Unsafe_loadFence:
       case TR::sun_misc_Unsafe_storeFence:
       case TR::sun_misc_Unsafe_fullFence:
+
+      case TR::jdk_internal_misc_Unsafe_getCharUnaligned:
+      case TR::jdk_internal_misc_Unsafe_getShortUnaligned:
+      case TR::jdk_internal_misc_Unsafe_getIntUnaligned:
+      case TR::jdk_internal_misc_Unsafe_getLongUnaligned:
+      case TR::jdk_internal_misc_Unsafe_putCharUnaligned:
+      case TR::jdk_internal_misc_Unsafe_putShortUnaligned:
+      case TR::jdk_internal_misc_Unsafe_putIntUnaligned:
+      case TR::jdk_internal_misc_Unsafe_putLongUnaligned:
+
          return true;
 
       case TR::sun_misc_Unsafe_staticFieldBase:
