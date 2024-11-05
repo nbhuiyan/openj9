@@ -2790,7 +2790,15 @@ TR_J9InlinerPolicy::isInlineableJNI(TR_ResolvedMethod *method,TR::Node *callNode
       // methods in jdk.internal, and the enum values above match both. Only
       // return true for the methods that are native.
       if (!TR::Compiler->om.canGenerateArraylets() || (callNode && callNode->isUnsafeGetPutCASCallOnNonArray()))
+         {
+         if (recognizedMethod == TR::jdk_internal_misc_Unsafe_getIntUnaligned ||
+             recognizedMethod == TR::jdk_internal_misc_Unsafe_getLongUnaligned ||
+             recognizedMethod == TR::jdk_internal_misc_Unsafe_getShortUnaligned ||
+             recognizedMethod == TR::jdk_internal_misc_Unsafe_getCharUnaligned) // simplify into a is simple native unsafe wrapper query
+             return true;
+
          return method->isNative();
+         }
       else
          return false;
       }
