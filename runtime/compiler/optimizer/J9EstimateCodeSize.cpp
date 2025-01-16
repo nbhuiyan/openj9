@@ -748,6 +748,16 @@ TR_J9EstimateCodeSize::processBytecodeAndGenerateCFG(TR_CallTarget *calltarget, 
             auto calleeMethod = (TR_ResolvedJ9Method*)calltarget->_calleeMethod;
             resolvedMethod = calleeMethod->getResolvedPossiblyPrivateVirtualMethod(comp(), cpIndex, true, &isUnresolvedInCP);
 
+            if (resolvedMethod)
+               {
+               const char * sig = resolvedMethod->signature(comp()->trMemory());
+               if (sig && (!strncmp(sig, "java/util/HashMap.put", 21) || !strncmp(sig, "java/util/HashMap.get", 21) || !strncmp(sig, "java/util/HashMap.hash", 22)))
+                  {
+                  nph.setNeedsPeekingToTrue();
+                  heuristicTrace(tracer(), "Depth %d: invokevirtual call at bc index %d has Signature %s, enabled peeking for caller to propagate prex arg info from caller.", _recursionDepth, i, sig);
+                  }
+               }
+
             ///if (!resolvedMethod || isUnresolvedInCP || resolvedMethod->isCold(comp(), true))
             if ((isUnresolvedInCP && !resolvedMethod) || (resolvedMethod
                   && resolvedMethod->isCold(comp(), true)))
@@ -824,6 +834,16 @@ TR_J9EstimateCodeSize::processBytecodeAndGenerateCFG(TR_CallTarget *calltarget, 
             TR::Node *parent = 0;
             TR::Node *callNode = 0;
             TR::ResolvedMethodSymbol *resolvedSymbol = 0;
+
+            if (resolvedMethod)
+               {
+               const char * sig = resolvedMethod->signature(comp()->trMemory());
+               if (sig && (!strncmp(sig, "java/util/HashMap.put", 21) || !strncmp(sig, "java/util/HashMap.get", 21) || !strncmp(sig, "java/util/HashMap.hash", 22)))
+                  {
+                  nph.setNeedsPeekingToTrue();
+                  heuristicTrace(tracer(), "Depth %d: invokestatic call at bc index %d has Signature %s, enabled peeking for caller to propagate prex arg info from caller.", _recursionDepth, i, sig);
+                  }
+               }
             if (!resolvedMethod || isUnresolvedInCP || resolvedMethod->isCold(comp(), false))
                {
                if (unresolvedSymbolsAreCold)
@@ -847,7 +867,7 @@ TR_J9EstimateCodeSize::processBytecodeAndGenerateCFG(TR_CallTarget *calltarget, 
             break;
          case J9BCinvokeinterface:
             cpIndex = bci.next2Bytes();
-#if JAVA_SPEC_VERSION >= 21
+//#if JAVA_SPEC_VERSION >= 21
             {
             TR::Method *meth = comp()->fej9()->createMethod(comp()->trMemory(), calltarget->_calleeMethod->containingClass(), cpIndex);
             if (meth)
@@ -858,9 +878,14 @@ TR_J9EstimateCodeSize::processBytecodeAndGenerateCFG(TR_CallTarget *calltarget, 
                   nph.setNeedsPeekingToTrue();
                   heuristicTrace(tracer(), "Depth %d: invokeinterface call at bc index %d has Signature %s, enabled peeking for caller to fold layout field load necessary for VarHandle operation inlining.", _recursionDepth, i, sig);
                   }
+               else if (sig && (!strncmp(sig, "java/util/Map.put", 17) || !strncmp(sig, "java/util/Map.get", 17) || !strncmp(sig, "java/util/HashMap.put", 21) || !strncmp(sig, "java/util/HashMap.get", 21)))
+                  {
+                  nph.setNeedsPeekingToTrue();
+                  heuristicTrace(tracer(), "Depth %d: invokeinterface call at bc index %d has Signature %s, enabled peeking for caller to propagate prex arg info from caller.", _recursionDepth, i, sig);
+                  }
                }
             }
-#endif // JAVA_SPEC_VERSION >= 21
+//#endif // JAVA_SPEC_VERSION >= 21
             flags[i].set(InterpreterEmulator::BytecodePropertyFlag::isUnsanitizeable);
             break;
          case J9BCgetfield:
