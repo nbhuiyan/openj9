@@ -9263,6 +9263,16 @@ done:
 			mhReceiverIndex = (methodIndexAndArgCount & 0xFF);
 		}
 
+		if (fromJIT && (mhReceiverIndex < 0 || mhReceiverIndex > 550))
+			{
+			U_16 index = *(U_16 *)(_pc + 1);
+			J9ConstantPool *ramConstantPool = J9_CP_FROM_METHOD(_literals);
+			J9RAMMethodRef *ramMethodRef = ((J9RAMMethodRef *)ramConstantPool) + index;
+			UDATA volatile methodIndexAndArgCount = ramMethodRef->methodIndexAndArgCount;
+			mhReceiverIndex = (methodIndexAndArgCount & 0xFF);
+			fromJIT = false;
+			}
+
 		j9object_t mhReceiver = ((j9object_t *)_sp)[mhReceiverIndex];
 		if (J9_UNEXPECTED(NULL == mhReceiver)) {
 			if (fromJIT) {
