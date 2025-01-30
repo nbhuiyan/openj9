@@ -7709,6 +7709,7 @@ done:
 		UDATA volatile methodIndexAndArgCount = ramMethodRef->methodIndexAndArgCount;
 		UDATA methodIndex = methodIndexAndArgCount >> 8;
 		j9object_t receiver = ((j9object_t*)_sp)[methodIndexAndArgCount & 0xFF];
+		_currentThread->jitStackFrameFlags = 0;
 		if (J9_UNEXPECTED(NULL == receiver)) {
 			/* Resolution exceptions must be thrown first, so check if methodRef
 			 * is resolved before throwing NPE on receiver.
