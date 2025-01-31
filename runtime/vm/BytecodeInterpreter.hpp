@@ -7807,12 +7807,14 @@ done:
 	VMINLINE VM_BytecodeAction
 	invokespecial(REGISTER_ARGS_LIST)
 	{
+		_currentThread->jitStackFrameFlags = 0;
 		return invokespecialLogic(REGISTER_ARGS, true, false);
 	}
 
 	VMINLINE VM_BytecodeAction
 	invokespecialsplit(REGISTER_ARGS_LIST)
 	{
+		_currentThread->jitStackFrameFlags = 0;
 		return invokespecialLogic(REGISTER_ARGS, true, true);
 	}
 
@@ -7835,6 +7837,7 @@ done:
 		J9ConstantPool *ramConstantPool = J9_CP_FROM_METHOD(_literals);
 		J9Class *clazz = ramConstantPool->ramClass;
 		_sendMethod = clazz->staticSplitMethodTable[splitTableIndex];
+		_currentThread->jitStackFrameFlags = 0;
 		return GOTO_RUN_METHOD;
 	}
 
@@ -7939,12 +7942,14 @@ done:
 	VMINLINE VM_BytecodeAction
 	invokeinterface2(REGISTER_ARGS_LIST)
 	{
+		_currentThread->jitStackFrameFlags = 0;
 		return invokeinterfaceOffset(REGISTER_ARGS, 2);
 	}
 
 	VMINLINE VM_BytecodeAction
 	invokeinterface(REGISTER_ARGS_LIST)
 	{
+		_currentThread->jitStackFrameFlags = 0;
 		return invokeinterfaceOffset(REGISTER_ARGS, 0);
 	}
 
