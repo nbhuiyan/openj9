@@ -7823,6 +7823,7 @@ done:
 		profileCallingMethod(REGISTER_ARGS);
 		J9RAMStaticMethodRef *ramMethodRef = ((J9RAMStaticMethodRef*)J9_CP_FROM_METHOD(_literals)) + index;
 		_sendMethod = ramMethodRef->method;
+		_currentThread->jitStackFrameFlags = 0;
 		return GOTO_RUN_METHOD;
 	}
 
