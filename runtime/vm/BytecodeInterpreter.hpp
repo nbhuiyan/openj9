@@ -9257,12 +9257,16 @@ done:
 		bool fromJIT = J9_ARE_ANY_BITS_SET(jitStackFrameFlags(REGISTER_ARGS, 0), J9_SSF_JIT_NATIVE_TRANSITION_FRAME);
 		UDATA mhReceiverIndex = 0;
 
+		PORT_ACCESS_FROM_JAVAVM(_vm);
+
 		if (fromJIT) {
 			/* tempSlot contains the number of stack slots for the arguments, and the MH
 			 * receiver is the first argument.
 			 */
+			j9tty_printf(PORTLIB, "In invokebasic, about to compute receiver index, using tempSlot value %d\n", _currentThread->tempSlot);
 			mhReceiverIndex = _currentThread->tempSlot - 1;
 		} else {
+			j9tty_printf(PORTLIB, "In invokebasic, about to compute receiver index, using methodIndexAndArgCount\n");
 			U_16 index = *(U_16 *)(_pc + 1);
 			J9ConstantPool *ramConstantPool = J9_CP_FROM_METHOD(_literals);
 			J9RAMMethodRef *ramMethodRef = ((J9RAMMethodRef *)ramConstantPool) + index;
@@ -9270,16 +9274,7 @@ done:
 			mhReceiverIndex = (methodIndexAndArgCount & 0xFF);
 		}
 
-		if (fromJIT && (mhReceiverIndex < 0 || mhReceiverIndex > 550))
-			{
-			U_16 index = *(U_16 *)(_pc + 1);
-			J9ConstantPool *ramConstantPool = J9_CP_FROM_METHOD(_literals);
-			J9RAMMethodRef *ramMethodRef = ((J9RAMMethodRef *)ramConstantPool) + index;
-			UDATA volatile methodIndexAndArgCount = ramMethodRef->methodIndexAndArgCount;
-			mhReceiverIndex = (methodIndexAndArgCount & 0xFF);
-			fromJIT = false;
-			}
-
+		j9tty_printf(PORTLIB, "mhReceiverIndex = %d\n", mhReceiverIndex);
 		j9object_t mhReceiver = ((j9object_t *)_sp)[mhReceiverIndex];
 		if (J9_UNEXPECTED(NULL == mhReceiver)) {
 			if (fromJIT) {
@@ -9287,16 +9282,21 @@ done:
 			}
 			return THROW_NPE;
 		}
+		j9tty_printf(PORTLIB, "successfully obtained receiver object\n");
 
 		j9object_t lambdaForm = J9VMJAVALANGINVOKEMETHODHANDLE_FORM(_currentThread, mhReceiver);
+		j9tty_printf(PORTLIB, "successfully obtained LF object\n");
 		j9object_t memberName = J9VMJAVALANGINVOKELAMBDAFORM_VMENTRY(_currentThread, lambdaForm);
+		j9tty_printf(PORTLIB, "successfully obtained MN object\n");
 		_sendMethod = (J9Method *)(UDATA)J9OBJECT_U64_LOAD(_currentThread, memberName, _vm->vmtargetOffset);
+		j9tty_printf(PORTLIB, "successfully set sendMethod\n");
 
 		if (fromJIT) {
+			j9tty_printf(PORTLIB, "restoring JIT return address\n");
 			VM_JITInterface::restoreJITReturnAddress(_currentThread, _sp, (void *)_literals);
 			rc = j2iTransition(REGISTER_ARGS, true);
 		}
-
+		j9tty_printf(PORTLIB, "invokebasic DONE\n");
 		return rc;
 	}
 
