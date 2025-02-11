@@ -751,7 +751,7 @@ TR_J9EstimateCodeSize::processBytecodeAndGenerateCFG(TR_CallTarget *calltarget, 
             if (resolvedMethod)
                {
                const char * sig = resolvedMethod->signature(comp()->trMemory());
-               if (sig && (!strncmp(sig, "java/util/HashMap.put", 21) || !strncmp(sig, "java/util/HashMap.get", 21) || !strncmp(sig, "java/util/HashMap.hash", 22)))
+               if (sig && (!strncmp(sig, "java/util/HashMap.put", 21) || !strncmp(sig, "java/util/HashMap.get", 21) || !strncmp(sig, "java/util/HashMap.hash", 22) || !strncmp(sig,"java/lang/Object.hashCode", 25)))
                   {
                   nph.setNeedsPeekingToTrue();
                   heuristicTrace(tracer(), "Depth %d: invokevirtual call at bc index %d has Signature %s, enabled peeking for caller to propagate prex arg info from caller.", _recursionDepth, i, sig);
