@@ -748,6 +748,15 @@ TR_J9EstimateCodeSize::processBytecodeAndGenerateCFG(TR_CallTarget *calltarget, 
             auto calleeMethod = (TR_ResolvedJ9Method*)calltarget->_calleeMethod;
             resolvedMethod = calleeMethod->getResolvedPossiblyPrivateVirtualMethod(comp(), cpIndex, true, &isUnresolvedInCP);
 
+            if (resolvedMethod)
+               {
+               const char * sig = resolvedMethod->signature(comp()->trMemory());
+               if (sig && (!strncmp(sig, "java/util/HashMap.put", 21) || !strncmp(sig, "java/util/HashMap.get", 21) || !strncmp(sig,"java/lang/Object.hashCode", 25)))
+                  {
+                  nph.setNeedsPeekingToTrue();
+                  heuristicTrace(tracer(), "Depth %d: invokevirtual call at bc index %d has Signature %s, enabled peeking for caller to propagate prex arg info from caller.", _recursionDepth, i, sig);
+                  }
+               }
             ///if (!resolvedMethod || isUnresolvedInCP || resolvedMethod->isCold(comp(), true))
             if ((isUnresolvedInCP && !resolvedMethod) || (resolvedMethod
                   && resolvedMethod->isCold(comp(), true)))
