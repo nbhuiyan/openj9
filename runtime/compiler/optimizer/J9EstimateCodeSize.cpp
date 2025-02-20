@@ -833,6 +833,16 @@ TR_J9EstimateCodeSize::processBytecodeAndGenerateCFG(TR_CallTarget *calltarget, 
             TR::Node *parent = 0;
             TR::Node *callNode = 0;
             TR::ResolvedMethodSymbol *resolvedSymbol = 0;
+
+            if (resolvedMethod)
+               {
+               const char * sig = resolvedMethod->signature(comp()->trMemory());
+               if (sig && !strncmp(sig, "java/util/HashMap.hash", 22))
+                  {
+                  nph.setNeedsPeekingToTrue();
+                  heuristicTrace(tracer(), "Depth %d: invokestatic call at bc index %d has Signature %s, enabled peeking for caller to propagate prex arg info from caller.", _recursionDepth, i, sig);
+                  }
+               }
             if (!resolvedMethod || isUnresolvedInCP || resolvedMethod->isCold(comp(), false))
                {
                if (unresolvedSymbolsAreCold)
