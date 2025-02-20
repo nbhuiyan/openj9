@@ -865,21 +865,26 @@ TR_J9EstimateCodeSize::processBytecodeAndGenerateCFG(TR_CallTarget *calltarget, 
             flags[i].set(InterpreterEmulator::BytecodePropertyFlag::isUnsanitizeable);
             break;
          case J9BCinvokeinterface:
-            cpIndex = bci.next2Bytes();
-#if JAVA_SPEC_VERSION >= 21
             {
+            cpIndex = bci.next2Bytes();
             TR::Method *meth = comp()->fej9()->createMethod(comp()->trMemory(), calltarget->_calleeMethod->containingClass(), cpIndex);
             if (meth)
                {
                const char * sig = meth->signature(comp()->trMemory());
-               if (sig && (!strncmp(sig, "java/lang/foreign/MemorySegment.get", 35) || !strncmp(sig, "java/lang/foreign/MemorySegment.set", 35) ))
+               if (sig && (!strncmp(sig, "java/util/Map.put", 17) || !strncmp(sig, "java/util/Map.get", 17)))
+                  {
+                  nph.setNeedsPeekingToTrue();
+                  heuristicTrace(tracer(), "Depth %d: invokeinterface call at bc index %d has Signature %s, enabled peeking for caller to propagate prex arg info from caller.", _recursionDepth, i, sig);
+                  }
+#if JAVA_SPEC_VERSION >= 21
+               else if (sig && (!strncmp(sig, "java/lang/foreign/MemorySegment.get", 35) || !strncmp(sig, "java/lang/foreign/MemorySegment.set", 35) ))
                   {
                   nph.setNeedsPeekingToTrue();
                   heuristicTrace(tracer(), "Depth %d: invokeinterface call at bc index %d has Signature %s, enabled peeking for caller to fold layout field load necessary for VarHandle operation inlining.", _recursionDepth, i, sig);
                   }
+#endif // JAVA_SPEC_VERSION >= 21
                }
             }
-#endif // JAVA_SPEC_VERSION >= 21
             flags[i].set(InterpreterEmulator::BytecodePropertyFlag::isUnsanitizeable);
             break;
          case J9BCgetfield:
