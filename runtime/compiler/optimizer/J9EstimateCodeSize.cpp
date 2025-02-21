@@ -750,11 +750,13 @@ TR_J9EstimateCodeSize::processBytecodeAndGenerateCFG(TR_CallTarget *calltarget, 
 
             if (resolvedMethod)
                {
-               const char * sig = resolvedMethod->signature(comp()->trMemory());
-               if (sig && (!strncmp(sig, "java/util/HashMap.put", 21) || !strncmp(sig, "java/util/HashMap.get", 21) || !strncmp(sig,"java/lang/Object.hashCode", 25)))
+               TR::RecognizedMethod rm = resolvedMethod->getRecognizedMethod();
+               if (rm == TR::java_util_HashMap_put ||
+                   rm == TR::java_util_HashMap_get ||
+                   rm == TR::java_lang_Object_hashCode)
                   {
                   nph.setNeedsPeekingToTrue();
-                  heuristicTrace(tracer(), "Depth %d: invokevirtual call at bc index %d has Signature %s, enabled peeking for caller to propagate prex arg info from caller.", _recursionDepth, i, sig);
+                  heuristicTrace(tracer(), "Depth %d: invokevirtual call at bc index %d has Signature %s, enabled peeking for caller to propagate prex arg info from caller.", _recursionDepth, i, tracer()->traceSignature(resolvedMethod));
                   }
                }
             ///if (!resolvedMethod || isUnresolvedInCP || resolvedMethod->isCold(comp(), true))
