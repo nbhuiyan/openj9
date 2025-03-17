@@ -558,9 +558,9 @@ TR_J9EstimateCodeSize::adjustEstimateForConstArgs(TR_CallTarget * target, int32_
    }
 
 bool
-TR_J9EstimateCodeSize::estimateCodeSize(TR_CallTarget *calltarget, TR_CallStack *prevCallStack, bool recurseDown)
+TR_J9EstimateCodeSize::estimateCodeSize(TR_CallTarget *calltarget, TR_CallStack *prevCallStack, bool recurseDown, int32_t increasedAllowanceThreshold)
    {
-   if (realEstimateCodeSize(calltarget, prevCallStack, recurseDown, comp()->trMemory()->currentStackRegion()))
+   if (realEstimateCodeSize(calltarget, prevCallStack, recurseDown, comp()->trMemory()->currentStackRegion(), increasedAllowanceThreshold))
       {
       if (_isLeaf && _realSize > 1)
          {
@@ -1266,7 +1266,7 @@ TR_J9EstimateCodeSize::processBytecodeAndGenerateCFG(TR_CallTarget *calltarget, 
    }
 
 bool
-TR_J9EstimateCodeSize::realEstimateCodeSize(TR_CallTarget *calltarget, TR_CallStack *prevCallStack, bool recurseDown, TR::Region &cfgRegion)
+TR_J9EstimateCodeSize::realEstimateCodeSize(TR_CallTarget *calltarget, TR_CallStack *prevCallStack, bool recurseDown, TR::Region &cfgRegion, int32_t increasedAllowanceThreshold)
    {
    TR_ASSERT(calltarget->_calleeMethod, "assertion failure");
 
@@ -1638,7 +1638,11 @@ TR_J9EstimateCodeSize::realEstimateCodeSize(TR_CallTarget *calltarget, TR_CallSt
    static const char *af = feGetEnv("TR_AnalyzedAllowanceFactor");
    static const int32_t allowanceFactor = af ? atoi(af) : DEFAULT_ANALYZED_ALLOWANCE_FACTOR;
 
-   if (_analyzedSize > allowanceFactor*sizeThreshold) // even optimistically we've blown our budget
+   int32_t analyzedSizeThreshold =  allowanceFactor*sizeThreshold;
+   if (increasedAllowanceThreshold > analyzedSizeThreshold)
+      analyzedSizeThreshold = increasedAllowanceThreshold;
+
+   if (_analyzedSize > analyzedSizeThreshold) // even optimistically we've blown our budget
       {
       calltarget->_isPartialInliningCandidate = false;
       heuristicTrace(tracer(), "*** Depth %d: ECS end for target %p signature %s. analyzedSize exceeds Size Threshold", _recursionDepth, calltarget, callerName);
@@ -1682,6 +1686,11 @@ TR_J9EstimateCodeSize::realEstimateCodeSize(TR_CallTarget *calltarget, TR_CallSt
             const char *calleeName = NULL;
             if (tracer()->heuristicLevel())
                calleeName = comp()->fej9()->sampleSignature(targetCallee->_calleeMethod->getPersistentIdentifier(), nameBuffer, 1024, comp()->trMemory());
+
+               if(_inliner->alwaysWorthInlining(targetCallee->_calleeMethod, NULL)
+               && _analyzedSize > analyzedSizeThreshold)
+               analyzedSizeThreshold *= 10;
+
 
             if (callGraphEnabled && !currentBlock->isCold())
                {
@@ -1741,7 +1750,7 @@ TR_J9EstimateCodeSize::realEstimateCodeSize(TR_CallTarget *calltarget, TR_CallSt
                continue;
                }
 
-            if (_analyzedSize <= allowanceFactor*sizeThreshold) // for multiple calltargets, is this the desired behaviour?
+            if (_analyzedSize <= analyzedSizeThreshold) // for multiple calltargets, is this the desired behaviour?
                {
                _recursionDepth++;
                _numOfEstimatedCalls++;
@@ -1756,7 +1765,7 @@ TR_J9EstimateCodeSize::realEstimateCodeSize(TR_CallTarget *calltarget, TR_CallSt
                int32_t origRealSize = _realSize;
                int32_t origBigCalleesSize = _bigCalleesSize;
                bool prevNonColdCalls = _hasNonColdCalls;
-               bool estimateSuccess = estimateCodeSize(targetCallee, &callStack); //recurseDown = true
+               bool estimateSuccess = estimateCodeSize(targetCallee, &callStack, true, analyzedSizeThreshold); //recurseDown = true
                bool calltargetSetTooBig = false;
                bool calleeHasNonColdCalls = _hasNonColdCalls;
                _hasNonColdCalls = prevNonColdCalls;// reset the bool for the parent
