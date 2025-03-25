@@ -558,9 +558,9 @@ TR_J9EstimateCodeSize::adjustEstimateForConstArgs(TR_CallTarget * target, int32_
    }
 
 bool
-TR_J9EstimateCodeSize::estimateCodeSize(TR_CallTarget *calltarget, TR_CallStack *prevCallStack, bool recurseDown)
+TR_J9EstimateCodeSize::estimateCodeSize(TR_CallTarget *calltarget, TR_CallStack *prevCallStack, bool recurseDown, int32_t increasedAllowanceThreshold)
    {
-   if (realEstimateCodeSize(calltarget, prevCallStack, recurseDown, comp()->trMemory()->currentStackRegion()))
+   if (realEstimateCodeSize(calltarget, prevCallStack, recurseDown, comp()->trMemory()->currentStackRegion(), increasedAllowanceThreshold))
       {
       if (_isLeaf && _realSize > 1)
          {
@@ -1266,7 +1266,7 @@ TR_J9EstimateCodeSize::processBytecodeAndGenerateCFG(TR_CallTarget *calltarget, 
    }
 
 bool
-TR_J9EstimateCodeSize::realEstimateCodeSize(TR_CallTarget *calltarget, TR_CallStack *prevCallStack, bool recurseDown, TR::Region &cfgRegion)
+TR_J9EstimateCodeSize::realEstimateCodeSize(TR_CallTarget *calltarget, TR_CallStack *prevCallStack, bool recurseDown, TR::Region &cfgRegion, int32_t increasedAllowanceThreshold)
    {
    TR_ASSERT(calltarget->_calleeMethod, "assertion failure");
 
@@ -1624,6 +1624,8 @@ TR_J9EstimateCodeSize::realEstimateCodeSize(TR_CallTarget *calltarget, TR_CallSt
          break;
       }
 
+   int32_t originalAnalyzedSize = _analyzedSize;
+
    if (isCandidate)
       _analyzedSize += calltarget->_partialSize;
    else
@@ -1638,7 +1640,21 @@ TR_J9EstimateCodeSize::realEstimateCodeSize(TR_CallTarget *calltarget, TR_CallSt
    static const char *af = feGetEnv("TR_AnalyzedAllowanceFactor");
    static const int32_t allowanceFactor = af ? atoi(af) : DEFAULT_ANALYZED_ALLOWANCE_FACTOR;
 
-   if (_analyzedSize > allowanceFactor*sizeThreshold) // even optimistically we've blown our budget
+   int32_t analyzedSizeThreshold = increasedAllowanceThreshold ? increasedAllowanceThreshold : allowanceFactor*sizeThreshold;
+
+   bool analyzedSizeResetRequiredForForceInline = false;
+   static int32_t forceInlineMultiplier = 2;
+   int32_t originalAnalyzedSizeThreshold = analyzedSizeThreshold;
+
+   if (_inliner->alwaysWorthInlining(calltarget->_calleeMethod, NULL))
+      {
+      static const char *forceInlineMultiplierStr = feGetEnv("TR_ForceInlineMultiplier");
+      if (forceInlineMultiplierStr) forceInlineMultiplier = atoi(forceInlineMultiplierStr);
+      analyzedSizeThreshold *= forceInlineMultiplier;
+      analyzedSizeResetRequiredForForceInline = true;
+      }
+
+   if (_analyzedSize > analyzedSizeThreshold) // even optimistically we've blown our budget
       {
       calltarget->_isPartialInliningCandidate = false;
       heuristicTrace(tracer(), "*** Depth %d: ECS end for target %p signature %s. analyzedSize exceeds Size Threshold", _recursionDepth, calltarget, callerName);
@@ -1741,7 +1757,7 @@ TR_J9EstimateCodeSize::realEstimateCodeSize(TR_CallTarget *calltarget, TR_CallSt
                continue;
                }
 
-            if (_analyzedSize <= allowanceFactor*sizeThreshold) // for multiple calltargets, is this the desired behaviour?
+            if (_analyzedSize <= analyzedSizeThreshold) // for multiple calltargets, is this the desired behaviour?
                {
                _recursionDepth++;
                _numOfEstimatedCalls++;
@@ -1756,7 +1772,11 @@ TR_J9EstimateCodeSize::realEstimateCodeSize(TR_CallTarget *calltarget, TR_CallSt
                int32_t origRealSize = _realSize;
                int32_t origBigCalleesSize = _bigCalleesSize;
                bool prevNonColdCalls = _hasNonColdCalls;
-               bool estimateSuccess = estimateCodeSize(targetCallee, &callStack); //recurseDown = true
+               bool estimateSuccess;
+               if (_inliner->alwaysWorthInlining(targetCallee->_calleeMethod, NULL))
+                  estimateSuccess = estimateCodeSize(targetCallee, &callStack, true, analyzedSizeThreshold); //recurseDown = true
+               else
+                  estimateSuccess = estimateCodeSize(targetCallee, &callStack, true, originalAnalyzedSizeThreshold); //recurseDown = true
                bool calltargetSetTooBig = false;
                bool calleeHasNonColdCalls = _hasNonColdCalls;
                _hasNonColdCalls = prevNonColdCalls;// reset the bool for the parent
@@ -1899,6 +1919,9 @@ TR_J9EstimateCodeSize::realEstimateCodeSize(TR_CallTarget *calltarget, TR_CallSt
             }
          }
       }
+
+   if (analyzedSizeResetRequiredForForceInline)
+      _analyzedSize = originalAnalyzedSize;
 
    auto partialSizeBeforeAdjustment = calltarget->_partialSize;
 
