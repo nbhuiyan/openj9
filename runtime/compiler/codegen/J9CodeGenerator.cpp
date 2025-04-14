@@ -826,6 +826,7 @@ J9::CodeGenerator::lowerTreeIfNeeded(
          bool is64Bit = self()->comp()->target().is64Bit();
          TR::ILOpCodes storeOpCode;
          int32_t numParameterStackSlots = node->getSymbol()->castToResolvedMethodSymbol()->getNumParameterSlots();
+         TR_ASSERT(numParameterStackSlots >= 0, "Number of parameter stack slots are not supposed to be negative\n");
          if (is64Bit)
             {
             storeOpCode = TR::lstore;
