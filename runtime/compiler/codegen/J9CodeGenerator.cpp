@@ -792,8 +792,7 @@ J9::CodeGenerator::lowerTreeIfNeeded(
    TR_J9VMBase *fej9 = (TR_J9VMBase *)(self()->comp()->fe());
    OMR::CodeGeneratorConnector::lowerTreeIfNeeded(node, childNumberOfNode, parent, tt);
 
-   if (node->getOpCode().isCall() &&
-       !node->getSymbol()->castToMethodSymbol()->isHelper())
+   if (node->getOpCode().isCall())
       {
       TR::RecognizedMethod rm = node->getSymbol()->castToMethodSymbol()->getMandatoryRecognizedMethod();
 
@@ -801,7 +800,8 @@ J9::CodeGenerator::lowerTreeIfNeeded(
         rm == TR::java_lang_invoke_MethodHandle_linkToStatic ||
         rm == TR::java_lang_invoke_MethodHandle_linkToSpecial ||
         rm == TR::java_lang_invoke_MethodHandle_linkToVirtual ||
-        rm == TR::java_lang_invoke_MethodHandle_linkToInterface)
+        rm == TR::java_lang_invoke_MethodHandle_linkToInterface ||
+        rm == TR::com_ibm_jit_JITHelpers_dispatchVirtual)
          {
          // invokeBasic and linkTo* are signature-polymorphic, so the VM needs to know the number of argument slots
          // for the INL call in order to locate the start of the arguments on the stack. The arg slot count is stored
@@ -826,6 +826,7 @@ J9::CodeGenerator::lowerTreeIfNeeded(
          bool is64Bit = self()->comp()->target().is64Bit();
          TR::ILOpCodes storeOpCode;
          int32_t numParameterStackSlots = node->getSymbol()->castToResolvedMethodSymbol()->getNumParameterSlots();
+         if (rm == TR::com_ibm_jit_JITHelpers_dispatchVirtual) numParameterStackSlots -= 2;
          TR_ASSERT(numParameterStackSlots >= 0, "Number of parameter stack slots are not supposed to be negative\n");
          if (is64Bit)
             {
