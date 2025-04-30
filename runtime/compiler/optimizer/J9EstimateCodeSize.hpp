@@ -108,7 +108,7 @@ class TR_J9EstimateCodeSize : public TR_EstimateCodeSize
     * \return
     *    true if the \p value was lowered using the adjustment factor, otherwise false
     */
-   bool adjustEstimateForConstArgs(TR_CallTarget * target, int32_t& value, float factor);
+   bool adjustEstimateForConstArgs(TR_CallTarget * target, int32_t& value, float factor, NeedsPeekingHeuristic &nph);
 
    static TR::Block *getBlock(TR::Compilation *comp, TR::Block * * blocks, TR_ResolvedMethod *feMethod, int32_t i, TR::CFG & cfg);
 

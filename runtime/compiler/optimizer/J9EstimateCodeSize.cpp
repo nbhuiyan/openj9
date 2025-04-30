@@ -426,7 +426,7 @@ TR_J9EstimateCodeSize::adjustEstimateForMethodInvoke(TR_ResolvedMethod* method, 
    }
 
 bool
-TR_J9EstimateCodeSize::adjustEstimateForConstArgs(TR_CallTarget * target, int32_t& value, float factor)
+TR_J9EstimateCodeSize::adjustEstimateForConstArgs(TR_CallTarget * target, int32_t& value, float factor, NeedsPeekingHeuristic &nph)
    {
    static const char * disableConstArgWeightReduction = feGetEnv("TR_disableConstArgWeightReduction");
    if (disableConstArgWeightReduction || !target->_calleeSymbol)
@@ -542,6 +542,8 @@ TR_J9EstimateCodeSize::adjustEstimateForConstArgs(TR_CallTarget * target, int32_
             {
             value = knownObjWeight;
             heuristicTrace(tracer(),"Setting size from %d to %d because arg is known object.", interimWeight, value);
+            nph.setNeedsPeekingToTrue();
+            heuristicTrace(tracer(), "Enabled peeking due to known object being passed to callee.");
             break;
             }
          }
@@ -1006,7 +1008,7 @@ TR_J9EstimateCodeSize::processBytecodeAndGenerateCFG(TR_CallTarget *calltarget, 
       }
 
    sizeBeforeAdjustment = size;
-   if (adjustEstimateForConstArgs(calltarget, size, CONST_ARG_IN_CALLEE_ADJUSTMENT_FACTOR))
+   if (adjustEstimateForConstArgs(calltarget, size, CONST_ARG_IN_CALLEE_ADJUSTMENT_FACTOR, nph))
       {
       heuristicTrace(tracer(), "*** Depth %d: Adjusting size for %s because of constants in args from %d to %d", _recursionDepth, callerName, sizeBeforeAdjustment, size);
       }
