@@ -172,7 +172,9 @@ class NeedsPeekingHeuristic
          {
             if (_bci.bcIndex() - _loadIndices[i] <= _distance)
             {
-               heuristicTraceIfTracerIsNotNull(_tracer, "there is a parm load at %d which is within %d of a call at %d", _loadIndices[i], _distance, _bci.bcIndex());
+               heuristicTraceIfTracerIsNotNull(_tracer, "There is a parm load at %d which is within %d of a call at %d. Setting needs peeking to true and skipping any further param load check.", _loadIndices[i], _distance, _bci.bcIndex());
+               setNeedsPeekingToTrue();
+               break;
             }
          }
       };
@@ -184,7 +186,8 @@ class NeedsPeekingHeuristic
 
       void processByteCode()
          {
-            if (!_hasArgumentsInfo)
+            static const bool disableNPH = feGetEnv("TR_disableNPH") != NULL;
+            if (disableNPH || !_hasArgumentsInfo || doPeeking())
                return;
             TR_J9ByteCode bc = _bci.current();
             int slotIndex = -1;
