@@ -6852,9 +6852,8 @@ static bool treeMatchesCallSite(TR::TreeTop* tt, TR::ResolvedMethodSymbol* calle
       // below would return false if call node and call site LF method classes do not match.
       //
       bool isLFMethod = false;
-      if (callNodeMS->castToResolvedMethodSymbol()
-          && callNodeMS->castToResolvedMethodSymbol()->getResolvedMethod()
-          && TR::comp()->fej9()->isLambdaFormGeneratedMethod(callNodeMS->castToResolvedMethodSymbol()->getResolvedMethod()))
+      if (callsite->_initialCalleeMethod
+          && TR::comp()->fej9()->isLambdaFormGeneratedMethod(callsite->_initialCalleeMethod))
          isLFMethod = true;
 
       if (!isLFMethod && (!callNodeClass || !callSiteClass || callerSymbol->getResolvedMethod()->fe()->isInstanceOf (callNodeClass, callSiteClass, true, true, true) != TR_yes))
