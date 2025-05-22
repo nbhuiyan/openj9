@@ -1383,8 +1383,8 @@ TR_J9EstimateCodeSize::realEstimateCodeSize(TR_CallTarget *calltarget, TR_CallSt
    const static bool debugMHInlineWithOutPeeking = feGetEnv("TR_DebugMHInlineWithOutPeeking") ? true: false;
    bool mhInlineWithPeeking =  comp()->getOption(TR_DisableMHInlineWithoutPeeking);
    const static bool disableMethodHandleInliningAfterFirstPass = feGetEnv("TR_DisableMethodHandleInliningAfterFirstPass") ? true: false;
-   bool inlineArchetypeSpecimen = calltarget->_calleeMethod->convertToMethod()->isArchetypeSpecimen() &&
-                                   (!disableMethodHandleInliningAfterFirstPass || _inliner->firstPass());
+   bool isArchetypeSpecimen = calltarget->_calleeMethod->convertToMethod()->isArchetypeSpecimen();
+   bool inlineArchetypeSpecimen = isArchetypeSpecimen && (!disableMethodHandleInliningAfterFirstPass || _inliner->firstPass());
    bool inlineLambdaFormGeneratedMethod = comp()->fej9()->isLambdaFormGeneratedMethod(calltarget->_calleeMethod) &&
                                    (!disableMethodHandleInliningAfterFirstPass || _inliner->firstPass());
 
@@ -1395,11 +1395,11 @@ TR_J9EstimateCodeSize::realEstimateCodeSize(TR_CallTarget *calltarget, TR_CallSt
 
    TR::CFG &cfg = processBytecodeAndGenerateCFG(calltarget, cfgRegion, bci, nph, blocks, flags);
 
-   // No need to peek LF methods, as we'll always interprete the method with state in order to propagate object info
-   // through bytecodes to find call targets
+   // No need to peek LF methods, as we'll always interpret the method with state in order to propagate object info
+   // through bytecodes to find call targets.
    if (!inlineLambdaFormGeneratedMethod &&
-       ((nph.doPeeking() && recurseDown) ||
-       (inlineArchetypeSpecimen && mhInlineWithPeeking)))
+       ((nph.doPeeking() && !isArchetypeSpecimen && recurseDown) ||
+        (inlineArchetypeSpecimen && mhInlineWithPeeking)))
       {
 
       heuristicTrace(tracer(), "*** Depth %d: ECS CSI -- needsPeeking is true for calltarget %p",
