@@ -464,7 +464,7 @@ TR_J9EstimateCodeSize::adjustEstimateForConstArgs(TR_CallTarget * target, int32_
    int32_t originalWeight = value;
    TR_LinkHead<TR_ParameterMapping> argMap;
    TR_PrexArgInfo *prexArgInfo = target->_ecsPrexArgInfo;
-   if (prexArgInfo && ((TR_J9InlinerPolicy *)_inliner->getPolicy())->validateArguments(target,argMap))
+   if (prexArgInfo && target->_calleeSymbol && ((TR_J9InlinerPolicy *)_inliner->getPolicy())->validateArguments(target,argMap))
       {
       int32_t argIndex = 0;
       for (TR_ParameterMapping* parm = argMap.getFirst(); parm; parm = parm->getNext())
