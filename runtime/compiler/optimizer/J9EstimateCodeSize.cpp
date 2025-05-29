@@ -1817,7 +1817,9 @@ TR_J9EstimateCodeSize::realEstimateCodeSize(TR_CallTarget *calltarget, TR_CallSt
                int32_t origRealSize = _realSize;
                int32_t origBigCalleesSize = _bigCalleesSize;
                bool prevNonColdCalls = _hasNonColdCalls;
-               bool estimateSuccess = estimateCodeSize(targetCallee, &callStack, /* recurseDown */ true, analyzedSizeThreshold);
+               bool estimateSuccess = false;
+               if (!cameFromArchetypeSpecimen(calltarget->_calleeMethod))
+                  estimateSuccess = estimateCodeSize(targetCallee, &callStack, /* recurseDown */ true, analyzedSizeThreshold);
                bool calltargetSetTooBig = false;
                bool calleeHasNonColdCalls = _hasNonColdCalls;
                _hasNonColdCalls = prevNonColdCalls;// reset the bool for the parent
