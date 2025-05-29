@@ -1860,7 +1860,9 @@ TR_J9EstimateCodeSize::realEstimateCodeSize(TR_CallTarget *calltarget, TR_CallSt
                         }
                      }
 
-                  int32_t bigCalleesSizeBelowMe = _bigCalleesSize - origBigCalleesSize;
+                  int32_t bigCalleesSizeBelowMe = 0;
+                  if (!cameFromArchetypeSpecimen(calltarget->_calleeMethod))
+                     bigCalleesSizeBelowMe = _bigCalleesSize - origBigCalleesSize;
                   if ((_analyzedSize - origAnalyzedSize - bigCalleesSizeBelowMe) > bigCalleeThreshold)
                      {
                      ///printf("set warmcallgraphtoobig for method %s at index %d\n", calleeName, newBCInfo._byteCodeIndex);fflush(stdout);
