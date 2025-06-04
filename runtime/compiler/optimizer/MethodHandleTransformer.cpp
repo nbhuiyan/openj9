@@ -863,47 +863,48 @@ TR_MethodHandleTransformer::process_java_lang_invoke_Invokers_checkVarHandleGene
                                                                                  TR::Address,
                                                                                  typesAndInvokersOffset,
                                                                                  false,
-                                                                                 true,
-                                                                                 true,
+                                                                                 false,
+                                                                                 false,
                                                                                  tisFieldNameAndSig);
-         TR::Node *tisNode = TR::Node::createWithSymRef(comp()->il.opCodeForIndirectLoad(TR::Address), 1, 1, node->getFirstArgument(), tisSymRef);
+         TR::Node *tisNode = TR::Node::createWithSymRef(TR::aloadi, 1, 1, node->getFirstArgument(), tisSymRef);
          tisNode->copyByteCodeInfo(node);
          if (comp()->useCompressedPointers())
             tt->insertBefore(TR::TreeTop::create(comp(), TR::Node::createCompressedRefsAnchor(tisNode)));
-         else
-            tt->insertBefore(TR::TreeTop::create(comp(), TR::Node::create(node, TR::treetop, 1, tisNode)));
 
          uint32_t mhTableOffset = comp()->fej9()->getInstanceFieldOffsetIncludingHeader("Ljava/lang/invoke/VarHandle$TypesAndInvokers;", "methodHandle_table", "[Ljava/lang/invoke/MethodHandle;", comp()->getCurrentMethod());
          const char * mhTableFieldNameAndSig = "java/lang/invoke/VarHandle$TypesAndInvokers.methodHandle_table [Ljava/lang/invoke/MethodHandle;";
          TR::Node *mhTableHolder = tisNode;
+         bool mhTableIsFinal = true;
 #else
          uint32_t mhTableOffset = comp()->fej9()->getInstanceFieldOffsetIncludingHeader("Ljava/lang/invoke/VarHandle;", "methodHandleTable", "[Ljava/lang/invoke/MethodHandle;", comp()->getCurrentMethod());
          const char * mhTableFieldNameAndSig = "java/lang/invoke/VarHandle.methodHandleTable [Ljava/lang/invoke/MethodHandle;";
          TR::Node *mhTableHolder = node->getFirstArgument();
+         bool mhTableIsFinal = false;
 #endif /* JAVA_SPEC_VERSION <= 17 */
          TR::SymbolReference *mhTableSymRef = comp()->getSymRefTab()->findOrFabricateShadowSymbol(comp()->getMethodSymbol(),
                                                                                  TR::Symbol::Java_lang_invoke_VarHandle_methodHandleTable,
                                                                                  TR::Address,
                                                                                  mhTableOffset,
                                                                                  false,
-                                                                                 true,
-                                                                                 true,
+                                                                                 false,
+                                                                                 mhTableIsFinal,
                                                                                  mhTableFieldNameAndSig);
-         TR::Node *mhTableNode = TR::Node::createWithSymRef(comp()->il.opCodeForIndirectLoad(TR::Address), 1, 1, mhTableHolder, mhTableSymRef);
+         TR::Node *mhTableNode = TR::Node::createWithSymRef(TR::aloadi, 1, 1, mhTableHolder, mhTableSymRef);
          mhTableNode->copyByteCodeInfo(node);
+         if (comp()->useCompressedPointers())
+            tt->insertBefore(TR::TreeTop::create(comp(), TR::Node::createCompressedRefsAnchor(mhTableNode)));
 
          // get index for load
-         uintptr_t accessDescriptorObj = knot->getPointer(adIndex);
-         int32_t mhEntryIndex = comp()->fej9()->getInt32Field(accessDescriptorObj, "mode");
+         int32_t mhEntryIndex = comp()->fej9()->getVarHandleAccessDescriptorMode(adIndex);
          TR::Node *arrayIndexNode = TR::Node::create(TR::iconst, 0, mhEntryIndex);
          arrayIndexNode->copyByteCodeInfo(node);
 
          // calculate element address, create load from array, and refine MH symref with known object info
          TR::Node *mhAddressNode = J9::TransformUtil::calculateElementAddress(comp(), mhTableNode, arrayIndexNode, TR::Address);
-         TR::Node *mhNode = TR::Node::createWithSymRef(comp()->il.opCodeForIndirectArrayLoad(TR::Address), 1, 1, mhAddressNode, comp()->getSymRefTab()->findOrCreateArrayShadowSymbolRef(TR::Address, mhTableNode));
+         TR::Node *mhNode = TR::Node::createWithSymRef(TR::aloadi, 1, 1, mhAddressNode, comp()->getSymRefTab()->findOrCreateArrayShadowSymbolRef(TR::Address, mhTableNode));
          mhNode->copyByteCodeInfo(node);
-         TR::SymbolReference *refinedMHSymRef = comp()->getSymRefTab()->findOrCreateSymRefWithKnownObject(mhNode->getSymbolReference(), mhIndex);
-         mhNode->setSymbolReference(refinedMHSymRef);
+         TR::SymbolReference *improvedMHSymRef = comp()->getSymRefTab()->findOrCreateSymRefWithKnownObject(mhNode->getSymbolReference(), mhIndex);
+         mhNode->setSymbolReference(improvedMHSymRef);
 
          // Insert spine check for arraylets
          if (TR::Compiler->om.canGenerateArraylets())
@@ -920,10 +921,12 @@ TR_MethodHandleTransformer::process_java_lang_invoke_Invokers_checkVarHandleGene
 
          if (comp()->useCompressedPointers())
             tt->insertBefore(TR::TreeTop::create(comp(), TR::Node::createCompressedRefsAnchor(mhNode)));
-         else
-            tt->insertBefore(TR::TreeTop::create(comp(), TR::Node::create(node, TR::treetop, 1, mhNode)));
 
-         TR::TransformUtil::transformCallNodeToPassThrough(this, node, tt, mhNode);
+         // Replace original call with load from MH table
+         anchorAllChildren(node, tt);
+         node->removeAllChildren();
+         TR::Node::recreateWithSymRef(node, TR::aloadi, improvedMHSymRef);
+
          }
       else return;
       }
