@@ -5256,6 +5256,17 @@ TR_J9VMBase::getLayoutVarHandle(TR::Compilation *comp, TR::KnownObjectTable::Ind
    return result;
    }
 
+int32_t
+TR_J9VMBase::getVarHandleAccessDescriptorMode(TR::Compilation *comp, TR::KnownObjectTable::Index adIndex)
+   {
+   TR::VMAccessCriticalSection getAccessDescriptorMode(this);
+   TR::KnownObjectTable *knot = comp->getKnownObjectTable();
+   if (!knot) 
+      return -1;
+   uintptr_t accessDescriptorObj = knot->getPointer(adIndex);
+   return getInt32Field(accessDescriptorObj, "mode");
+   }
+
 TR::KnownObjectTable::Index
 TR_J9VMBase::getMethodHandleTableEntryIndex(TR::Compilation *comp, TR::KnownObjectTable::Index vhIndex, TR::KnownObjectTable::Index adIndex)
    {
@@ -5314,9 +5325,10 @@ TR_J9VMBase::getMethodHandleTableEntryIndex(TR::Compilation *comp, TR::KnownObje
       }
 #endif // JAVA_SPEC_VERSION >= 17
 
-   int32_t mhEntryIndex = getInt32Field(accessDescriptorObj, "mode");
-   uintptr_t methodHandleObj = getReferenceElement(mhTable, mhEntryIndex);
+   int32_t mhEntryIndex = getVarHandleAccessDescriptorMode(adIndex);
+   if (mhEntryIndex < 0) return result;
 
+   uintptr_t methodHandleObj = getReferenceElement(mhTable, mhEntryIndex);
    if (!methodHandleObj) return result;
 
    // For the MethodHandle obtained from the VarHandle's MH table, the type must match
