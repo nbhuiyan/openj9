@@ -981,15 +981,19 @@ TR_J9EstimateCodeSize::processBytecodeAndGenerateCFG(TR_CallTarget *calltarget, 
                flags[i].set(InterpreterEmulator::BytecodePropertyFlag::isUnsanitizeable);
             break;
 #if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
-            case J9BCinvokedynamic:
+         case J9BCinvokedynamic:
             {
-            int32_t callSiteTableEntryIndex = bci.next2Bytes();
-            isUnresolvedInCP = false;
-            resolvedMethod = calltarget->_calleeMethod->getResolvedDynamicMethod(comp(), callSiteTableEntryIndex, &isUnresolvedInCP);
-            if (resolvedMethod && !isUnresolvedInCP)
+            const static bool enablePeekingForInvokedynamic = feGetEnv("TR_enablePeekingForInvokedynamic") ? true : false;
+            if (enablePeekingForInvokedynamic)
                {
-               nph.setNeedsPeekingToTrue();
-               heuristicTrace(tracer(), "Depth %d: Resolved invokedynamic call at bc index %d has Signature %s, enabled peeking for caller to propagate prex arg info from caller.", _recursionDepth, i, tracer()->traceSignature(resolvedMethod));
+               int32_t callSiteTableEntryIndex = bci.next2Bytes();
+               isUnresolvedInCP = false;
+               resolvedMethod = calltarget->_calleeMethod->getResolvedDynamicMethod(comp(), callSiteTableEntryIndex, &isUnresolvedInCP);
+               if (resolvedMethod && !isUnresolvedInCP)
+                  {
+                  nph.setNeedsPeekingToTrue();
+                  heuristicTrace(tracer(), "Depth %d: Resolved invokedynamic call at bc index %d has Signature %s, enabled peeking for caller to propagate prex arg info from caller.", _recursionDepth, i, tracer()->traceSignature(resolvedMethod));
+                  }
                }
             }
             flags[i].set(InterpreterEmulator::BytecodePropertyFlag::isUnsanitizeable);
