@@ -1001,8 +1001,16 @@ TR_J9EstimateCodeSize::processBytecodeAndGenerateCFG(TR_CallTarget *calltarget, 
             resolvedMethod = calltarget->_calleeMethod->getResolvedHandleMethod(comp(), methodTypeTableEntryIndex, &isUnresolvedInCP);
             if (resolvedMethod && !isUnresolvedInCP)
                {
-               nph.setNeedsPeekingToTrue();
-               heuristicTrace(tracer(), "Depth %d: Resolved invokehandle call at bc index %d has Signature %s, enabled peeking for caller to propagate prex arg info from caller.", _recursionDepth, i, tracer()->traceSignature(resolvedMethod));
+               char rootNameBuffer[1024];
+               const char *rootName = NULL;
+                  rootName = comp()->fej9()->sampleSignature(
+               comp()->getCurrentMethod()->getPersistentIdentifier(), rootNameBuffer,
+               1024, comp()->trMemory());
+               if (strncmp(rootName, "javax/imageio/stream/ImageInputStreamImpl.readLong", 50))
+                     {
+                     nph.setNeedsPeekingToTrue();
+                     heuristicTrace(tracer(), "Depth %d: Resolved invokehandle call at bc index %d has Signature %s, enabled peeking for caller to propagate prex arg info from caller.", _recursionDepth, i, tracer()->traceSignature(resolvedMethod));
+                     }
                }
             }
             flags[i].set(InterpreterEmulator::BytecodePropertyFlag::isUnsanitizeable);
