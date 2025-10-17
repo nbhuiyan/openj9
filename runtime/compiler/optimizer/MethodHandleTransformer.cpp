@@ -78,9 +78,10 @@ static bool isKnownObject(TR::KnownObjectTable::Index objectInfo)
 
 int32_t TR_MethodHandleTransformer::perform()
    {
-   // Only do the opt for MethodHandle methods
+   // Only do the opt for LambdaForm generated methods, and for for peeking ILGen, since currently
+   // peeking ILGen is only triggered for MethodHandle/VarHandle-related cases to propagate object info
    TR_ResolvedMethod* currentMethod = comp()->getCurrentMethod();
-   if (!comp()->fej9()->isLambdaFormGeneratedMethod(currentMethod))
+   if (!comp()->fej9()->isLambdaFormGeneratedMethod(currentMethod) && !comp()->isPeekingMethod())
       return 0;
 
    TR::StackMemoryRegion stackMemoryRegion(*trMemory());
