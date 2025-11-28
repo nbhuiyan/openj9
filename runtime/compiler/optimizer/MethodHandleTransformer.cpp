@@ -364,7 +364,6 @@ TR_MethodHandleTransformer::computeObjectInfoOfNode(TR::TreeTop *tt, TR::Node *n
    auto symbol = symRef->getSymbol();
    if (node->getOpCode().isLoadDirect() &&
        symbol->isAutoOrParm())
-      {
       koi = (*_currentObjectInfo)[symbol->getLocalIndex()];
       }
    else if (node->getOpCode().isCall()
@@ -433,6 +432,20 @@ TR_MethodHandleTransformer::computeObjectInfoOfNode(TR::TreeTop *tt, TR::Node *n
          default:
             break;
          }
+         const char * sig = symbol->castToMethodSymbol()->getMethod()->signature(comp()->trMemory());
+         if (!strncmp(sig, "java/lang/reflect/Method.acquireMethodAccessor",46))
+            {
+            auto methodIndex = getObjectInfoOfNode(node->getFirstArgument());
+            if (knot
+               && isKnownObject(methodIndex)
+               && !knot->isNull(methodIndex))
+               {
+               auto maIndex = comp()->fej9()->getMAIndex(comp(), methodIndex);
+               //if (trace())
+               //   traceMsg(comp(), "Method.acquireMethodAccessor with known Method object %d, updating node n%dn with known MA object %d from MA Field\n", methodIndex, node->getGlobalIndex(), maIndex);
+               koi = maIndex;
+               }
+            }
       }
 
    if (isKnownObject(koi)
@@ -505,8 +518,11 @@ void TR_MethodHandleTransformer::visitIndirectLoad(TR::TreeTop* tt, TR::Node* no
       }
 
    auto symbol = node->getSymbol();
-   if (!symRef->isUnresolved() && symbol &&
-       (symbol->isFinal() || symbol->isArrayShadowSymbol()))
+   if (!symRef->isUnresolved() &&
+       symbol &&
+       (symbol->isFinal() ||
+        symbol->isArrayShadowSymbol() ||
+        comp()->fej9()->canDereferenceAtCompileTime(symRef, comp())))
       {
       auto baseNode = symbol->isArrayShadowSymbol() ? node->getFirstChild()->getFirstChild() : node->getFirstChild();
       auto baseSymRef = baseNode->getSymbolReference();
