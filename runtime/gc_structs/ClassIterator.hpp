@@ -98,14 +98,12 @@ public:
 		, _callSitesIterator(clazz)
 #if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
 		, _methodTypesIterator(clazz->romClass->invokeCacheCount, clazz->invokeCache)
+		, _constRefsIterator(clazz)
 #else /* defined(J9VM_OPT_OPENJDK_METHODHANDLE) */
 		, _methodTypesIterator(clazz->romClass->methodTypeCount, clazz->methodTypes)
 		, _varHandlesMethodTypesIterator(clazz->romClass->varHandleMethodTypeCount, clazz->varHandleMethodTypes)
 #endif /* defined(J9VM_OPT_OPENJDK_METHODHANDLE) */
 		, _valueTypesIterator(clazz)
-#if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
-		, _constRefsIterator(clazz)
-#endif
 		, _shouldScanClassObject(shouldScanClassObject)
 	{}
 
@@ -118,14 +116,12 @@ public:
 		, _callSitesIterator(clazz)
 #if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
 		, _methodTypesIterator(clazz->romClass->invokeCacheCount, clazz->invokeCache)
+		, _constRefsIterator(clazz)
 #else /* defined(J9VM_OPT_OPENJDK_METHODHANDLE) */
 		, _methodTypesIterator(clazz->romClass->methodTypeCount, clazz->methodTypes)
 		, _varHandlesMethodTypesIterator(clazz->romClass->varHandleMethodTypeCount, clazz->varHandleMethodTypes)
 #endif /* defined(J9VM_OPT_OPENJDK_METHODHANDLE) */
 		, _valueTypesIterator(clazz)
-#if defined(J9VM_OPT_OPENJDK_METHODHANDLE)
-		, _constRefsIterator(clazz)
-#endif /* defined(J9VM_OPT_OPENJDK_METHODHANDLE) */
 		, _shouldScanClassObject(true)
 	{}
 
@@ -145,4 +141,3 @@ public:
 };
 
 #endif /* CLASSITERATOR_HPP_ */
-
