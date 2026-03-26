@@ -1826,6 +1826,7 @@ TR_ResolvedJ9Method::TR_ResolvedJ9Method(TR_OpaqueMethodBlock *aMethod, TR_Front
     , TR_ResolvedJ9MethodBase(fe, owner)
     , _pendingPushSlots(-1)
 {
+    _linkToNativeJniTargetAddress = NULL;
     _ramMethod = (J9Method *)aMethod;
 
     {
@@ -1864,7 +1865,9 @@ TR_ResolvedJ9Method::TR_ResolvedJ9Method(TR_FrontEnd *fe, TR_ResolvedMethod *own
     : TR_J9Method()
     , TR_ResolvedJ9MethodBase(fe, owner)
     , _pendingPushSlots(-1)
-{}
+{
+    _linkToNativeJniTargetAddress = NULL;
+}
 #endif /* defined(J9VM_OPT_JITSERVER) */
 
 void TR_ResolvedJ9Method::construct()
@@ -3540,6 +3543,11 @@ void TR_ResolvedJ9Method::construct()
             "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;") },
         { TR::unknownMethod } };
 
+    static X NativeMethodHandleMethods[]
+        = { { x(TR::java_lang_invoke_NativeMethodHandle_internalNativeEntryPoint, "internalNativeEntryPoint",
+                "(Ljava/lang/Object;)Ljava/lang/Object;") },
+              { TR::unknownMethod } };
+
     static X PrimitiveHandleMethods[]
         = { { x(TR::java_lang_invoke_PrimitiveHandle_initializeClassIfRequired, "initializeClassIfRequired", "()V") },
               { TR::unknownMethod } };
@@ -4092,6 +4100,7 @@ void TR_ResolvedJ9Method::construct()
         { "jdk/internal/loader/NativeLibraries", NativeLibrariesMethods },
 #endif  /* JAVA_SPEC_VERSION >= 15 */
         { "java/lang/invoke/DirectMethodHandle", DirectMethodHandleMethods },
+        { "java/lang/invoke/NativeMethodHandle", NativeMethodHandleMethods },
         { 0 }
     };
 
@@ -5234,6 +5243,10 @@ void *TR_ResolvedJ9Method::addressContainingIsOverriddenBit() { return &ramMetho
 
 bool TR_ResolvedJ9Method::isJNINative()
 {
+    if (_linkToNativeJniTargetAddress != NULL) {
+        return true;
+    }
+
     if (!supportsFastJNI(_fe)) {
         return (((UDATA)ramMethod()->constantPool) & J9_STARTPC_JNI_NATIVE) != 0;
     }
@@ -6332,6 +6345,10 @@ const char *TR_ResolvedJ9Method::newInstancePrototypeSignature(TR_Memory *m, TR_
 
 void *TR_ResolvedJ9Method::startAddressForJNIMethod(TR::Compilation *comp)
 {
+    if (_linkToNativeJniTargetAddress != NULL) {
+        return _linkToNativeJniTargetAddress;
+    }
+
     // This is a FastJNI method, address is directly callable
     if (_jniProperties)
         return _jniTargetAddress;

@@ -657,7 +657,7 @@ void J9::X86::AMD64::JNILinkage::buildOutgoingJNIArgsAndDependencies(TR::Node *c
 }
 
 TR::Instruction *J9::X86::AMD64::JNILinkage::generateMethodDispatch(TR::Node *callNode, bool isJNIGCPoint,
-    uintptr_t targetAddress)
+    uintptr_t targetAddress, int32_t baseArgSize)
 {
     TR::ResolvedMethodSymbol *callSymbol = callNode->getSymbol()->castToResolvedMethodSymbol();
     TR::RealRegister *espReal = machine()->getRealRegister(TR::RealRegister::esp);
@@ -715,7 +715,9 @@ TR::Instruction *J9::X86::AMD64::JNILinkage::generateMethodDispatch(TR::Node *ca
     // the memory arguments for the call.  Only clean up the memory argument portion.
     //
     if (!cg()->getJNILinkageCalleeCleanup()) {
-        intptr_t cleanUpSize = argSize - TR::Compiler->om.sizeofReferenceAddress();
+        intptr_t cleanUpSize = argSize - baseArgSize;
+        logprintf(comp()->getOption(TR_TraceCG), comp()->log(), "Caller argSize=%d, cleanUpSize=%d\n", (int32_t)argSize,
+            (int32_t)cleanUpSize);
 
         if (comp()->target().is64Bit())
             TR_ASSERT(cleanUpSize <= 0x7fffffff,
@@ -1152,6 +1154,11 @@ TR::Register *J9::X86::AMD64::JNILinkage::buildDirectJNIDispatch(TR::Node *callN
         wrapRefs = !fej9->jniDoNotWrapObjects(resolvedMethod);
         passReceiver = !fej9->jniDoNotPassReceiver(resolvedMethod);
         passThread = !fej9->jniDoNotPassThread(resolvedMethod);
+
+        auto rm = callSymbol->getMandatoryRecognizedMethod();
+        if (rm == TR::java_lang_invoke_MethodHandle_linkToNative) {
+            passThread = false;
+        }
     } else {
         gpuHelperSymRef = comp()->getSymRefTab()->methodSymRefFromName(comp()->getMethodSymbol(),
             "com/ibm/jit/JITHelpers", "GPUHelper", "()V", TR::MethodSymbol::Static);
@@ -1233,8 +1240,10 @@ TR::Register *J9::X86::AMD64::JNILinkage::buildDirectJNIDispatch(TR::Node *callN
     // Adjust the argSize to include the just pushed VMThread pointer.
     //
     generateRegInstruction(TR::InstOpCode::PUSHReg, callNode, vmThreadReg, cg());
+    int32_t baseArgSize = 0;
     if (passThread || isGPUHelper) {
         _JNIDispatchInfo.argSize = TR::Compiler->om.sizeofReferenceAddress();
+        baseArgSize = _JNIDispatchInfo.argSize;
     }
 
     TR::LabelSymbol *startJNISequence = generateLabelSymbol(cg());
@@ -1267,7 +1276,7 @@ TR::Register *J9::X86::AMD64::JNILinkage::buildDirectJNIDispatch(TR::Node *callN
         targetAddress = (uintptr_t)callSymbol1->getResolvedMethod()->startAddressForJNIMethod(comp());
     }
 
-    TR::Instruction *callInstr = generateMethodDispatch(callNode, isJNIGCPoint, targetAddress);
+    TR::Instruction *callInstr = generateMethodDispatch(callNode, isJNIGCPoint, targetAddress, baseArgSize);
 
     if (isGPUHelper)
         callNode->setSymbolReference(callSymRef); // change back to callSymRef afterwards
