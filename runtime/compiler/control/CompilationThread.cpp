@@ -5537,7 +5537,7 @@ void TR::CompilationInfo::recycleCompilationEntry(TR_MethodToBeCompiled *entry)
 
 void TR::CompilationInfo::releaseMethodHandleThunkRefs(J9VMThread *vmThread, TR::IlGeneratorMethodDetails &details)
 {
-    TR_ASSERT(vmThread && (vmThread->publicFlags & J9_PUBLIC_FLAGS_VM_ACCESS),
+    TR_ASSERT_FATAL(vmThread && (vmThread->publicFlags & J9_PUBLIC_FLAGS_VM_ACCESS),
         "%p must have VM access to release MethodHandle thunk refs", vmThread);
 
     if (!details.isMethodHandleThunk())
